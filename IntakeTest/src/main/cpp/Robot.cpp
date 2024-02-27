@@ -1,0 +1,114 @@
+   // if (r->input.driver.trigger_left > 0.25)
+  // {
+  //     
+  // }
+  // if (r->input.driver.trigger_right > 0.25)
+  // {
+  //    
+  // }
+  // r->input.driver.joystick_right
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+#include "Robot.h"
+#include <stdio.h>
+#include <fmt/core.h>
+#include <frc/smartdashboard/SmartDashboard.h>
+#include <rev/CANSparkMax.h>
+#include <frc/DriverStation.h>
+#include "robot.h"
+#include <frc/smartdashboard/Field2d.h>
+#include <string>
+#include "frc/DriverStation.h"
+#include <math.h>
+#include "fennec/gamepad.cpp"
+
+rev::CANSparkMax intake_motor{1, rev::CANSparkMax::MotorType::kBrushless};
+
+enum RobotMode
+{
+  ROBOT_AUTO,
+  ROBOT_TELEOP,
+  ROBOT_DISABLE,
+};
+
+void Robot::RobotInit() {
+  m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
+  m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
+  frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
+}
+
+/**
+ * This function is called every 20 ms, no matter the mode. Use
+ * this for items like diagnostics that you want ran during disabled,
+ * autonomous, teleoperated and test.
+ *
+ * <p> This runs after the mode specific periodic functions, but before
+ * LiveWindow and SmartDashboard integrated updating.
+ */
+void Robot::RobotPeriodic() {}
+
+/**
+ * This autonomous (along with the chooser code above) shows how to select
+ * between different autonomous modes using the dashboard. The sendable chooser
+ * code works with the Java SmartDashboard. If you prefer the LabVIEW Dashboard,
+ * remove all of the chooser code and uncomment the GetString line to get the
+ * auto name from the text box below the Gyro.
+ *
+ * You can add additional auto modes by adding additional comparisons to the
+ * if-else structure below with additional strings. If using the SendableChooser
+ * make sure to add them to the chooser code above as well.
+ */
+void Robot::AutonomousInit() {
+  m_autoSelected = m_chooser.GetSelected();
+  // m_autoSelected = SmartDashboard::GetString("Auto Selector",
+  //     kAutoNameDefault);
+  fmt::print("Auto selected: {}\n", m_autoSelected);
+
+  if (m_autoSelected == kAutoNameCustom) {
+    // Custom Auto goes here
+  } else {
+    // Default Auto goes here
+  }
+}
+
+void Robot::AutonomousPeriodic() {
+  if (m_autoSelected == kAutoNameCustom) {
+    // Custom Auto goes here
+  } else {
+    // Default Auto goes here
+  }
+}
+
+void Robot::TeleopInit() {
+  intake_motor.Set(0.5);
+}
+
+void Robot::TeleopPeriodic() {
+  printf("Hello World\n");
+}
+
+void Robot::DisabledInit() {}
+
+void Robot::DisabledPeriodic() {}
+
+void Robot::TestInit() {}
+
+void Robot::TestPeriodic() {}
+
+void Robot::SimulationInit() {}
+
+void Robot::SimulationPeriodic() {}
+
+void updateRobot(RobotData *r, float time_step, RobotMode mode) {
+  if (r->input.driver.big_button.held) {
+    // intake_motor.Set(0.5);
+  } 
+}
+
+#ifndef RUNNING_FRC_TESTS
+int main() {
+  return frc::StartRobot<Robot>();
+}
+#endif

@@ -1,0 +1,1 @@
+g++ -g -std=c++14 -Iinclude -I/opt/homebrew/include/opencv4 -L/opt/homebrew/Cellar/opencv/4.8.1_5/lib -I/opt/X11/include src/*.cpp -lopencv_videoio -lopencv_core -lopencv_features2d -lopencv_imgproc -lopencv_highgui -lopencv_calib3d -lopencv_imgcodecs -lopencv_shape -L/opt/X11/lib -lX11 -Linclude/build -lapriltag -Ofast
