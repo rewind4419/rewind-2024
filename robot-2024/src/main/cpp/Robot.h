@@ -92,7 +92,8 @@ struct RobotData
 // void fieldDashboard(RobotData* r, v2 object, std::string object_name);
 
 
-
+void initRobot(RobotMode mode);
+void updateRobot(float time_step, RobotMode mode);
 
 
 // Charge pad

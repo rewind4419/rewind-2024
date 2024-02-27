@@ -10,7 +10,7 @@
 
 RobotData r;
 
-void initRobot()
+void initRobot(RobotMode mode)
 {
 //How to use smart dashboard
 // frc::SmartDashboard::PutData("Field", &r.field);
@@ -32,7 +32,7 @@ void initRobot()
 
 void updateRobot(float time_step, RobotMode mode)
 {
-    printCalibrationData(&r.drivetrain);
+    // printCalibrationData(&r.drivetrain);
 
     if (mode == ROBOT_DISABLE) return;
 
