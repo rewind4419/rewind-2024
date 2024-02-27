@@ -170,6 +170,17 @@ void drivetrainUpdateRawVectors(Drivetrain* drivetrain, v2* target_vectors, floa
         float steer_throttle = -turn_angle / M_PI; 
         if (steer_throttle >  .5) steer_throttle =  .5;
         if (steer_throttle < -.5) steer_throttle = -.5;
+
+        if(steer_throttle > 0.2)
+        {
+            steer_throttle = 0.2;
+        }
+
+        if(steer_throttle < -0.2)
+        {
+            steer_throttle = -0.2;
+        }
+
         module->steer_motor->Set(steer_throttle);
 
 		
@@ -190,7 +201,19 @@ void drivetrainUpdateRawVectors(Drivetrain* drivetrain, v2* target_vectors, floa
             v = 0;
         }
 
-        module->drive_motor->Set(v / driveSpeed);
+        float drive_throttle = v / driveSpeed;
+
+        if(drive_throttle > 0.2)
+        {
+            drive_throttle = 0.2;
+        }
+
+        if(drive_throttle < -0.2)
+        {
+            drive_throttle = -0.2;
+        }
+
+        module->drive_motor->Set(drive_throttle);
 
 
         // float cancoder_position = module->direction_encoder->GetAbsolutePosition() * M_PI / 180;

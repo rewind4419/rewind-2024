@@ -34,10 +34,10 @@ constexpr int CFG_CAN_DRIVETRAIN_STEER_MOTOR_FR = 8; // S3
 constexpr int CFG_CAN_DRIVETRAIN_STEER_MOTOR_BR = 9; // S4
 
 //            ENCODER NAME                                 Encoder LABEL
-constexpr int CFG_CAN_DRIVETRAIN_STEER_ENCODER_BL = 10; // S1
-constexpr int CFG_CAN_DRIVETRAIN_STEER_ENCODER_FL = 11; // S2
-constexpr int CFG_CAN_DRIVETRAIN_STEER_ENCODER_FR = 12; // S3
-constexpr int CFG_CAN_DRIVETRAIN_STEER_ENCODER_BR = 13; // S4
+constexpr int CFG_CAN_DRIVETRAIN_STEER_ENCODER_BL = 14; // S4
+constexpr int CFG_CAN_DRIVETRAIN_STEER_ENCODER_FL = 12; // S3
+constexpr int CFG_CAN_DRIVETRAIN_STEER_ENCODER_FR = 10; // S1
+constexpr int CFG_CAN_DRIVETRAIN_STEER_ENCODER_BR = 11; // S2
 
 
 //              DRIVETRAIN MOTOR OFFSET                     OFFSET (in radians)
