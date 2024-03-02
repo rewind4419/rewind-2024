@@ -17,6 +17,7 @@ void initRobot(RobotMode mode)
 // frc::SmartDashboard::PutNumber("AutoMode", 0);
 
     // initialize the sensors
+    printf("Initializing Robot");
 
     initDrivetrain(&r.drivetrain);
 
@@ -32,7 +33,7 @@ void initRobot(RobotMode mode)
 
 void updateRobot(float time_step, RobotMode mode)
 {
-    // printCalibrationData(&r.drivetrain);
+    printCalibrationData(&r.drivetrain);
 
     if (mode == ROBOT_DISABLE) return;
 

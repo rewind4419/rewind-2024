@@ -1,6 +1,7 @@
 #pragma once
 
 #include <thread>
+#include <iostream>
 
 // NavX2 library for the IMU
 #include "AHRS.h"
@@ -61,9 +62,6 @@ struct RobotData
   OdometryFrame latest_odometry_frame; 
 
   DrivetrainController drivetrain_controller;
-
-//   ChargingPad charging_pad;
-
 
   // physical components
   Drivetrain drivetrain;

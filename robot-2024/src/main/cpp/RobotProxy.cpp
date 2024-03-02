@@ -24,7 +24,7 @@
  */
 
 void RobotProxy::RobotInit() {
-    
+        initRobot(ROBOT_DISABLE);
 }
 
 void RobotProxy::RobotPeriodic() {
@@ -32,7 +32,7 @@ void RobotProxy::RobotPeriodic() {
 }
 
 void RobotProxy::AutonomousInit() {
-    initRobot(ROBOT_AUTO);
+    // initRobot(ROBOT_AUTO);
 }
 void RobotProxy::AutonomousPeriodic() {
     // NOTE: robot timestep is hard-coded to 0.02 for now,
@@ -43,9 +43,8 @@ void RobotProxy::AutonomousPeriodic() {
 }
 
 void RobotProxy::TeleopInit() {
-    initRobot(ROBOT_TELEOP);
+    // initRobot(ROBOT_TELEOP);
 }
-
 void RobotProxy::TeleopPeriodic() {
     // NOTE: robot timestep is hard-coded to 0.02 for now,
     // this is the default
@@ -59,7 +58,7 @@ void RobotProxy::TeleopPeriodic() {
 // UNUSED
 
 void RobotProxy::DisabledInit() {
-    initRobot(ROBOT_DISABLE);
+    // initRobot(ROBOT_DISABLE);
 }
 void RobotProxy::DisabledPeriodic() {
     updateRobot(0.02, ROBOT_DISABLE);
