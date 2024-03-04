@@ -23,8 +23,10 @@
  * make sure to add them to the chooser code above as well.
  */
 
+RobotData r;
+
 void RobotProxy::RobotInit() {
-        initRobot(ROBOT_DISABLE);
+        initRobot(&r, ROBOT_DISABLE);
 }
 
 void RobotProxy::RobotPeriodic() {
@@ -39,18 +41,18 @@ void RobotProxy::AutonomousPeriodic() {
     // this is the default
     // if we ever change it, we should make a constant in the
     // Config.h file
-    updateRobot(0.02, ROBOT_AUTO);
+    updateRobot(&r, 0.02, ROBOT_AUTO);
 }
 
 void RobotProxy::TeleopInit() {
-    // initRobot(ROBOT_TELEOP);
+    robotModeInit(&r, ROBOT_TELEOP);
 }
 void RobotProxy::TeleopPeriodic() {
     // NOTE: robot timestep is hard-coded to 0.02 for now,
     // this is the default
     // if we ever change it, we should make a constant in the
     // Config.h file
-    updateRobot(0.02, ROBOT_TELEOP);
+    updateRobot(&r, 0.02, ROBOT_TELEOP);
 }
 
 
@@ -61,7 +63,7 @@ void RobotProxy::DisabledInit() {
     // initRobot(ROBOT_DISABLE);
 }
 void RobotProxy::DisabledPeriodic() {
-    updateRobot(0.02, ROBOT_DISABLE);
+    updateRobot(&r, 0.02, ROBOT_DISABLE);
 
 }
 

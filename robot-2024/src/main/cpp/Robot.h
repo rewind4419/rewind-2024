@@ -14,6 +14,8 @@
 #include "fennec/gamepad.h"
 #include "fennec/pid.h"
 #include "fennec/localiser.h"
+#include "fennec/taskmgr.h"
+
 ////////////
 
 
@@ -44,6 +46,8 @@ enum Aligner
 struct RobotData
 {
   // high level
+  TaskMgr taskmgr;
+
   // control
 	float delta_time;
   float enable_time;
@@ -79,9 +83,7 @@ struct RobotData
 
 }; 
 
-// void initRobot(RobotData* robot);
-
-// void robotModeInit(RobotData* robot, RobotMode new_mode);
+void robotModeInit(RobotData *robot, RobotMode new_mode);
 // void updateRobot(RobotData* robot, float time_step, RobotMode mode);
 
 
@@ -90,8 +92,8 @@ struct RobotData
 // void fieldDashboard(RobotData* r, v2 object, std::string object_name);
 
 
-void initRobot(RobotMode mode);
-void updateRobot(float time_step, RobotMode mode);
+void initRobot(RobotData *r, RobotMode mode);
+void updateRobot(RobotData *r, float time_step, RobotMode mode);
 
 
 // Charge pad
