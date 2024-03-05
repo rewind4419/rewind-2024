@@ -4,8 +4,6 @@
 #include <frc/DigitalInput.h>
 #include "fennec/config.h"
 
-struct RobotData;
-
 struct Intake
 {
     float beam_break_val;
@@ -16,12 +14,3 @@ struct Intake
 
 void initIntake(Intake* intake);
 void updateIntake(Intake* intake);
-
-enum IntakeState
-{
-    INTAKE_OFF_GROUND = 0,
-
-    INTAKE_TRANSFER,
-
-
-};
