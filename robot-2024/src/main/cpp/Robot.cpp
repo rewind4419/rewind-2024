@@ -289,9 +289,12 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
         if (in->mate.a.down)
         {
-            r->intake.intake_speed = CFG_INTAKE_MAX_SPEED;
+            {
+                Task t;
+                t.type = TASK_INTAKE_PULLER;
+                pushTask(&r->taskmgr, t);
+            }
         }
-        else r->intake.intake_speed = 0;
 
         if (in->mate.x.down)
         {

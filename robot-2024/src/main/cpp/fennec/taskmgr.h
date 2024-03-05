@@ -22,24 +22,13 @@ enum TaskType {
 	TASK_WAYPOINT,
 	TASK_DRIVETRAIN_VELOCITY,
 	
-	TASK_HANK,
-	TASK_STAG,
-
-	TASK_CHARGEPAD_STABLISE,
-
-	TASK_UPDATE_MATE_STATE,
-
-	TASK_CONE_ROTATION_ADJUST,
-	TASK_CONE_Y_ADJUST,
-
-	TASK_INTAKE_POSITIONING,
-	TASK_INTAKE_PULLER,
-
-	TASK_UPDATE_LIMELIGHT_LED_STATE,
+	TASK_SHOOTER_POSITIONING,
 
     TASK_MIDDLE_THE_WHEELS,
 
-	TASK_INTAKE,
+	TASK_INTAKE_PULLER,
+
+	TASK_SHOOTER_PULLER,
 
 	// TASK_FUNCTIONPTR, // TODO
 };
@@ -106,7 +95,7 @@ struct TaskData_Shrek {
 	float epsilon;
 };
 
-struct TaskData_Intake {
+struct TaskData_Shooter {
 	float target_angle;
 	float epsilon;
 };
@@ -129,10 +118,7 @@ struct Task {
 		TaskData_Delay delay;
 		TaskData_Waypoint waypoint;
 		TaskData_DrivetrainVelocity drivetrain_velocity;
-		TaskData_Hank hank;
-		TaskData_Stag stag;
-		TaskData_Shrek shrek;
-		TaskData_Intake intake;
+		TaskData_Shooter shooter;
 		TaskData_IntakePuller intake_puller;
         TaskData_MiddleWheels middle_wheels;
         TaskData_FollowLine follow_line;
@@ -191,19 +177,7 @@ inline Task genTaskDrivetrainVelocity(TaskData_DrivetrainVelocity drivetrain_vel
 	return t;
 }
 
-inline Task genTaskHank(TaskData_Hank hank)
-{
-	Task t;
-	t.type = TASK_HANK;
-	t.hank = hank;
-	return t;
-}
 
-inline Task genTaskStag(TaskData_Stag stag)
-{
-	Task t;
-	t.type = TASK_STAG;
-	t.stag = stag;
-	return t;
-}
+
+
 

@@ -21,7 +21,9 @@
 
 ////////////
 
-#include "intake.h"
+#include "Intake.h"
+#include "Shooter.h"
+
 
 
 
@@ -64,8 +66,10 @@ struct RobotData
   PID aligner_pid { .kP = 1.5, .kI = 0, .kD = 0.2 };
   PID holder_pid { .kP = 1.5, .kI = 0, .kD = 0.2 };
 
-  Input input;
   Intake intake;
+  Shooter shooter;
+
+  Input input;
   Localiser_FirstOrderLag localiser;
   OdometryFrame latest_odometry_frame; 
 

@@ -177,7 +177,7 @@ static bool taskStep(Task* task, RobotData* robot)
 
 	} break;
 
-	case TASK_INTAKE: 
+	case TASK_INTAKE_PULLER: 
 	{
 		robot->intake.intake_speed = CFG_INTAKE_MAX_SPEED;
 		if(robot->intake.beam_break_val == 0)
@@ -189,8 +189,30 @@ static bool taskStep(Task* task, RobotData* robot)
     
     } break;
 
+	case TASK_SHOOTER_POSITIONING: 
+	{
+		robot->shooter.target_angle = task->shooter.target_angle;
+		bool angle_complete = ( fabsf(robot->shooter.target_angle - robot->shooter.sum_angle) < task->shooter.epsilon );
+
+		return angle_complete;
+	} break;
+
+	case TASK_SHOOTER_PULLER: 
+	{
+		robot->shooter.control_motor_speed = CFG_SHOOTER_CONTROL_MAX_SPEED;
+		if(robot->shooter.beam_break_val == 0)
+		{
+			robot->shooter.control_motor_speed = 0;
+			return true;
+		}
+		return false;
+    
+    } break;
+
 	default: break;
 	}
+
+	
 	
 	// returns true on complete
 	return true;

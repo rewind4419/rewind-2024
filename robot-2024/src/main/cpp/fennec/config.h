@@ -4,7 +4,7 @@
 // This is the robot's configuration file
 // It will have constants and ID's that we can change all in one place
 
-
+constexpr float CFG_DELTA_TIME = 0.02f;
 
 //////////////////////////////// Drivetrain ////////////////////////////////
 
@@ -24,7 +24,7 @@
 
 //            MOTOR NAME                                MOTOR LABEL
 constexpr int CFG_CAN_DRIVETRAIN_DRIVE_MOTOR_BL = 2; // D4
-constexpr int CFG_CAN_DRIVETRAIN_DRIVE_MOTOR_FL = 62; // D3
+constexpr int CFG_CAN_DRIVETRAIN_DRIVE_MOTOR_FL = 62; // D3 CHANGE TO ID 3
 constexpr int CFG_CAN_DRIVETRAIN_DRIVE_MOTOR_FR = 4; // D1
 constexpr int CFG_CAN_DRIVETRAIN_DRIVE_MOTOR_BR = 5; // D2
 
@@ -106,9 +106,29 @@ constexpr float CFG_DRIVER_ADJUSTMENT_ROTATION_SENSITIVITY = 0.5;
 
 //////////////////////////////// Intake ////////////////////////////////
 
-constexpr int CFG_INTAKE_MOTOR = 21;
+constexpr int CFG_INTAKE_MOTOR = 10;
+
+constexpr int CFG_INTAKE_BB_DIO = 0;
+
 constexpr float CFG_INTAKE_MAX_SPEED = 1;
-constexpr int CFG_BB_DIO = 0;
+
+
+
+//////////////////////////////// Shooter ////////////////////////////////
+
+constexpr int CFG_SHOOTER_CONTROL_MOTOR = 11;
+constexpr int CFG_SHOOTER_FIRING_MOTOR = 12;
+
+constexpr int CFG_SHOOTER_AXIS_LEFT = 13;
+constexpr int CFG_SHOOTER_AXIS_RIGHT = 14;
+constexpr int CFG_SHOOTER_AXIS_MOTOR_COUNT = 2;
+
+constexpr int CFG_SHOOTER_ENCODER = 14;
+constexpr int CFG_SHOOTER_BB_DIO = 1;
+
+constexpr float CFG_SHOOTER_AXIS_OFFSET = 0;
+constexpr float CFG_SHOOTER_AXIS_THROTTLE = 0.85f;
+constexpr float CFG_SHOOTER_CONTROL_MAX_SPEED = 1;
 
 
 //////////////////////////////// Localiser ////////////////////////////////
@@ -124,8 +144,6 @@ constexpr float CFG_DRIVETRAIN_ODO_MULTIPLIER = 1.0f;
 
 
 ///// experimental /////
-
-constexpr bool CFG_ENABLE_ANTISLOP_CHAINS_ON_HANK = false;
 
 constexpr int CFG_LED_STRIP_PIN = 9;
 constexpr int CFG_LED_STRIP_LENGTH = 86;
