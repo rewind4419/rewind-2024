@@ -12,8 +12,7 @@ void initShooter(Shooter* shooter)
 
     shooter->deliver_angle_offset = 0;
 
-    float curr_ang = shooter->shooter_encoder->GetPosition();
-    shooter->sum_angle += curr_ang;
+    shooter->prev_angle = shooter->shooter_encoder->GetPosition();
 }
 
 void updateShooter(Shooter* shooter)
@@ -26,10 +25,12 @@ void updateShooter(Shooter* shooter)
 
     // Shooter angle code
 
-    shooter->sum_angle += shooter->shooter_encoder->GetPosition();
+    float curr_angle = shooter->shooter_encoder->GetPosition();
 
-    float angle_interpol_val = shooter->sum_angle / CFG_SHOOTER_MAX_ANGLE;
-    float interpol_diff = shooter->target_angle - shooter->sum_angle;
+    shooter->sum_angle += curr_angle - shooter->prev_angle;
+
+    float angle_interpol_val = shooter->sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE;
+    float interpol_diff = shooter->target_angle - angle_interpol_val;
 
     float pid = evalPid(&shooter->shooter_pid, interpol_diff, CFG_DELTA_TIME);
 
@@ -49,6 +50,13 @@ void updateShooter(Shooter* shooter)
         else shooter->axis_motors[i]->Set(shooter->axis_throttle);
     }
 
+    shooter->prev_angle = curr_angle;
     
+}
+
+void calibrateShooter(Shooter* shooter)
+{
+    shooter->sum_angle += shooter->shooter_encoder->GetPosition();
+    printf("Shooter Sum Angle = %f", shooter->sum_angle);
 }
 

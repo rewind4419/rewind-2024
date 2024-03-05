@@ -293,11 +293,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
         if (in->mate.a.down)
         {
-            {
-                Task t;
-                t.type = TASK_INTAKE_PULLER;
-                pushTask(&r->taskmgr, t);
-            }
+            robotCmd(&r->taskmgr, INTAKE_OFF_GROUND);
         }
 
         if (in->mate.x.down)

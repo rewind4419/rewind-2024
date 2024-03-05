@@ -7,6 +7,7 @@ void robotCmd(TaskMgr* mgr, RobotState state)
     {
         case INTAKE_OFF_GROUND:
         {
+
             {
                 Task t;
                 t.type = TASK_INTAKE_PULLER;
@@ -19,7 +20,7 @@ void robotCmd(TaskMgr* mgr, RobotState state)
             {
                 Task t;
                 t.type = TASK_SHOOTER_POSITIONING;
-                t.shooter.target_angle = 20.0f / CFG_SHOOTER_MAX_ANGLE;
+                t.shooter.target_angle = M_PI/4;
                 pushTask(mgr, t);
             }
 
@@ -34,7 +35,7 @@ void robotCmd(TaskMgr* mgr, RobotState state)
             {
                 Task t;
                 t.type = TASK_SHOOTER_POSITIONING;
-                t.shooter.target_angle = 0 / CFG_SHOOTER_MAX_ANGLE;
+                t.shooter.target_angle = 0;
                 pushTask(mgr, t);
             }
 

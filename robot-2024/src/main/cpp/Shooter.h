@@ -16,6 +16,7 @@ struct Shooter
     float sum_angle = 0;
     float target_angle = CFG_SHOOTER_AXIS_OFFSET;
     float axis_throttle;
+    float prev_angle;
 
     PID shooter_pid = { .kP = 1.25f, .kI = 0, .kD = 0,  .errorAccum = 0, .lastError = 0 };
 

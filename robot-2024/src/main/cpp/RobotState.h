@@ -8,3 +8,5 @@ enum RobotState
 
 
 };
+
+void robotCmd(TaskMgr* mgr, RobotState state);
