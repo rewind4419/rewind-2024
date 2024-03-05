@@ -3,6 +3,8 @@
 #include <thread>
 #include <iostream>
 
+
+
 // NavX2 library for the IMU
 #include "AHRS.h"
 #include <frc/smartdashboard/Field2d.h>
@@ -15,11 +17,12 @@
 #include "fennec/pid.h"
 #include "fennec/localiser.h"
 #include "fennec/taskmgr.h"
+#include "fennec/config.h"
 
 ////////////
 
+#include "intake.h"
 
-#include "fennec/config.h"
 
 
 
@@ -62,6 +65,7 @@ struct RobotData
   PID holder_pid { .kP = 1.5, .kI = 0, .kD = 0.2 };
 
   Input input;
+  Intake intake;
   Localiser_FirstOrderLag localiser;
   OdometryFrame latest_odometry_frame; 
 

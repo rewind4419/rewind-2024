@@ -5,7 +5,7 @@
 #include "maths.h"
 #include "pid.h"
 
-struct Robot; // forward declaration
+struct RobotData; // forward declaration
 
 
 #define TASKMGR_MAX_TASKS (1024)
@@ -38,6 +38,8 @@ enum TaskType {
 	TASK_UPDATE_LIMELIGHT_LED_STATE,
 
     TASK_MIDDLE_THE_WHEELS,
+
+	TASK_INTAKE,
 
 	// TASK_FUNCTIONPTR, // TODO
 };

@@ -177,6 +177,18 @@ static bool taskStep(Task* task, RobotData* robot)
 
 	} break;
 
+	case TASK_INTAKE: 
+	{
+		robot->intake.intake_speed = CFG_INTAKE_MAX_SPEED;
+		if(robot->intake.beam_break_val == 0)
+		{
+			robot->intake.intake_speed = 0;
+			return true;
+		}
+		return false;
+    
+    } break;
+
 	default: break;
 	}
 	
