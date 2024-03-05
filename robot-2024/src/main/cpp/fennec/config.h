@@ -129,6 +129,7 @@ constexpr int CFG_SHOOTER_BB_DIO = 1;
 constexpr float CFG_SHOOTER_AXIS_OFFSET = 0;
 constexpr float CFG_SHOOTER_AXIS_THROTTLE = 0.85f;
 constexpr float CFG_SHOOTER_CONTROL_MAX_SPEED = 1;
+constexpr float CFG_SHOOTER_MAX_ANGLE = 0; // CHANGE!!!!!!!!!
 
 
 //////////////////////////////// Localiser ////////////////////////////////

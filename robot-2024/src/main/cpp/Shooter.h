@@ -1,5 +1,6 @@
 #pragma once
 #include <rev/CANSparkMax.h>
+#include <rev/CANSparkFlex.h>
 #include <ctre/phoenix/sensors/CANCoder.h>
 #include <frc/DutyCycleEncoder.h>
 #include <frc/DigitalInput.h>
@@ -18,8 +19,9 @@ struct Shooter
 
     PID shooter_pid = { .kP = 1.25f, .kI = 0, .kD = 0,  .errorAccum = 0, .lastError = 0 };
 
-    frc::DutyCycleEncoder shooter_encoder { CFG_SHOOTER_ENCODER };
-    rev::CANSparkMax* axis_motors[CFG_SHOOTER_AXIS_MOTOR_COUNT];
+    std::unique_ptr<rev::SparkMaxRelativeEncoder> shooter_encoder;
+    
+    rev::CANSparkFlex* axis_motors[CFG_SHOOTER_AXIS_MOTOR_COUNT];
     rev::CANSparkMax* control_motor;
     rev::CANSparkMax* firing_motor;
     frc::DigitalInput beam_break{CFG_SHOOTER_BB_DIO};
