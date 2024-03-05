@@ -1,4 +1,4 @@
-// void intakeCmd(RobotData* r, IntakeState state)
+// void robotCmd(RobotData* r, IntakeState state)
 // {
 //     switch(state)
 //     {

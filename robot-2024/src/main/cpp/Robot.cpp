@@ -22,6 +22,8 @@ void initRobot(RobotData *r, RobotMode mode)
 
     // initDrivetrainController(&r->drivetrain_controller);
     initIntake(&r->intake);
+    initShooter(&r->shooter);
+
 
     // r->taskmgr = TaskMgr();
     r->sensor_imu = new AHRS(frc::SPI::Port::kMXP);
@@ -64,6 +66,8 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
     // Update
     updateGamepad(&r->input);
     updateIntake(&r->intake);
+    updateShooter(&r->shooter);
+
 
     r->latest_odometry_frame = getDrivetrainOdometry(&r->drivetrain);
 
