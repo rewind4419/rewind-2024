@@ -17,11 +17,11 @@ enum DrivetrainControllerMode
 struct DrivetrainController
 {
 	// linear velocity
-	PID normal_pid  = { .kP = 0.1, .kI = 0.3, .kD = 0 };
-	PID tangent_pid = { .kP = 0.1, .kI = 0.3, .kD = 0 };
+	PID normal_pid  = { .kP = 0.1, .kI = 0, .kD = 0 };
+	PID tangent_pid = { .kP = 0.1, .kI = 0, .kD = 0 };
 
 	// angular velocity
-	PID angular_pid = { .kP = 0.1, .kI = 0.3, .kD = 0 };
+	PID angular_pid = { .kP = 0.1, .kI = 0, .kD = 0 };
 
 	// aligner
 	PID linear_x_pid { .kP = 1.5, .kI = 0.0, .kD = 0.1 };

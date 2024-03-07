@@ -168,10 +168,9 @@ void drivetrainUpdateRawVectors(Drivetrain* drivetrain, v2* target_vectors, floa
 
         // simple P loop
         float steer_throttle = -turn_angle / M_PI; 
-        if (steer_throttle >  .5) steer_throttle =  .5;
-        if (steer_throttle < -.5) steer_throttle = -.5;
-
-        module->steer_motor->Set(steer_throttle);
+        // if (steer_throttle >  .5) steer_throttle =  .5;
+        // if (steer_throttle < -.5) steer_throttle = -.5;
+        module->steer_motor->Set( steer_throttle);
 
 		
 		float driveSpeed = 1.0;
@@ -193,6 +192,7 @@ void drivetrainUpdateRawVectors(Drivetrain* drivetrain, v2* target_vectors, floa
 
         float drive_throttle = v / driveSpeed;
 
+    
         module->drive_motor->Set(drive_throttle);
 
 
