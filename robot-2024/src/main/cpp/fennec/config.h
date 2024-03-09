@@ -110,7 +110,7 @@ constexpr int CFG_INTAKE_MOTOR = 10;
 
 constexpr int CFG_INTAKE_BB_DIO = 0;
 
-constexpr float CFG_INTAKE_MAX_SPEED = 1;
+constexpr float CFG_INTAKE_MAX_SPEED = 0.5;
 
 
 

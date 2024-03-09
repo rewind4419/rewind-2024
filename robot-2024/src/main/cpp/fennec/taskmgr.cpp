@@ -189,6 +189,22 @@ static bool taskStep(Task* task, RobotData* robot)
     
     } break;
 
+	case TASK_INTAKE_WITHOUT_BB: 
+	{
+
+		float intake_speed = robot->input.mate.trigger_right;
+		if(robot->input.mate.trigger_right < 0.5) intake_speed = 0.5;
+
+		robot->intake.intake_speed = intake_speed;
+		if(robot->input.mate.trigger_right < 0.05)
+		{
+			robot->intake.intake_speed = 0;
+			return true;
+		}
+		return false;
+    
+    } break;
+
 	case TASK_SHOOTER_POSITIONING: 
 	{
 		robot->shooter.target_angle = task->shooter.target_angle;

@@ -6,6 +6,8 @@ enum RobotState
 
     INTAKE_TRANSFER,
 
+    INTAKE_OFF_GROUND_WITHOUT_BB
+
 
 };
 

@@ -14,6 +14,14 @@ void robotCmd(TaskMgr* mgr, RobotState state)
                 pushTask(mgr, t);
             }
         } break;
+        case INTAKE_OFF_GROUND_WITHOUT_BB:
+        {
+            {
+                Task t;
+                t.type = TASK_INTAKE_WITHOUT_BB;
+                pushTask(mgr, t);
+            }
+        } break;
 
         case INTAKE_TRANSFER:
         {

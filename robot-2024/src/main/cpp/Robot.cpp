@@ -19,9 +19,8 @@ void initRobot(RobotData *r, RobotMode mode)
     printf("Initializing Robot");
 
     initDrivetrain(&r->drivetrain);
-
+    initIntake(&r->intake);
     initDrivetrainController(&r->drivetrain_controller);
-    // initIntake(&r->intake);
     // initShooter(&r->shooter);
 
 
@@ -64,10 +63,8 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
     r->delta_time = time_step;
 
     // Update
-    updateGamepad(&r->input);
-    // updateIntake(&r->intake);
-    // updateShooter(&r->shooter);
 
+    updateGamepad(&r->input);
 
     r->latest_odometry_frame = getDrivetrainOdometry(&r->drivetrain);
 
@@ -296,18 +293,18 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         {
 
         }
-
         //Intake off ground
-        if (in->mate.a.down)
+        if (in->mate.trigger_right > 0.5f)
         {
-            // robotCmd(&r->taskmgr, INTAKE_OFF_GROUND);
+            robotCmd(&r->taskmgr, INTAKE_OFF_GROUND_WITHOUT_BB);
+            // r->intake.intake_speed = in->mate.trigger_right;
         }
 
-        if (in->mate.x.down)
-        {
-            r->shooter.firing_motor_speed = r->shooter.CFG_SHOOTER_MAX_FIRING_SPEED;
-        }
-        else r->shooter.firing_motor_speed = 0;
+        // else if (in->mate.trigger_left > 0.5f)
+        // {
+        //     r->intake.intake_speed = -in->mate.trigger_left;
+        // }
+        // else r->intake.intake_speed = 0;
 
         if (in->mate.bumper_left.down)
         {
@@ -315,9 +312,14 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         }
         
         // Shooter firing motors activation
-        //if (in->mate.trigger_right) r->shooter.firing_motor_speed = r->shooter.CFG_SHOOTER_MAX_FIRING_SPEED;
-        //else r->shooter.firing_motor_speed = 0;
+        // if (in->mate.trigger_right) r->shooter.firing_motor_speed = r->shooter.CFG_SHOOTER_MAX_FIRING_SPEED;
+        // else r->shooter.firing_motor_speed = 0;
     }
+
+    // Update
+    updateIntake(&r->intake);
+    // updateShooter(&r->shooter);
+
     
 
     // Localiser code (not using IMU yet)

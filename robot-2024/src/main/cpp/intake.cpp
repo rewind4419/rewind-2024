@@ -8,7 +8,7 @@ void initIntake(Intake* intake)
 
 void updateIntake(Intake* intake)
 {
-    intake->beam_break_val = intake->beam_break.Get();
+    // intake->beam_break_val = intake->beam_break.Get();
     intake->intake_motor->Set(intake->intake_speed);
 }
 
