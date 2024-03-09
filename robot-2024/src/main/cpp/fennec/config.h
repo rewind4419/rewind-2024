@@ -116,14 +116,14 @@ constexpr float CFG_INTAKE_MAX_SPEED = 1;
 
 //////////////////////////////// Shooter ////////////////////////////////
 
-constexpr int CFG_SHOOTER_CONTROL_MOTOR = 11;
-constexpr int CFG_SHOOTER_FIRING_MOTOR = 12;
+constexpr int CFG_SHOOTER_CONTROL_MOTOR = 30;
+constexpr int CFG_SHOOTER_FIRING_MOTOR = 31;
 
-constexpr int CFG_SHOOTER_AXIS_LEFT = 13;
-constexpr int CFG_SHOOTER_AXIS_RIGHT = 14;
+constexpr int CFG_SHOOTER_AXIS_LEFT = 21;
+constexpr int CFG_SHOOTER_AXIS_RIGHT = 22;
 constexpr int CFG_SHOOTER_AXIS_MOTOR_COUNT = 2;
 
-constexpr int CFG_SHOOTER_ENCODER = 14;
+constexpr int CFG_SHOOTER_ENCODER = 23;
 constexpr int CFG_SHOOTER_BB_DIO = 1;
 
 constexpr float CFG_SHOOTER_AXIS_OFFSET = 0;

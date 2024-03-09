@@ -3,7 +3,7 @@
 void initShooter(Shooter* shooter)
 {
     shooter->control_motor = new rev::CANSparkMax(CFG_SHOOTER_CONTROL_MOTOR, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
-    shooter->firing_motor = new rev::CANSparkMax(CFG_SHOOTER_FIRING_MOTOR, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
+    shooter->firing_motor = new rev::CANSparkFlex(CFG_SHOOTER_FIRING_MOTOR, rev::CANSparkFlex::MotorType::kBrushless);
 
     shooter->axis_motors[0] = new rev::CANSparkFlex(CFG_SHOOTER_AXIS_LEFT, rev::CANSparkFlex::MotorType::kBrushless);
     shooter->axis_motors[1] = new rev::CANSparkFlex(CFG_SHOOTER_AXIS_RIGHT, rev::CANSparkFlex::MotorType::kBrushless);

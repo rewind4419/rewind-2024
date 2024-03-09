@@ -11,12 +11,13 @@ struct Shooter
 {
     float beam_break_val;
     float control_motor_speed = 0;
-    float firing_motor_speed = 0;
+    float firing_motor_speed;
     float deliver_angle_offset = 0;
     float sum_angle = 0;
     float target_angle = CFG_SHOOTER_AXIS_OFFSET;
     float axis_throttle;
     float prev_angle;
+    float CFG_SHOOTER_MAX_FIRING_SPEED = 0.1; //Shooter Speed can only be in the range of 0 - 1
 
     PID shooter_pid = { .kP = 1.25f, .kI = 0, .kD = 0,  .errorAccum = 0, .lastError = 0 };
 
@@ -24,7 +25,7 @@ struct Shooter
     
     rev::CANSparkFlex* axis_motors[CFG_SHOOTER_AXIS_MOTOR_COUNT];
     rev::CANSparkMax* control_motor;
-    rev::CANSparkMax* firing_motor;
+    rev::CANSparkFlex* firing_motor;
     frc::DigitalInput beam_break{CFG_SHOOTER_BB_DIO};
 };
 

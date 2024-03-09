@@ -305,8 +305,9 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
         if (in->mate.x.down)
         {
-  
+            r->shooter.firing_motor_speed = r->shooter.CFG_SHOOTER_MAX_FIRING_SPEED;
         }
+        else r->shooter.firing_motor_speed = 0;
 
         if (in->mate.bumper_left.down)
         {
@@ -314,8 +315,8 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         }
         
         // Shooter firing motors activation
-        if (in->mate.trigger_right.down) r->shooter.firing_motor_speed = CFG_SHOOTER_MAX_FIRING_SPEED;
-        else r->shooter.firing_motor_speed = 0;
+        //if (in->mate.trigger_right) r->shooter.firing_motor_speed = r->shooter.CFG_SHOOTER_MAX_FIRING_SPEED;
+        //else r->shooter.firing_motor_speed = 0;
     }
     
 
