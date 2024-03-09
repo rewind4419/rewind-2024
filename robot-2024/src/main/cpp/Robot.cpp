@@ -21,8 +21,8 @@ void initRobot(RobotData *r, RobotMode mode)
     initDrivetrain(&r->drivetrain);
 
     initDrivetrainController(&r->drivetrain_controller);
-    // initIntake(&r->intake);
-    // initShooter(&r->shooter);
+    initIntake(&r->intake);
+    initShooter(&r->shooter);
 
 
     // r->taskmgr = TaskMgr();
@@ -65,8 +65,8 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
     // Update
     updateGamepad(&r->input);
-    // updateIntake(&r->intake);
-    // updateShooter(&r->shooter);
+    updateIntake(&r->intake);
+    updateShooter(&r->shooter);
 
 
     r->latest_odometry_frame = getDrivetrainOdometry(&r->drivetrain);
@@ -298,10 +298,21 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         }
 
         //Intake off ground
-        if (in->mate.a.down)
+        //TEMP
+        if (in->mate.bumper_right.down)
         {
             // robotCmd(&r->taskmgr, INTAKE_OFF_GROUND);
+            r->intake.intake_speed = 0.75f;
+            r->shooter.control_motor_speed = 0.5f;
+        } else if(in->mate.bumper_left.down)
+        {
+            r->intake.intake_speed = -0.75f;
+            r->shooter.control_motor_speed = -0.5f;
+        }else {
+            r->intake.intake_speed = 0.0f;
+            r->shooter.control_motor_speed = 0.0f;
         }
+        //TEMP
 
         if (in->mate.x.down)
         {
