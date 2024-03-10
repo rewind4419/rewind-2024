@@ -191,12 +191,14 @@ static bool taskStep(Task* task, RobotData* robot)
 
 	case TASK_INTAKE_WITHOUT_BB: 
 	{
+		float intake_speed = 0;
 
-		float intake_speed = robot->input.mate.trigger_right;
-		if(robot->input.mate.trigger_right < 0.5) intake_speed = 0.5;
+		if(robot->input.mate.trigger_right > 0) intake_speed = robot->input.mate.trigger_right;
+		else if(robot->input.mate.trigger_left > 0) intake_speed = -robot->input.mate.trigger_left;
 
 		robot->intake.intake_speed = intake_speed;
-		if(robot->input.mate.trigger_right < 0.05)
+
+		if(robot->input.mate.trigger_right < 0.05 && robot->input.mate.trigger_left < 0.05)
 		{
 			robot->intake.intake_speed = 0;
 			return true;
@@ -208,8 +210,9 @@ static bool taskStep(Task* task, RobotData* robot)
 	case TASK_SHOOTER_POSITIONING: 
 	{
 		robot->shooter.target_angle = task->shooter.target_angle;
-		bool angle_complete = ( fabsf(robot->shooter.target_angle - robot->shooter.sum_angle) < task->shooter.epsilon );
-
+		float curr_angle = robot->shooter.sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE;
+		bool angle_complete = ( fabsf(robot->shooter.target_angle - curr_angle) < task->shooter.epsilon );
+		// printf("distance = %f\n", fabsf(robot->shooter.target_angle - curr_angle));
 		return angle_complete;
 	} break;
 
@@ -218,7 +221,7 @@ static bool taskStep(Task* task, RobotData* robot)
 		robot->shooter.control_motor_speed = CFG_SHOOTER_CONTROL_MAX_SPEED;
 		robot->intake.intake_speed = CFG_INTAKE_MAX_SPEED;
 
-		if(robot->shooter.beam_break_val == 0)
+		if(!robot->input.mate.a.held)
 		{
 			robot->shooter.control_motor_speed = 0;
 			robot->intake.intake_speed = 0;
@@ -243,6 +246,7 @@ static bool taskStep(Task* task, RobotData* robot)
 
 
 bool pushTask(TaskMgr* mgr, Task task) {
+
 	if (((mgr->write_head + 1) % TASKMGR_MAX_TASKS) == mgr->read_head) {
 		printf("TaskMgr; Failed to add task, queue is full!\n");
 		return false;

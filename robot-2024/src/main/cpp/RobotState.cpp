@@ -1,4 +1,5 @@
 #include "RobotState.h"
+#include <iostream>
 #include "fennec/config.h"
 
 void robotCmd(TaskMgr* mgr, RobotState state)
@@ -28,9 +29,10 @@ void robotCmd(TaskMgr* mgr, RobotState state)
             {
                 Task t;
                 t.type = TASK_SHOOTER_POSITIONING;
-                t.shooter.target_angle = M_PI/4;
+                t.shooter.target_angle = 1.4f;
+                t.shooter.epsilon = 0.4f;
                 pushTask(mgr, t);
-            }
+            }     
 
             {
                 Task t;

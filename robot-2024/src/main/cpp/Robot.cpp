@@ -4,6 +4,7 @@
 
 #include "Robot.h"
 
+
 #include <fmt/core.h>
 #include <frc/smartdashboard/SmartDashboard.h>
 
@@ -19,12 +20,12 @@ void initRobot(RobotData *r, RobotMode mode)
     printf("Initializing Robot");
 
     initDrivetrain(&r->drivetrain);
-    initIntake(&r->intake);
     initDrivetrainController(&r->drivetrain_controller);
-    // initShooter(&r->shooter);
+    initIntake(&r->intake);
+    initShooter(&r->shooter);
 
 
-    // r->taskmgr = TaskMgr();
+    r->taskmgr = TaskMgr();
     r->sensor_imu = new AHRS(frc::SPI::Port::kMXP);
     r->integrated_imu_pos = {};
     r->imu_basis = 0;
@@ -55,6 +56,8 @@ void robotModeInit(RobotData *r, RobotMode new_mode)
 
 void updateRobot(RobotData *r, float time_step, RobotMode mode)
 {
+
+    // calibrateShooter(&r->shooter);
     // printCalibrationData(&r->drivetrain);
 
     if (mode == ROBOT_DISABLE) return;
@@ -62,11 +65,8 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
     r->enable_time +=r->delta_time;
     r->delta_time = time_step;
 
-    // Update
-
+    // Update gamepad
     updateGamepad(&r->input);
-    updateIntake(&r->intake);
-    updateShooter(&r->shooter);
 
 
     r->latest_odometry_frame = getDrivetrainOdometry(&r->drivetrain);
@@ -290,48 +290,55 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         }
 
 
+
         auto *in = &r->input;
 
-        if (in->mate.b.down)
+
+        if (in->mate.trigger_right > 0.01f)
         {
+            r->intake.intake_speed = in->mate.trigger_right / 3;
+            r->shooter.control_motor_speed = in->mate.trigger_right / 3;
 
         }
-        //Intake off ground
-        //TEMP
-        if (in->mate.bumper_right.down)
+        else if((in->mate.trigger_left > 0.01f))
         {
-            // robotCmd(&r->taskmgr, INTAKE_OFF_GROUND);
-            r->intake.intake_speed = 0.75f;
-            r->shooter.control_motor_speed = 0.5f;
-        } else if(in->mate.bumper_left.down)
-        {
-            r->intake.intake_speed = -0.75f;
-            r->shooter.control_motor_speed = -0.5f;
-        }else {
-            r->intake.intake_speed = 0.0f;
-            r->shooter.control_motor_speed = 0.0f;
-        }
-        //TEMP
-
-        // else if (in->mate.trigger_left > 0.5f)
-        // {
-        //     r->intake.intake_speed = -in->mate.trigger_left;
-        // }
-        // else r->intake.intake_speed = 0;
-
-        if (in->mate.bumper_left.down)
-        {
+            r->intake.intake_speed = -in->mate.trigger_left / 3;
+            r->shooter.control_motor_speed = -in->mate.trigger_left / 3;
 
         }
+        else
+        {
+            r->intake.intake_speed = 0;
+            r->shooter.control_motor_speed = 0;
+        } 
+
+        if(in->mate.b.down)
+        {
+            {
+                Task t;
+                t.type = TASK_SHOOTER_POSITIONING;
+                t.shooter.target_angle = 0;
+                t.shooter.epsilon = 0.5f;
+                pushTask(&r->taskmgr, t);
+            }        
+        }
+
+        if(in->mate.a.down)
+        {
+            robotCmd(&r->taskmgr, INTAKE_TRANSFER);
+        }
+      
         
         // Shooter firing motors activation
-        // if (in->mate.trigger_right) r->shooter.firing_motor_speed = r->shooter.CFG_SHOOTER_MAX_FIRING_SPEED;
-        // else r->shooter.firing_motor_speed = 0;
+        if (in->mate.bumper_right.held) r->shooter.firing_motor_speed = -r->shooter.CFG_SHOOTER_MAX_FIRING_SPEED;
+        else r->shooter.firing_motor_speed = 0;
+
+        // Update
+        updateManager(&r->taskmgr, r);
+        updateIntake(&r->intake);
+        updateShooter(&r->shooter);
     }
 
-    // Update
-    updateIntake(&r->intake);
-    // updateShooter(&r->shooter);
 
     
 

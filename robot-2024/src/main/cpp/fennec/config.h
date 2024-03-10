@@ -108,7 +108,7 @@ constexpr float CFG_DRIVER_ADJUSTMENT_ROTATION_SENSITIVITY = 0.5;
 
 constexpr int CFG_INTAKE_MOTOR = 10;
 
-constexpr int CFG_INTAKE_BB_DIO = 0;
+constexpr int CFG_INTAKE_BB_DIO = 1;
 
 constexpr float CFG_INTAKE_MAX_SPEED = 0.5;
 
@@ -123,14 +123,22 @@ constexpr int CFG_SHOOTER_AXIS_LEFT = 21;
 constexpr int CFG_SHOOTER_AXIS_RIGHT = 22;
 constexpr int CFG_SHOOTER_AXIS_MOTOR_COUNT = 2;
 
-constexpr int CFG_SHOOTER_ENCODER = 23;
-constexpr int CFG_SHOOTER_BB_DIO = 1;
+constexpr int CFG_SHOOTER_BB_DIO = 0;
 
-constexpr float CFG_SHOOTER_AXIS_OFFSET = 0;
-constexpr float CFG_SHOOTER_AXIS_THROTTLE = 0.85f;
-constexpr float CFG_SHOOTER_CONTROL_MAX_SPEED = 1;
-constexpr float CFG_SHOOTER_MAX_ANGLE = 0; // CHANGE!!!!!!!!!
-constexpr float CFG_SHOOTER_ANGLE_RANGE = M_PI/4;
+constexpr float CFG_SHOOTER_ANGLE_OFFSET = 0.279253; //In radians - 16 degrees
+constexpr float CFG_SHOOTER_AXIS_THROTTLE = 0.15f;
+constexpr float CFG_SHOOTER_CONTROL_MAX_SPEED = 0.4f;
+constexpr float CFG_SHOOTER_MAX_ANGLE = 10.558441; 
+constexpr float CFG_SHOOTER_ANGLE_RANGE = 1.44862;
+// constexpr float CFG_SHOOTER_START_ANGLE = 0.5 / 45 * CFG_SHOOTER_ANGLE_RANGE;
+constexpr float CFG_SHOOTER_START_ANGLE = 0;
+
+
+
+constexpr float CFG_SHOOTER_MASS = 30 / 2.205; //kg
+constexpr float CFG_SHOOTER_CENTER_OF_MASS = 10.0f / 39.37; // In meters
+constexpr float CFG_SHOOTER_GEAR_RATIO = 3.0f;
+constexpr float CFG_SHOOTER_STALL_TORQUE = 3.6f; // newton meters
 
 
 //////////////////////////////// Localiser ////////////////////////////////
@@ -149,3 +157,6 @@ constexpr float CFG_DRIVETRAIN_ODO_MULTIPLIER = 1.0f;
 
 constexpr int CFG_LED_STRIP_PIN = 9;
 constexpr int CFG_LED_STRIP_LENGTH = 86;
+
+constexpr float CFG_GRAVITATIONAL_CONSTANT = 9.8; // m/s/s
+

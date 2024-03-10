@@ -142,7 +142,7 @@ struct TaskMgr
 };
 
 bool pushTask(TaskMgr* mgr, Task task);
-// void updateManager(TaskMgr* mgr, RobotData* robot);
+void updateManager(TaskMgr* mgr, RobotData* robot);
 
 // util
 inline Task genTaskDefault(TaskType type)

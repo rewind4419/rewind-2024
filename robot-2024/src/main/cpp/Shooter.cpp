@@ -2,7 +2,7 @@
 
 void initShooter(Shooter* shooter)
 {
-    shooter->control_motor = new rev::CANSparkMax(CFG_SHOOTER_CONTROL_MOTOR, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
+    shooter->control_motor = new rev::CANSparkFlex(CFG_SHOOTER_CONTROL_MOTOR, rev::CANSparkFlex::MotorType::kBrushless);
     shooter->firing_motor = new rev::CANSparkFlex(CFG_SHOOTER_FIRING_MOTOR, rev::CANSparkFlex::MotorType::kBrushless);
 
     shooter->axis_motors[0] = new rev::CANSparkFlex(CFG_SHOOTER_AXIS_LEFT, rev::CANSparkFlex::MotorType::kBrushless);
@@ -19,12 +19,20 @@ void updateShooter(Shooter* shooter)
 {
     shooter->beam_break_val = shooter->beam_break.Get();
 
+    // if(!shooter->beam_break_val) printf("not broken \n");
+    // else printf("broken \n");
+
     shooter->control_motor->Set(shooter->control_motor_speed);
+
     shooter->firing_motor->Set(shooter->firing_motor_speed);
 
+    float shooter_angle = shooter->sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE + CFG_SHOOTER_ANGLE_OFFSET;
+
+    float counter_throttle = 0.05 * cos(shooter_angle);
+
+    // printf("shooter angle = %f \n", shooter_angle);
 
     // Shooter angle code
-
     float curr_angle = shooter->shooter_encoder->GetPosition();
 
     shooter->sum_angle += curr_angle - shooter->prev_angle;
@@ -33,16 +41,25 @@ void updateShooter(Shooter* shooter)
     float interpol_diff = shooter->target_angle - angle_interpol_val;
 
     float pid = evalPid(&shooter->shooter_pid, interpol_diff, CFG_DELTA_TIME);
+    // printf("PID = %f \n", pid);
 
     float target_throttle = CLAMP(pid, -CFG_SHOOTER_AXIS_THROTTLE, CFG_SHOOTER_AXIS_THROTTLE);
 
     shooter->axis_throttle = mix(
         shooter->axis_throttle,
         target_throttle,
-        0.2f
+        0.8f
     );
 
+    // printf("THROTTLE PRIOR = %f\n", shooter->axis_throttle);
+
+
+    shooter->axis_throttle += counter_throttle;
+
+    // printf("THROTTLE = %f\n", shooter->axis_throttle);
+
     shooter->axis_throttle = CLAMP(shooter->axis_throttle, -CFG_SHOOTER_AXIS_THROTTLE, CFG_SHOOTER_AXIS_THROTTLE);
+
 
     for(int i = 0; i < CFG_SHOOTER_AXIS_MOTOR_COUNT; i++)
     {
@@ -56,7 +73,9 @@ void updateShooter(Shooter* shooter)
 
 void calibrateShooter(Shooter* shooter)
 {
-    shooter->sum_angle += shooter->shooter_encoder->GetPosition();
-    printf("Shooter Sum Angle = %f", shooter->sum_angle);
+    shooter->sum_angle += shooter->shooter_encoder->GetPosition() - shooter->prev_angle;
+    shooter->prev_angle = shooter->shooter_encoder->GetPosition();
+
+    printf("Shooter Sum Angle = %f\n", shooter->sum_angle);
 }
 

@@ -9,6 +9,8 @@
 #include "AHRS.h"
 #include <frc/smartdashboard/Field2d.h>
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <rev/CANSparkFlex.h>
+
 
 // FENNEC //
 #include "fennec/drivetrain.h"
