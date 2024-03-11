@@ -136,20 +136,20 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             r->imu_basis = degToRad( r->sensor_imu->GetYaw());
         }
 
-        if ( r->input.driver.x.held)
-        {
-            r->imu_basis = degToRad( r->sensor_imu->GetYaw()) + M_PI / 2.0f;
-        }
+        // if ( r->input.driver.x.held)
+        // {
+        //     r->imu_basis = degToRad( r->sensor_imu->GetYaw()) + M_PI / 2.0f;
+        // }
 
-        if ( r->input.driver.b.held)
-        {
-            r->imu_basis = degToRad( r->sensor_imu->GetYaw()) - M_PI / 2.0f;
-        }
+        // if ( r->input.driver.b.held)
+        // {
+        //     r->imu_basis = degToRad( r->sensor_imu->GetYaw()) - M_PI / 2.0f;
+        // }
 
-        if ( r->input.driver.a.held)
-        {
-            r->imu_basis = degToRad( r->sensor_imu->GetYaw()) + M_PI;
-        }
+        // if ( r->input.driver.a.held)
+        // {
+        //     r->imu_basis = degToRad( r->sensor_imu->GetYaw()) + M_PI;
+        // }
 
         float imu_yaw = degToRad( r->sensor_imu->GetYaw()) - r->imu_basis;
         input_translation = rotate(input_translation, -imu_yaw);
@@ -293,17 +293,22 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
         auto *in = &r->input;
 
+        // if (in->mate.big_button.held)
+        // {
+        //     r->taskmgr = TaskMgr{};
+        // }
 
-        if (in->mate.trigger_right > 0.01f)
+
+        if (in->driver.trigger_right > 0.01f)
         {
-            r->intake.intake_speed = in->mate.trigger_right / 3;
-            r->shooter.control_motor_speed = in->mate.trigger_right / 3;
+            r->intake.intake_speed = in->driver.trigger_right / 5;
+            r->shooter.control_motor_speed = in->driver.trigger_right / 5;
 
         }
-        else if((in->mate.trigger_left > 0.01f))
+        else if((in->driver.trigger_left > 0.01f))
         {
-            r->intake.intake_speed = -in->mate.trigger_left / 3;
-            r->shooter.control_motor_speed = -in->mate.trigger_left / 3;
+            r->intake.intake_speed = -in->driver.trigger_left / 5;
+            r->shooter.control_motor_speed = -in->driver.trigger_left / 5;
 
         }
         else
@@ -312,7 +317,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             r->shooter.control_motor_speed = 0;
         } 
 
-        if(in->mate.b.down)
+        if(in->driver.b.down)
         {
             {
                 Task t;
@@ -323,15 +328,40 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             }        
         }
 
-        if(in->mate.a.down)
+        if(in->driver.a.down)
         {
-            robotCmd(&r->taskmgr, INTAKE_TRANSFER);
+            printf("intake\n");
+            robotCmd(r, INTAKE_TRANSFER);
         }
       
+        if (in->driver.trigger_right > 0.01 && r->shooter.firing_motor_task == true && r->shooter.shooter_first_time == true) 
+        {
+            if(r->shooter.shooter_first_time)
+            {
+                printf("stopping\n");
+                robotCmd(r, SHOOTER_STOP);
+                r->shooter.shooter_first_time = false;
+            }
+
+        }
+        else if (in->driver.bumper_right.held && r->shooter.firing_motor_task == false)  r->shooter.firing_motor_speed = -CFG_SHOOTER_MAX_FIRING_SPEED;
+        else if (r->shooter.firing_motor_task == false) r->shooter.firing_motor_speed = 0;
+
+        // if(in->driver.bumper_left.down)
+        // {
+        //     {
+        //         Task t;
+        //         t.type = TASK_SEAT_RING;
+        //         t.shooter.delay_timer = 0;
+        //         t.shooter.delay_length = 0.1f;
+        //         t.shooter.seat_speed = -0.1f;
+        //         pushTask(&r->taskmgr, t);
+        //     }
+        // }
         
         // Shooter firing motors activation
-        if (in->mate.bumper_right.held) r->shooter.firing_motor_speed = -r->shooter.CFG_SHOOTER_MAX_FIRING_SPEED;
-        else r->shooter.firing_motor_speed = 0;
+        // if (in->mate.bumper_right.held) r->shooter.firing_motor_speed = -r->shooter.CFG_SHOOTER_MAX_FIRING_SPEED;
+        // else r->shooter.firing_motor_speed = 0;
 
         // Update
         updateManager(&r->taskmgr, r);

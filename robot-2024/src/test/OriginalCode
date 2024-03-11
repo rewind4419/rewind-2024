@@ -1,352 +1,296 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+#include "taskmgr.h"
+#include "../Robot.h"
 
-#include "Robot.h"
-
-#include <fmt/core.h>
-#include <frc/smartdashboard/SmartDashboard.h>
+#include <stdio.h>
 
 
+static bool taskStep(Task* task, RobotData* robot);
 
-void initRobot(RobotData *r, RobotMode mode)
+static void taskStart(Task* task, RobotData* robot)
 {
-//How to use smart dashboard
-// frc::SmartDashboard::PutData("Field", &r.field);
-// frc::SmartDashboard::PutNumber("AutoMode", 0);
+	switch (task->type) {
+		case TASK_WAYPOINT: {
 
-    // initialize the sensors
-    printf("Initializing Robot");
+		} break;
 
-    // initDrivetrain(&r->drivetrain);
-    // initDrivetrainController(&r->drivetrain_controller);
-    // initIntake(&r->intake);
-    // initShooter(&r->shooter);
-
-    r->test_motor = new rev::CANSparkMax(1, rev::CANSparkMaxLowLevel::MotorType::kBrushless);
-
-
-
-    // r->taskmgr = TaskMgr();
-    r->sensor_imu = new AHRS(frc::SPI::Port::kMXP);
-    r->integrated_imu_pos = {};
-    r->imu_basis = 0;
-    r->sensor_imu->ZeroYaw();
+		default: break;
+	}
 }
 
-void robotModeInit(RobotData *r, RobotMode new_mode)
-{
-    r->enable_time = 0;
-    r->localiser = {};
 
-    {
-        r->taskmgr = TaskMgr{};
-    }
+static void doTask(TaskMgr* mgr, Task* task, RobotData* robot) {
+	// Do the task
+	if (!task->started) {
+		task->started = true;
+		taskStart(task, robot);
+	}
 
-    r->sensor_imu->ZeroYaw();
-
-    r->aligner = ALGN_NONE;
-
-    r->drivetrain_controller.mode = DRIVECTRL_VELOCITY;
-    r->drivetrain_controller.ctrl.velocity.velocity = {0, 0};
-    r->drivetrain_controller.ctrl.velocity.angular_velocity = 0;
-
-
-    r->imu_basis = 0;
-
+	bool complete = taskStep(task, robot);
+	if (complete) {
+		if (task->type == TASK_LIST) free(task->list);
+		*task = { };
+		mgr->read_head = (mgr->read_head + 1) % TASKMGR_MAX_TASKS;
+	}
 }
 
-void updateRobot(RobotData *r, float time_step, RobotMode mode)
+void updateManager(TaskMgr* mgr, RobotData* robot) {
+	if (mgr->is_parallel) {
+		for (uint64_t i=0; i<mgr->write_head; i++) {
+			doTask(mgr, &mgr->task_buffer[i], robot);
+		}
+	}
+	else {
+		if (mgr->read_head != mgr->write_head)
+			doTask(mgr, &mgr->task_buffer[mgr->read_head], robot);
+	}
+}
+
+static bool taskStep(Task* task, RobotData* robot)
 {
-    // printCalibrationData(&r->drivetrain);
+	switch (task->type) {
+	case TASK_LIST: {
+		updateManager(task->list, robot);
+		return task->list->read_head == task->list->write_head;
+	} break;
 
-    if (mode == ROBOT_DISABLE) return;
+	case TASK_DELAY: {
+		task->delay.timer += robot->delta_time;
+		return task->delay.timer > task->delay.length;
+	} break;
 
-    r->enable_time +=r->delta_time;
-    r->delta_time = time_step;
+	case TASK_WAYPOINT: {
+		robot->drivetrain_controller.mode = DRIVECTRL_WAYPOINT;
+		robot->drivetrain_controller.ctrl.waypoint.pose = task->waypoint.target_pose;
+		robot->drivetrain_controller.ctrl.waypoint.speed = task->waypoint.speed;
+		robot->drivetrain_controller.ctrl.waypoint.speed_rot = task->waypoint.speed_rot;
 
-    // Update
-    updateGamepad(&r->input);
-    // updateIntake(&r->intake);
-    // updateShooter(&r->shooter);
+		if (length(robot->localiser.pose_estimate.position - task->waypoint.target_pose.position) < task->waypoint.epsilon
+			&& fabsf(robot->localiser.pose_estimate.rotation - task->waypoint.target_pose.rotation) < task->waypoint.epsilon_rot)
+		{
+			return true;
+		}
 
+		return false;
 
-    r->latest_odometry_frame = getDrivetrainOdometry(&r->drivetrain);
+	} break;
 
-    // reset the target velocities
-    if (r->drivetrain_controller.mode == DRIVECTRL_VELOCITY)
-    {
-        r->drivetrain_controller.ctrl.velocity.velocity = v2{0, 0};
-        r->drivetrain_controller.ctrl.velocity.angular_velocity = 0;
+	case TASK_DRIVETRAIN_VELOCITY: {
+		robot->drivetrain_controller.mode = DRIVECTRL_VELOCITY;
+		robot->drivetrain_controller.ctrl.velocity.velocity = task->drivetrain_velocity.target_velocity;
+		robot->drivetrain_controller.ctrl.velocity.angular_velocity = task->drivetrain_velocity.target_angular_velocity;
+
+        task->drivetrain_velocity.timer += robot->delta_time;
+		
+		return task->drivetrain_velocity.timer > task->drivetrain_velocity.length;
+	} break;
+
+    case TASK_MIDDLE_THE_WHEELS: {
+        robot->middle_wheels = task->middle_wheels.enabled;
+        return true;
     }
-    else if (r->drivetrain_controller.mode == DRIVECTRL_THROTTLE)
-    {
-        r->drivetrain_controller.ctrl.throttle.throttle = v2{0, 0};
-        r->drivetrain_controller.ctrl.throttle.angular_throttle = 0;
-    }
 
-    // // update(&r.taskmgr, r);
+	case TASK_FOLLOW_LINE: {
 
-    if (mode == ROBOT_TELEOP)
-    {
-    //     // Drivetrain
-    //     v2 input_translation = r->input.driver.joystick_left;
+		TaskData_FollowLine* follow_line = &task->follow_line;
 
-    //     if (length(input_translation) > 1)
-    //         input_translation = normalize(input_translation);
+		v2 line_direction = normalize(follow_line->ending_pose.position - follow_line->starting_pose.position);
+		float line_length = length(follow_line->ending_pose.position - follow_line->starting_pose.position);
 
-    //     // Speed of the bot based on gamepad bumpers
-    //     float driver_speed_target = CFG_DRIVER_SPEED_NORMAL;
-    //     float driver_speed_target_rotation = CFG_DRIVER_SPEED_NORMAL_ROT;
+		v2 our_pos_relative_to_start = robot->localiser.pose_estimate.position - follow_line->starting_pose.position;
 
-    //     // Make input curve Square
-    //     // input_translation = input_translation * v2{length(input_translation), length(input_translation)};
-
-    //     if ( r->input.driver.bumper_right.held)
-    //     {
-    //         driver_speed_target = CFG_DRIVER_SPEED_SURGERY;
-    //         driver_speed_target_rotation = CFG_DRIVER_SPEED_SURGERY_ROT;
-    //     }
-
-    //     else if ( r->input.driver.bumper_left.held)
-    //     {
-    //         driver_speed_target = CFG_DRIVER_SPEED_SPRINT;
-    //         driver_speed_target_rotation = CFG_DRIVER_SPEED_SPRINT_ROT;
-    //     }
-
-    //     //Slowly amp up speed
-    //     const float SPEED_CHANGE_RATE = 1;
-        
-    //     {
-    //         float speed_diff = driver_speed_target - r->driver_speed;
-
-    //         speed_diff = CLAMP(speed_diff, -SPEED_CHANGE_RATE * r->delta_time, SPEED_CHANGE_RATE * r->delta_time);
-
-    //         r->driver_speed += speed_diff;
-    //     }
-
-    //     float curr_speed = r->driver_speed;
-    //     float curr_speed_rot = driver_speed_target_rotation;
-
-    //     // driver-oriented (as opposed to robot-oriented)
-
-    //     // printf("IMU ROT = %f \n\n", degToRad( r->sensor_imu->GetYaw()));
-
-    //     // Resets the rotation of the drivetrain
-    //     if ( r->input.driver.y.held)
-    //     {
-    //         r->imu_basis = degToRad( r->sensor_imu->GetYaw());
-    //     }
-
-    //     if ( r->input.driver.x.held)
-    //     {
-    //         r->imu_basis = degToRad( r->sensor_imu->GetYaw()) + M_PI / 2.0f;
-    //     }
-
-    //     if ( r->input.driver.b.held)
-    //     {
-    //         r->imu_basis = degToRad( r->sensor_imu->GetYaw()) - M_PI / 2.0f;
-    //     }
-
-    //     if ( r->input.driver.a.held)
-    //     {
-    //         r->imu_basis = degToRad( r->sensor_imu->GetYaw()) + M_PI;
-    //     }
-
-    //     float imu_yaw = degToRad( r->sensor_imu->GetYaw()) - r->imu_basis;
-    //     input_translation = rotate(input_translation, -imu_yaw);
-
-    //     if ( r->input.driver.x.held || r->input.driver.y.held || r->input.driver.b.held || r->input.driver.a.held)
-    //     {
-    //         r->held_rotation = imu_yaw;
-    //     }
-
-    //     input_translation = input_translation * curr_speed;
-
-    //     // driver
-        
-    //     if ( r->input.driver.big_button.held)
-    //     {
-    //         r->middle_wheels = true;
-    //     }
-
-    //     //Allign Straight Code
-    //     // if ( r->input.driver.trigger_left > 0.25)
-    //     // {
-    //     //     r->aligner = ALGN_FORWARD;
-    //     // }
-    //     // if ( r->input.driver.trigger_right > 0.25)
-    //     // {
-    //     //     r->aligner = ALGN_BACKWARD;
-    //     // }
-
-    //     float imu_rotation_radians = imu_yaw;
-
-    //     v2 robot_dir = v2{sinf(imu_rotation_radians), cosf(imu_rotation_radians)};
-
-    //     //Fixing wrong sided rotaton -Matteo
-    //     v2 driver_joystick_right = r->input.driver.joystick_right;
-    //     driver_joystick_right.x *= -1;
-    //     driver_joystick_right.y *= -1;
-
-    //     float angle_diff = acosf(dot(robot_dir, normalize( driver_joystick_right)));
-    //     v2 robot_right = rotate(robot_dir, M_PI / 2);
-    //     if (dot(robot_right, normalize( driver_joystick_right)) < 0)
-    //     {
-    //         angle_diff = -angle_diff;
-    //     }
-
-    //     // deadzone
-    //     // if(length( driver_joystick_right) < 0.5f)
-    //     {
-    //         angle_diff = 0;
-    //     }
-
-    //     float angle01 = angle_diff / M_PI;
-    //     // const float reactiveness = 0.5; // higher reactivity = closer to 0, straight reactiveness curve = 1
-    //     float power_curve = pow(fabsf(angle01), CFG_DRIVER_ABSOLUTE_ROTATION_REACTIVENESS);
-
-    //     power_curve = power_curve * sign(angle01);
-
-    //     float adjustment_rotation = driver_joystick_right.x * CFG_DRIVER_ADJUSTMENT_ROTATION_SENSITIVITY * (curr_speed_rot / CFG_DRIVER_SPEED_NORMAL);
-
-    //     //( r->input.driver.trigger_right - r->input.driver.trigger_left) * CFG_DRIVER_ADJUSTMENT_ROTATION_SENSITIVITY * (curr_speed / CFG_DRIVER_SPEED_NORMAL);
-
-    //     if (length(input_translation) > 0.15 || fabsf(power_curve + adjustment_rotation) > 0.15)
-    //     {
-    //         r->middle_wheels = false;
-    //     }
-
-    //     if (fabsf(power_curve + adjustment_rotation) > 0.15)
-    //     {
-    //         r->aligner = ALGN_NONE;
-    //     }
-
-    //     if ( r->middle_wheels)
-    //     {
-    //         v2 targets[DrivetrainSwerve_Count];
-    //         targets[DrivetrainSwerve_BL] = v2{1, 1};
-    //         targets[DrivetrainSwerve_BR] = v2{-1, 1};
-    //         targets[DrivetrainSwerve_FL] = v2{1, -1};
-    //         targets[DrivetrainSwerve_FR] = v2{-1, -1};
-    //         drivetrainUpdateRawVectors(&r->drivetrain, targets, r->delta_time, true);
-    //     }
-    //     else
-    //     {
-    //       if ( r->aligner != ALGN_NONE)
-    //       {
-    //           float auto_rotater = 0;
-
-    //           v2 robot_dir = v2{sinf(imu_rotation_radians), cosf(imu_rotation_radians)};
-
-    //           v2 align_dir = v2{0, 1};
-
-    //           switch ( r->aligner)
-    //           {
-    //           case ALGN_FORWARD:
-    //               align_dir = v2{0, 1};
-    //               break;
-    //           case ALGN_BACKWARD:
-    //               align_dir = v2{0, -1};
-    //               break;
-    //           default:
-    //               break;
-    //           }
-
-    //           float my_angle_diff = angleBetween(robot_dir, align_dir);
-
-    //           float my_angle01 = my_angle_diff / M_PI;
-
-    //           auto_rotater = evalPid(&r->aligner_pid, my_angle01, r->delta_time);
-
-    //           // printf("Rotater: %f\n", my_power_curve);
-
-    //           // drivetrainUpdate(&r.drivetrain, input_translation, auto_rotater, r->delta_time);
-    //           r->drivetrain_controller.mode = DRIVECTRL_THROTTLE;
-    //           r->drivetrain_controller.ctrl.throttle.throttle = input_translation;
-    //           r->drivetrain_controller.ctrl.throttle.angular_throttle = auto_rotater;
-    //         }
-    //         else
-    //         {
-    //             // the idea is that it holds rotation
-    //             if (fabsf(power_curve + adjustment_rotation) > 0.015)
-    //             {
-    //                 r->held_rotation = imu_yaw;
-    //             }
-
-    //             v2 robot_facing = rotate(v2{0, 1}, imu_yaw);
-    //             v2 hold_facing = rotate(v2{0, 1}, r->held_rotation);
-
-    //             // this is zero if you're actively turning the robot, bc held_rotation is getting updated
-    //             float hold_angle_diff = angleBetween(robot_facing, hold_facing);
-
-    //             float hold_angle01 = hold_angle_diff / M_PI;
-                
-    //             r->drivetrain_controller.mode = DRIVECTRL_THROTTLE;
-    //             r->drivetrain_controller.ctrl.throttle.throttle = input_translation;
-    //             r->drivetrain_controller.ctrl.throttle.angular_throttle = power_curve + adjustment_rotation + evalPid(&r->holder_pid, -1 * hold_angle01, r->delta_time);
-
-    //             // drivetrainUpdate(&r->drivetrain, input_translation, power_curve + adjustment_rotation + evalPid(&r->holder_pid, hold_angle01, r->delta_time), r->delta_time);
-    //         }
-    //         updateDrivetrainController(r, &r->drivetrain_controller, &r->drivetrain, r->latest_odometry_frame, r->delta_time);
-    //     }
+		float dist_along_line = dot(line_direction, our_pos_relative_to_start);
 
 
-        auto *in = &r->input;
+		// t = (v1 - v0) / a
+		// d = v0 * t + a * t ^ 2 / 2
 
-        if (in->mate.b.down)
-        {
+		float mid_start_ideal_time = (follow_line->mid_speed - follow_line->start_speed) / follow_line->max_accel;
+		float mid_start_length = follow_line->start_speed * mid_start_ideal_time + follow_line->max_accel * mid_start_ideal_time * mid_start_ideal_time / 2;
 
-        }
+		float mid_end_ideal_time = (follow_line->mid_speed - follow_line->end_speed) / follow_line->max_accel; 
+		float mid_end_length = follow_line->end_speed * mid_end_ideal_time + follow_line->max_accel * mid_end_ideal_time * mid_end_ideal_time / 2;
 
-        //Intake off ground
-        if (in->mate.a.down)
-        {
-            // robotCmd(&r->taskmgr, INTAKE_OFF_GROUND);
-        }
 
-        // if (in->mate.x.down)
-        // {
-        //     robot->test_motor.Set(0.1);
-        // }  
-        // else robot->test_motor.Set(0);
+		float est_speed = follow_line->mid_speed;
 
-        r->test_motor->Set(0.1);
+		if (dist_along_line < mid_start_length)
+		{
+			est_speed = mix(follow_line->start_speed, follow_line->mid_speed, dist_along_line / mid_start_length);
+		}
+		else if (dist_along_line > line_length - mid_end_length)
+		{
+			est_speed = mix(follow_line->end_speed, follow_line->mid_speed, (line_length - dist_along_line) / mid_end_length);
+		}
 
-        if (in->mate.bumper_left.down)
-        {
+		if (dist_along_line < 0)
+		{
+			est_speed = follow_line->start_speed;
+		}
 
-        }
-        
-        // Shooter firing motors activation
-        // if (in->mate.trigger_right.down) r->shooter.firing_motor_speed = CFG_SHOOTER_MAX_FIRING_SPEED;
-        // else r->shooter.firing_motor_speed = 0;
-    }
+		// printf("DIST: %f / %f, EST: %f\n", dist_along_line, line_length, est_speed);
+
+		float tangence_to_line = dot(our_pos_relative_to_start, rightPerpendicular(line_direction));
+
+		{
+
+			v2 current_facing = rotate(v2{ 0, 1 }, robot->localiser.pose_estimate.rotation);
+			v2 target_facing  = rotate(v2{ 0, 1 }, follow_line->ending_pose.rotation);
+
+			float error = acos(dot(current_facing, target_facing));
+			if (dot(target_facing, rightPerpendicular(current_facing)) < 0)
+				error *= -1;
+
+			float rot = error / M_PI;
+
+			rot = evalPid(&robot->drivetrain_controller.aligner_pid, rot * robot->drivetrain_controller.ctrl.waypoint.speed_rot, robot->delta_time);
+
+
+			v2 move = line_direction * est_speed - rightPerpendicular(line_direction) * tangence_to_line * 6;
+
+			robot->drivetrain_controller.mode = DRIVECTRL_VELOCITY;
+			robot->drivetrain_controller.ctrl.velocity.velocity = move;
+			robot->drivetrain_controller.ctrl.velocity.angular_velocity = rot;
+		}
+
+
+		if (dist_along_line > line_length)
+		{
+			robot->drivetrain_controller.mode = DRIVECTRL_WAYPOINT;
+			robot->drivetrain_controller.ctrl.waypoint.pose = follow_line->ending_pose;
+			robot->drivetrain_controller.ctrl.waypoint.speed = follow_line->end_speed;
+			robot->drivetrain_controller.ctrl.waypoint.speed_rot = follow_line->speed_rot;
+		}
+
+
+		if (length(robot->localiser.pose_estimate.position - follow_line->ending_pose.position) < follow_line->epsilon
+			&& fabsf(robot->localiser.pose_estimate.rotation - follow_line->ending_pose.rotation) < follow_line->epsilon_rot)
+		{
+			robot->drivetrain_controller.mode = DRIVECTRL_WAYPOINT;
+			robot->drivetrain_controller.ctrl.waypoint.pose = follow_line->ending_pose;
+			robot->drivetrain_controller.ctrl.waypoint.speed = follow_line->end_speed;
+			robot->drivetrain_controller.ctrl.waypoint.speed_rot = follow_line->speed_rot;
+
+			return true;
+		}
+
+		return false;
+
+	} break;
+
+	case TASK_INTAKE_PULLER: 
+	{
+		robot->intake.intake_speed = CFG_INTAKE_MAX_SPEED;
+		if(robot->intake.beam_break_val == 0)
+		{
+			robot->intake.intake_speed = 0;
+			return true;
+		}
+		return false;
     
+    } break;
 
-    // Localiser code (not using IMU yet)
+	case TASK_INTAKE_WITHOUT_BB: 
+	{
+		float intake_speed = 0;
 
-    // int ntags = 0;
-    // auto estimate = estimatePoseUsingAprilTags(degToRad( r->sensor_imu->GetYaw()) + r->auto_imu_basis, &ntags);
+		if(robot->input.mate.trigger_right > 0) intake_speed = robot->input.mate.trigger_right;
+		else if(robot->input.mate.trigger_left > 0) intake_speed = -robot->input.mate.trigger_left;
 
-    // frc::SmartDashboard::PutNumber("AX", estimate.position.x);
-    // frc::SmartDashboard::PutNumber("AY", estimate.position.y);
-    // frc::SmartDashboard::PutNumber("AR", estimate.rotation);
+		robot->intake.intake_speed = intake_speed;
 
-    // stepLocaliser(&r.localiser, r->latest_odometry_frame, degToRad( r->sensor_imu->GetYaw()), estimate, ntags, CFG_APRIL_TAG_COUNT);
-    // r->localiser.pose_estimate.rotation = degToRad( r->sensor_imu->GetYaw()) + r->auto_imu_basis;
-
-    // auto localiser_pose = r->localiser.pose_estimate;
-
-    // frc::Pose2d pose(frc::Translation2d((units::meter_t)localiser_pose.position.x, (units::meter_t)-localiser_pose.position.y), frc::Rotation2d());
+		if(robot->input.mate.trigger_right < 0.05 && robot->input.mate.trigger_left < 0.05)
+		{
+			robot->intake.intake_speed = 0;
+			return true;
+		}
+		return false;
     
-    // frc::SmartDashboard::PutNumber("LX", localiser_pose.position.x);
-    // frc::SmartDashboard::PutNumber("LY", localiser_pose.position.y);
-    // frc::SmartDashboard::PutNumber("LR", localiser_pose.rotation);
+    } break;
+
+	case TASK_SHOOTER_POSITIONING: 
+	{
+		robot->shooter.target_angle = task->shooter.target_angle;
+		float curr_angle = robot->shooter.sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE;
+		bool angle_complete = ( fabsf(robot->shooter.target_angle - curr_angle) < task->shooter.epsilon );
+		// printf("distance = %f\n", fabsf(robot->shooter.target_angle - curr_angle));
+		return angle_complete;
+	} break;
+
+	case TASK_SHOOTER_PULLER: 
+	{
+		robot->shooter.control_motor_speed = CFG_SHOOTER_CONTROL_MAX_SPEED;
+		robot->intake.intake_speed = CFG_INTAKE_MAX_SPEED;
+
+		if(!robot->input.driver.a.held)
+		{
+			robot->shooter.control_motor_speed = 0;
+			robot->intake.intake_speed = 0;
+
+			return true;
+		}
+		return false;
+    
+    } break;
+
+	case TASK_SHOOTER_FIRE:
+	{
+		robot->shooter.firing_motor_speed = -CFG_SHOOTER_MAX_FIRING_SPEED;
+		robot->shooter.firing_motor_task = true;
+		return true;
+	} break;
+
+	case TASK_SHOOTER_STOP:
+	{
+		robot->shooter.firing_motor_speed = 0;
+		robot->shooter.firing_motor_task = false;
+		return true;
+	} break;
+
+	case TASK_SEAT_RING: 
+	{
+		robot->shooter.control_motor_speed = task->shooter.delay_speed;
+		task->shooter.delay_timer += robot->delta_time;
+		bool task_complete = false;
+		if ( task->shooter.delay_timer > task->shooter.delay_length)
+		{
+			task_complete = true;
+			robot->shooter.control_motor_speed = 0;
+		}
+
+		return task_complete;
+	} break;
 
 
-    // frc::SmartDashboard::PutNumber("TaskMngr Diff", r->taskmgr.write_head - r->taskmgr.read_head);
+	default: break;
+	}
 
-    // r.field.SetRobotPose(pose);
+	// returns true on complete
+	return true;
 }
 
+///
+
+
+
+bool pushTask(TaskMgr* mgr, Task task) {
+
+	if (((mgr->write_head + 1) % TASKMGR_MAX_TASKS) == mgr->read_head) {
+		printf("TaskMgr; Failed to add task, queue is full!\n");
+		return false;
+	}
+
+	mgr->task_buffer[mgr->write_head] = task;
+	mgr->write_head = (mgr->write_head + 1) % TASKMGR_MAX_TASKS;
+	return true;
+}
+
+
+
+
+Task genTaskList(TaskMgr* list) {
+	Task t;
+	t.type = TASK_LIST;
+	t.list = (TaskMgr*)malloc(sizeof(TaskMgr));
+	*t.list = *list;
+	return t;
+}

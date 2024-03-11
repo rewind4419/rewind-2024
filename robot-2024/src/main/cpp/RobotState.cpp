@@ -2,7 +2,7 @@
 #include <iostream>
 #include "fennec/config.h"
 
-void robotCmd(TaskMgr* mgr, RobotState state)
+void robotCmd(RobotData* r, RobotState state)
 {
     switch(state)
     {
@@ -12,7 +12,7 @@ void robotCmd(TaskMgr* mgr, RobotState state)
             {
                 Task t;
                 t.type = TASK_INTAKE_PULLER;
-                pushTask(mgr, t);
+                pushTask(&r->taskmgr, t);
             }
         } break;
         case INTAKE_OFF_GROUND_WITHOUT_BB:
@@ -20,7 +20,7 @@ void robotCmd(TaskMgr* mgr, RobotState state)
             {
                 Task t;
                 t.type = TASK_INTAKE_WITHOUT_BB;
-                pushTask(mgr, t);
+                pushTask(&r->taskmgr, t);
             }
         } break;
 
@@ -31,25 +31,52 @@ void robotCmd(TaskMgr* mgr, RobotState state)
                 t.type = TASK_SHOOTER_POSITIONING;
                 t.shooter.target_angle = 1.4f;
                 t.shooter.epsilon = 0.4f;
-                pushTask(mgr, t);
+                pushTask(&r->taskmgr, t);
             }     
 
             {
                 Task t;
                 t.type = TASK_SHOOTER_PULLER;
-                pushTask(mgr, t);
+                pushTask(&r->taskmgr, t);
             }
 
-            pushTask(mgr, genTaskDelay(0.5));
+            pushTask(&r->taskmgr, genTaskDelay(0.5));
 
             {
                 Task t;
                 t.type = TASK_SHOOTER_POSITIONING;
                 t.shooter.target_angle = 0;
-                pushTask(mgr, t);
+                pushTask(&r->taskmgr, t);
             }
 
-        }
+            {
+                Task t;
+                t.type = TASK_SEAT_RING;
+                t.shooter.delay_timer = 0;
+                t.shooter.delay_length = 0.1f;
+                t.shooter.seat_speed = -0.1f;
+                pushTask(&r->taskmgr, t);
+            }
+
+            {
+                Task t;
+                t.type = TASK_SHOOTER_FIRE;
+                pushTask(&r->taskmgr, t);
+            }
+            
+        } break;
+
+        case SHOOTER_STOP:
+        {
+            pushTask(&r->taskmgr, genTaskDelay(1));
+            {
+                Task t;
+                t.type = TASK_SHOOTER_STOP;
+                pushTask(&r->taskmgr, t);
+            }
+            
+        } break;
+        
     }   
     
 }

@@ -34,6 +34,12 @@ static void doTask(TaskMgr* mgr, Task* task, RobotData* robot) {
 }
 
 void updateManager(TaskMgr* mgr, RobotData* robot) {
+
+	if(mgr->write_head > mgr->read_head)
+	{
+		// printf("Task Manager Num Tasks = %d \n", mgr->write_head - mgr->read_head);
+	}
+
 	if (mgr->is_parallel) {
 		for (uint64_t i=0; i<mgr->write_head; i++) {
 			doTask(mgr, &mgr->task_buffer[i], robot);
@@ -209,10 +215,12 @@ static bool taskStep(Task* task, RobotData* robot)
 
 	case TASK_SHOOTER_POSITIONING: 
 	{
+		printf("Setting Angle\n");
 		robot->shooter.target_angle = task->shooter.target_angle;
 		float curr_angle = robot->shooter.sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE;
 		bool angle_complete = ( fabsf(robot->shooter.target_angle - curr_angle) < task->shooter.epsilon );
-		// printf("distance = %f\n", fabsf(robot->shooter.target_angle - curr_angle));
+
+		// printf("NOT COMPLETE delta = %f\n", fabsf(robot->shooter.target_angle - curr_angle));
 		return angle_complete;
 	} break;
 
@@ -221,7 +229,7 @@ static bool taskStep(Task* task, RobotData* robot)
 		robot->shooter.control_motor_speed = CFG_SHOOTER_CONTROL_MAX_SPEED;
 		robot->intake.intake_speed = CFG_INTAKE_MAX_SPEED;
 
-		if(!robot->input.mate.a.held)
+		if(!robot->input.driver.a.held)
 		{
 			robot->shooter.control_motor_speed = 0;
 			robot->intake.intake_speed = 0;
@@ -232,11 +240,42 @@ static bool taskStep(Task* task, RobotData* robot)
     
     } break;
 
+	case TASK_SHOOTER_FIRE:
+	{
+		robot->shooter.firing_motor_speed = -CFG_SHOOTER_MAX_FIRING_SPEED;
+		robot->shooter.firing_motor_task = true;
+		printf("Shooter Fire\n");
+		return true;
+	} break;
+
+	case TASK_SHOOTER_STOP:
+	{
+		robot->shooter.firing_motor_speed = 0;
+		robot->shooter.firing_motor_task = false;
+		robot->shooter.shooter_first_time = true;
+		printf("Shooter Stop\n");
+		return true;
+	} break;
+
+	case TASK_SEAT_RING: 
+	{
+		robot->shooter.control_motor_speed = task->shooter.seat_speed;
+		task->shooter.delay_timer += robot->delta_time;
+		bool task_complete = false;
+		if ( task->shooter.delay_timer > task->shooter.delay_length)
+		{
+			task_complete = true;
+			robot->shooter.control_motor_speed = 0;
+			printf("Ring Seated \n");
+		}
+
+		return task_complete;
+	} break;
+
+
 	default: break;
 	}
 
-	
-	
 	// returns true on complete
 	return true;
 }

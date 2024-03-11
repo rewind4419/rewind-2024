@@ -17,7 +17,10 @@ struct Shooter
     float target_angle = CFG_SHOOTER_START_ANGLE;
     float axis_throttle;
     float prev_angle;
-    float CFG_SHOOTER_MAX_FIRING_SPEED = 1; //Shooter Speed can only be in the range of 0 - 1
+    float shooter_delay_timer = 0;
+
+    bool firing_motor_task = false;
+    bool shooter_first_time = true;
 
     PID shooter_pid = { .kP = 0.9f, .kI = 0, .kD = 0,  .errorAccum = 0, .lastError = 0 };
 

@@ -30,7 +30,13 @@ enum TaskType {
 
 	TASK_SHOOTER_PULLER,
 
-	TASK_INTAKE_WITHOUT_BB
+	TASK_INTAKE_WITHOUT_BB,
+
+	TASK_SHOOTER_FIRE,
+
+	TASK_SHOOTER_STOP,
+
+	TASK_SEAT_RING,
 
 	// TASK_FUNCTIONPTR, // TODO
 };
@@ -44,6 +50,7 @@ struct TaskData_Delay {
 	//state
 	float timer;
 };
+
 
 struct TaskData_Waypoint {
 	Pose  target_pose;
@@ -100,6 +107,9 @@ struct TaskData_Shrek {
 struct TaskData_Shooter {
 	float target_angle;
 	float epsilon;
+	float delay_timer;
+	float delay_length;
+	float seat_speed;
 };
 
 struct TaskData_IntakePuller {
@@ -124,7 +134,6 @@ struct Task {
 		TaskData_IntakePuller intake_puller;
         TaskData_MiddleWheels middle_wheels;
         TaskData_FollowLine follow_line;
-
 	};
 };
 

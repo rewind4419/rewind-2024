@@ -126,13 +126,12 @@ constexpr int CFG_SHOOTER_AXIS_MOTOR_COUNT = 2;
 constexpr int CFG_SHOOTER_BB_DIO = 0;
 
 constexpr float CFG_SHOOTER_ANGLE_OFFSET = 0.279253; //In radians - 16 degrees
-constexpr float CFG_SHOOTER_AXIS_THROTTLE = 0.15f;
+constexpr float CFG_SHOOTER_AXIS_THROTTLE = 0.18f;
 constexpr float CFG_SHOOTER_CONTROL_MAX_SPEED = 0.4f;
 constexpr float CFG_SHOOTER_MAX_ANGLE = 10.558441; 
 constexpr float CFG_SHOOTER_ANGLE_RANGE = 1.44862;
-// constexpr float CFG_SHOOTER_START_ANGLE = 0.5 / 45 * CFG_SHOOTER_ANGLE_RANGE;
 constexpr float CFG_SHOOTER_START_ANGLE = 0;
-
+constexpr float CFG_SHOOTER_MAX_FIRING_SPEED = 1.0f;
 
 
 constexpr float CFG_SHOOTER_MASS = 30 / 2.205; //kg
