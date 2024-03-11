@@ -11,6 +11,8 @@ enum RobotState
     INTAKE_OFF_GROUND_WITHOUT_BB,
 
     SHOOTER_STOP,
+
+    SHOOTER_SPEAKER,
 };
 
 void robotCmd(RobotData* r, RobotState state);

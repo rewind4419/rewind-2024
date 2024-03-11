@@ -1,4 +1,5 @@
 #include "Shooter.h"
+#include "Robot.h"
 
 void initShooter(Shooter* shooter)
 {
@@ -15,12 +16,9 @@ void initShooter(Shooter* shooter)
     shooter->prev_angle = shooter->shooter_encoder->GetPosition();
 }
 
-void updateShooter(Shooter* shooter)
+void updateShooter(Shooter* shooter, RobotData* r)
 {
     shooter->beam_break_val = shooter->beam_break.Get();
-
-    // if(!shooter->beam_break_val) printf("not broken \n");
-    // else printf("broken \n");
 
     shooter->control_motor->Set(shooter->control_motor_speed);
 
@@ -38,7 +36,20 @@ void updateShooter(Shooter* shooter)
     shooter->sum_angle += curr_angle - shooter->prev_angle;
 
     float angle_interpol_val = shooter->sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE;
-    float interpol_diff = shooter->target_angle - angle_interpol_val;
+
+    shooter->target_angle = CLAMP(shooter->target_angle, 0, CFG_SHOOTER_ANGLE_RANGE);
+
+    float target_angle_w_adjustment = shooter->target_angle + ( r->input.mate.joystick_right.y * CFG_SHOOTER_ANGLE_RANGE / 10);
+
+    target_angle_w_adjustment = CLAMP(target_angle_w_adjustment, 0, CFG_SHOOTER_ANGLE_RANGE);
+
+    float interpol_diff;
+    if(shooter->intake_task) interpol_diff =  shooter->target_angle - angle_interpol_val;
+    else interpol_diff = target_angle_w_adjustment - angle_interpol_val;
+     
+
+
+
 
     float pid = evalPid(&shooter->shooter_pid, interpol_diff, CFG_DELTA_TIME);
     // printf("PID = %f \n", pid);

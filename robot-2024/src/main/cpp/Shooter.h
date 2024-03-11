@@ -7,6 +7,8 @@
 #include "fennec/config.h"
 #include "fennec/pid.h"
 
+struct RobotData;
+
 struct Shooter
 {
     bool beam_break_val;
@@ -21,6 +23,7 @@ struct Shooter
 
     bool firing_motor_task = false;
     bool shooter_first_time = true;
+    bool intake_task = false;
 
     PID shooter_pid = { .kP = 0.9f, .kI = 0, .kD = 0,  .errorAccum = 0, .lastError = 0 };
 
@@ -33,7 +36,7 @@ struct Shooter
 };
 
 void initShooter(Shooter* shooter);
-void updateShooter(Shooter* shooter);
+void updateShooter(Shooter* shooter, RobotData* r);
 void calibrateShooter(Shooter* shooter);
 
 

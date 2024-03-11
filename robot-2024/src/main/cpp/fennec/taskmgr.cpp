@@ -215,12 +215,15 @@ static bool taskStep(Task* task, RobotData* robot)
 
 	case TASK_SHOOTER_POSITIONING: 
 	{
-		printf("Setting Angle\n");
+		// printf("Setting Angle\n");
 		robot->shooter.target_angle = task->shooter.target_angle;
 		float curr_angle = robot->shooter.sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE;
 		bool angle_complete = ( fabsf(robot->shooter.target_angle - curr_angle) < task->shooter.epsilon );
-
-		// printf("NOT COMPLETE delta = %f\n", fabsf(robot->shooter.target_angle - curr_angle));
+		if (angle_complete)
+		{
+			printf("Position Achieved\n");
+		}
+		printf("NOT COMPLETE delta = %f\n", fabsf(robot->shooter.target_angle - curr_angle));
 		return angle_complete;
 	} break;
 
@@ -229,7 +232,7 @@ static bool taskStep(Task* task, RobotData* robot)
 		robot->shooter.control_motor_speed = CFG_SHOOTER_CONTROL_MAX_SPEED;
 		robot->intake.intake_speed = CFG_INTAKE_MAX_SPEED;
 
-		if(!robot->input.driver.a.held)
+		if(!robot->input.mate.a.held)
 		{
 			robot->shooter.control_motor_speed = 0;
 			robot->intake.intake_speed = 0;
@@ -262,6 +265,7 @@ static bool taskStep(Task* task, RobotData* robot)
 		robot->shooter.control_motor_speed = task->shooter.seat_speed;
 		task->shooter.delay_timer += robot->delta_time;
 		bool task_complete = false;
+		robot->shooter.intake_task = false;
 		if ( task->shooter.delay_timer > task->shooter.delay_length)
 		{
 			task_complete = true;

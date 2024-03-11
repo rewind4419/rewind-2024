@@ -26,6 +26,8 @@ void robotCmd(RobotData* r, RobotState state)
 
         case INTAKE_TRANSFER:
         {
+
+            r->shooter.intake_task = true;
             {
                 Task t;
                 t.type = TASK_SHOOTER_POSITIONING;
@@ -46,6 +48,7 @@ void robotCmd(RobotData* r, RobotState state)
                 Task t;
                 t.type = TASK_SHOOTER_POSITIONING;
                 t.shooter.target_angle = 0;
+                t.shooter.epsilon = 0.4f;
                 pushTask(&r->taskmgr, t);
             }
 
@@ -74,7 +77,21 @@ void robotCmd(RobotData* r, RobotState state)
                 t.type = TASK_SHOOTER_STOP;
                 pushTask(&r->taskmgr, t);
             }
-            
+
+        } break;
+
+        case SHOOTER_SPEAKER:
+        {
+            printf("running speaker task\n");
+            {
+                Task t;
+                t.type = TASK_SHOOTER_POSITIONING;
+                t.shooter.target_angle = 0.9f - CFG_SHOOTER_ANGLE_OFFSET;
+                t.shooter.epsilon = 0.4f;
+                pushTask(&r->taskmgr, t);
+            }
+
+
         } break;
         
     }   

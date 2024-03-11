@@ -293,22 +293,24 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
         auto *in = &r->input;
 
+        in->mate = in->driver;
+
         // if (in->mate.big_button.held)
         // {
         //     r->taskmgr = TaskMgr{};
         // }
 
 
-        if (in->driver.trigger_right > 0.01f)
+        if (in->mate.trigger_right > 0.01f)
         {
-            r->intake.intake_speed = in->driver.trigger_right / 5;
-            r->shooter.control_motor_speed = in->driver.trigger_right / 5;
+            r->intake.intake_speed = in->mate.trigger_right / 5;
+            r->shooter.control_motor_speed = in->mate.trigger_right / 5;
 
         }
-        else if((in->driver.trigger_left > 0.01f))
+        else if((in->mate.trigger_left > 0.01f))
         {
-            r->intake.intake_speed = -in->driver.trigger_left / 5;
-            r->shooter.control_motor_speed = -in->driver.trigger_left / 5;
+            r->intake.intake_speed = -in->mate.trigger_left / 5;
+            r->shooter.control_motor_speed = -in->mate.trigger_left / 5;
 
         }
         else
@@ -317,56 +319,54 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             r->shooter.control_motor_speed = 0;
         } 
 
-        if(in->driver.b.down)
+        if(in->mate.b.down)
         {
             {
                 Task t;
                 t.type = TASK_SHOOTER_POSITIONING;
                 t.shooter.target_angle = 0;
-                t.shooter.epsilon = 0.5f;
+                t.shooter.epsilon = 0.4f;
                 pushTask(&r->taskmgr, t);
             }        
         }
 
-        if(in->driver.a.down)
+        if(in->mate.x.down)
         {
-            printf("intake\n");
+            robotCmd(r, SHOOTER_SPEAKER);
+        }
+
+        if(in->mate.a.down)
+        {
             robotCmd(r, INTAKE_TRANSFER);
         }
       
-        if (in->driver.trigger_right > 0.01 && r->shooter.firing_motor_task == true && r->shooter.shooter_first_time == true) 
+        if (in->mate.trigger_right > 0.01 && r->shooter.firing_motor_task == true && r->shooter.shooter_first_time == true) 
         {
-            if(r->shooter.shooter_first_time)
-            {
-                printf("stopping\n");
-                robotCmd(r, SHOOTER_STOP);
-                r->shooter.shooter_first_time = false;
-            }
+            robotCmd(r, SHOOTER_STOP);
+            r->shooter.shooter_first_time = false;
 
         }
-        else if (in->driver.bumper_right.held && r->shooter.firing_motor_task == false)  r->shooter.firing_motor_speed = -CFG_SHOOTER_MAX_FIRING_SPEED;
+        else if (in->mate.bumper_right.held && r->shooter.firing_motor_task == false)  r->shooter.firing_motor_speed = -CFG_SHOOTER_MAX_FIRING_SPEED;
         else if (r->shooter.firing_motor_task == false) r->shooter.firing_motor_speed = 0;
 
-        // if(in->driver.bumper_left.down)
-        // {
-        //     {
-        //         Task t;
-        //         t.type = TASK_SEAT_RING;
-        //         t.shooter.delay_timer = 0;
-        //         t.shooter.delay_length = 0.1f;
-        //         t.shooter.seat_speed = -0.1f;
-        //         pushTask(&r->taskmgr, t);
-        //     }
-        // }
+        if(in->driver.bumper_left.down)
+        {
+            {
+                Task t;
+                t.type = TASK_SEAT_RING;
+                t.shooter.delay_timer = 0;
+                t.shooter.delay_length = 0.1f;
+                t.shooter.seat_speed = -0.1f;
+                pushTask(&r->taskmgr, t);
+            }
+        }
+
         
-        // Shooter firing motors activation
-        // if (in->mate.bumper_right.held) r->shooter.firing_motor_speed = -r->shooter.CFG_SHOOTER_MAX_FIRING_SPEED;
-        // else r->shooter.firing_motor_speed = 0;
 
         // Update
         updateManager(&r->taskmgr, r);
         updateIntake(&r->intake);
-        updateShooter(&r->shooter);
+        updateShooter(&r->shooter, r);
     }
 
 
