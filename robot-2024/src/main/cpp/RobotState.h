@@ -12,7 +12,9 @@ enum RobotState
 
     SHOOTER_STOP,
 
-    SHOOTER_SPEAKER,
+    SHOOTER_DELIVER_SPEAKER,
+
+    SHOOTER_DELIVER_AMP,
 };
 
 void robotCmd(RobotData* r, RobotState state);

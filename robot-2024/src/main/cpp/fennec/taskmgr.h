@@ -44,6 +44,11 @@ enum TaskType {
 
 struct TaskMgr;
 
+struct TaskData_FiringMotor
+{
+	float direction;
+};
+
 struct TaskData_Delay {
 	float length;
 
@@ -134,6 +139,7 @@ struct Task {
 		TaskData_IntakePuller intake_puller;
         TaskData_MiddleWheels middle_wheels;
         TaskData_FollowLine follow_line;
+		TaskData_FiringMotor firing_motor;
 	};
 };
 

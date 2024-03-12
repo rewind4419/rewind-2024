@@ -56,7 +56,7 @@ void robotCmd(RobotData* r, RobotState state)
                 Task t;
                 t.type = TASK_SEAT_RING;
                 t.shooter.delay_timer = 0;
-                t.shooter.delay_length = 0.1f;
+                t.shooter.delay_length = 0.2f;
                 t.shooter.seat_speed = -0.1f;
                 pushTask(&r->taskmgr, t);
             }
@@ -80,7 +80,7 @@ void robotCmd(RobotData* r, RobotState state)
 
         } break;
 
-        case SHOOTER_SPEAKER:
+        case SHOOTER_DELIVER_SPEAKER:
         {
             printf("running speaker task\n");
             {
@@ -91,6 +91,25 @@ void robotCmd(RobotData* r, RobotState state)
                 pushTask(&r->taskmgr, t);
             }
 
+
+        } break;
+
+        case SHOOTER_DELIVER_AMP:
+        {
+            {
+                Task t;
+                t.type = TASK_SHOOTER_POSITIONING;
+                t.shooter.target_angle = 1.5f;
+                t.shooter.epsilon = 0.4f;
+                pushTask(&r->taskmgr, t);
+            }   
+
+            {
+                Task t;
+                t.type = TASK_SHOOTER_FIRE;
+                t.firing_motor.direction = -0.4f;
+                pushTask(&r->taskmgr, t);
+            }
 
         } break;
         

@@ -332,8 +332,14 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
         if(in->mate.x.down)
         {
-            robotCmd(r, SHOOTER_SPEAKER);
+            robotCmd(r, SHOOTER_DELIVER_SPEAKER);
         }
+
+        if(in->mate.y.down)
+        {
+            robotCmd(r, SHOOTER_DELIVER_AMP);
+        }
+
 
         if(in->mate.a.down)
         {
@@ -345,6 +351,11 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             robotCmd(r, SHOOTER_STOP);
             r->shooter.shooter_first_time = false;
 
+        }
+        else if(in->mate.bumper_right.down && r->shooter.firing_motor_task == true && r->shooter.shooter_first_time == true) 
+        {
+            robotCmd(r, SHOOTER_STOP);
+            r->shooter.shooter_first_time = false;
         }
         else if (in->mate.bumper_right.held && r->shooter.firing_motor_task == false)  r->shooter.firing_motor_speed = -CFG_SHOOTER_MAX_FIRING_SPEED;
         else if (r->shooter.firing_motor_task == false) r->shooter.firing_motor_speed = 0;

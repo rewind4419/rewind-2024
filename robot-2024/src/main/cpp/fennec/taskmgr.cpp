@@ -246,6 +246,7 @@ static bool taskStep(Task* task, RobotData* robot)
 	case TASK_SHOOTER_FIRE:
 	{
 		robot->shooter.firing_motor_speed = -CFG_SHOOTER_MAX_FIRING_SPEED;
+		if(task->firing_motor.direction != NULL) robot->shooter.firing_motor_speed *= task->firing_motor.direction;
 		robot->shooter.firing_motor_task = true;
 		printf("Shooter Fire\n");
 		return true;
