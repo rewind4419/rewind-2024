@@ -26,9 +26,7 @@ void updateShooter(Shooter* shooter, RobotData* r)
 
     float shooter_angle = shooter->sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE + CFG_SHOOTER_ANGLE_OFFSET;
 
-    float counter_throttle = 0.05 * cos(shooter_angle);
-
-    // printf("shooter angle = %f \n", shooter_angle);
+    float counter_throttle = CFG_SHOOTER_PERPENDICULAR_THROTTLE * cos(shooter_angle);
 
     // Shooter angle code
     float curr_angle = shooter->shooter_encoder->GetPosition();
@@ -46,6 +44,7 @@ void updateShooter(Shooter* shooter, RobotData* r)
     float inputted_angle;
 
     float interpol_diff;
+<<<<<<< HEAD
     if(shooter->intake_task) inputted_angle =  shooter->target_angle;
     else inputted_angle = target_angle_w_adjustment;
 
@@ -61,6 +60,10 @@ void updateShooter(Shooter* shooter, RobotData* r)
 
 
 
+=======
+    if(shooter->intake_task) interpol_diff =  shooter->target_angle - angle_interpol_val;
+    else interpol_diff = target_angle_w_adjustment - angle_interpol_val;
+>>>>>>> a2913ae651515e0372e67140b162cb27fe395565
 
     float pid = evalPid(&shooter->shooter_pid, interpol_diff, CFG_DELTA_TIME);
     // printf("PID = %f \n", pid);
@@ -74,7 +77,6 @@ void updateShooter(Shooter* shooter, RobotData* r)
     );
 
     // printf("THROTTLE PRIOR = %f\n", shooter->axis_throttle);
-
 
     shooter->axis_throttle += counter_throttle;
 

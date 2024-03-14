@@ -132,12 +132,7 @@ constexpr float CFG_SHOOTER_MAX_ANGLE = 10.558441;
 constexpr float CFG_SHOOTER_ANGLE_RANGE = 1.44862;
 constexpr float CFG_SHOOTER_START_ANGLE = 0;
 constexpr float CFG_SHOOTER_MAX_FIRING_SPEED = 1.0f;
-
-
-constexpr float CFG_SHOOTER_MASS = 30 / 2.205; //kg
-constexpr float CFG_SHOOTER_CENTER_OF_MASS = 10.0f / 39.37; // In meters
-constexpr float CFG_SHOOTER_GEAR_RATIO = 3.0f;
-constexpr float CFG_SHOOTER_STALL_TORQUE = 3.6f; // newton meters
+constexpr float CFG_SHOOTER_PERPENDICULAR_THROTTLE = 0.05f;
 
 
 //////////////////////////////// Localiser ////////////////////////////////

@@ -29,6 +29,7 @@
 #include "Intake.h"
 #include "Shooter.h"
 #include "RobotState.h"
+#include "photonvis.h"
 
 
 
@@ -74,6 +75,8 @@ struct RobotData
 
   Intake intake;
   Shooter shooter;
+
+  PhotonParameters photon;
 
   Input input;
   Localiser_FirstOrderLag localiser;
