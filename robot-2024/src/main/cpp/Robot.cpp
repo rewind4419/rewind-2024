@@ -378,6 +378,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         updateManager(&r->taskmgr, r);
         updateIntake(&r->intake);
         updateShooter(&r->shooter, r);
+        updatePhoton(&r->photon);
     }
 
 
