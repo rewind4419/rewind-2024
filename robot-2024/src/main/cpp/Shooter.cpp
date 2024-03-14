@@ -43,9 +43,20 @@ void updateShooter(Shooter* shooter, RobotData* r)
 
     target_angle_w_adjustment = CLAMP(target_angle_w_adjustment, 0, CFG_SHOOTER_ANGLE_RANGE);
 
+    float inputted_angle;
+
     float interpol_diff;
-    if(shooter->intake_task) interpol_diff =  shooter->target_angle - angle_interpol_val;
-    else interpol_diff = target_angle_w_adjustment - angle_interpol_val;
+    if(shooter->intake_task) inputted_angle =  shooter->target_angle;
+    else inputted_angle = target_angle_w_adjustment;
+
+
+    // inputted_angle = frc::SmartDashboard::GetNumber("Current Angle", 0);
+
+    interpol_diff = inputted_angle - angle_interpol_val;
+
+    printf("Current Angle = %f\n", inputted_angle );
+
+
      
 
 
