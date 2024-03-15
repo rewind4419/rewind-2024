@@ -154,3 +154,8 @@ constexpr int CFG_LED_STRIP_LENGTH = 86;
 
 constexpr float CFG_GRAVITATIONAL_CONSTANT = 9.8; // m/s/s
 
+//////// Photon Vision //////// 
+constexpr int CFG_APRIL_TAG_COUNT = 16;
+constexpr float CFG_MAX_TAG_ALIGN_THROTTLE = 0.2f;
+
+

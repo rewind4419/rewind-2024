@@ -24,6 +24,7 @@ struct Shooter
     bool firing_motor_task = false;
     bool shooter_first_time = true;
     bool intake_task = false;
+    bool firing_mode = false;
 
     PID shooter_pid = { .kP = 0.9f, .kI = 0, .kD = 0,  .errorAccum = 0, .lastError = 0 };
 

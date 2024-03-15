@@ -115,13 +115,13 @@ void robotCmd(RobotData* r, RobotState state)
 
         case ANGLE_TO_SPEAKER:
         {
-
-            float angular_throttle = -1 * evalPid(r->drivetrain_controller.tag_aligner_pid, r->photon.tag_rel_robot.Y(), CFG_DELTA_TIME);
-
             {
                 Task t;
-                t.drivetrain_velocity.target_angular_velocity = angular_throttle;
-                t.drivetrain_velocity.length = 1;
+                t.drivetrain_velocity.align = true;
+                t.drivetrain_velocity.align_epsilon = 0.1f;
+                t.drivetrain_velocity.align_tag_id = 15;
+
+                pushTask(&r->taskmgr, t);
             }
 
         } break;

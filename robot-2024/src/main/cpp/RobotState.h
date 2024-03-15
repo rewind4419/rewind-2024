@@ -15,6 +15,8 @@ enum RobotState
     SHOOTER_DELIVER_SPEAKER,
 
     SHOOTER_DELIVER_AMP,
+
+    ANGLE_TO_SPEAKER,
 };
 
 void robotCmd(RobotData* r, RobotState state);

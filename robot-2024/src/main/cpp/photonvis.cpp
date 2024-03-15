@@ -1,6 +1,7 @@
 #include "photonvis.h"
-#include "field_layout.h"
 #include <photon/PhotonUtils.h>
+#include "field_layout.h"
+
 
 void updatePhoton(PhotonParameters* photon)
 {
@@ -13,9 +14,11 @@ void updatePhoton(PhotonParameters* photon)
         {
             photon::PhotonTrackedTarget working_target = targets[i];
 
-            photon->tag_rel_robot = working_target.GetBestCameraToTarget();
+            frc::Transform3d working_tag_rel_robot = working_target.GetBestCameraToTarget();
 
-            frc::Transform3d pose_rel_to_tag = photon->tag_rel_robot.Inverse();
+            photon->tag_rel_robot[working_target.fiducialId - 1] = working_tag_rel_robot;
+
+            frc::Transform3d pose_rel_to_tag = working_tag_rel_robot.Inverse();
 
             std::optional<frc::Pose3d> tag_pose = photon->aprilTagFieldLayout.GetTagPose(working_target.fiducialId);
 

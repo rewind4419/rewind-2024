@@ -80,14 +80,32 @@ static bool taskStep(Task* task, RobotData* robot)
 
 	} break;
 
-	case TASK_DRIVETRAIN_VELOCITY: {
+	case TASK_DRIVETRAIN_VELOCITY: 
+	{
 		robot->drivetrain_controller.mode = DRIVECTRL_VELOCITY;
 		robot->drivetrain_controller.ctrl.velocity.velocity = task->drivetrain_velocity.target_velocity;
-		robot->drivetrain_controller.ctrl.velocity.angular_velocity = task->drivetrain_velocity.target_angular_velocity;
+		bool task_complete = false;
 
-        task->drivetrain_velocity.timer += robot->delta_time;
+
+		if(task->drivetrain_velocity.align)
+		{
+			float tag_y_dist = static_cast<float>(robot->photon.tag_rel_robot[task->drivetrain_velocity.align_tag_id - 1].Y());
+			float angular_throttle = -1 * evalPid(&robot->drivetrain_controller.tag_aligner_pid, tag_y_dist, CFG_DELTA_TIME);
+
+			angular_throttle = CLAMP(angular_throttle, -CFG_MAX_TAG_ALIGN_THROTTLE, CFG_MAX_TAG_ALIGN_THROTTLE);
+
+			robot->drivetrain_controller.ctrl.velocity.angular_velocity = angular_throttle;
+			// task_complete = fabsf(task->drivetrain_velocity.target_angular_velocity) < task->drivetrain_velocity.align_epsilon;
+			if(robot->input.mate.trigger_right < 0.01f) task_complete = true;
+		}
+		else 
+		{
+			robot->drivetrain_controller.ctrl.velocity.angular_velocity = task->drivetrain_velocity.target_angular_velocity;
+			task->drivetrain_velocity.timer += robot->delta_time;
+			task_complete = task->drivetrain_velocity.timer > task->drivetrain_velocity.length;
+		}
 		
-		return task->drivetrain_velocity.timer > task->drivetrain_velocity.length;
+		return task_complete;
 	} break;
 
     case TASK_MIDDLE_THE_WHEELS: {
@@ -248,6 +266,7 @@ static bool taskStep(Task* task, RobotData* robot)
 		robot->shooter.firing_motor_speed = -CFG_SHOOTER_MAX_FIRING_SPEED;
 		if(task->firing_motor.direction != NULL) robot->shooter.firing_motor_speed *= task->firing_motor.direction;
 		robot->shooter.firing_motor_task = true;
+		robot->shooter.firing_mode = true;
 		printf("Shooter Fire\n");
 		return true;
 	} break;
@@ -255,8 +274,10 @@ static bool taskStep(Task* task, RobotData* robot)
 	case TASK_SHOOTER_STOP:
 	{
 		robot->shooter.firing_motor_speed = 0;
+		//Im prob making duplicates of bools but i cant remember XD
 		robot->shooter.firing_motor_task = false;
 		robot->shooter.shooter_first_time = true;
+		robot->shooter.firing_mode = false;
 		printf("Shooter Stop\n");
 		return true;
 	} break;

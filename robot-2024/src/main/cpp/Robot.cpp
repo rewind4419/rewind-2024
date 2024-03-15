@@ -301,23 +301,48 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         // }
 
 
-        if (in->mate.trigger_right > 0.01f)
+        //Not During Firing Mode, Right Trigger
+        if (in->mate.trigger_right > 0.01f && r->shooter.firing_mode == false)
         {
             r->intake.intake_speed = in->mate.trigger_right / 5;
             r->shooter.control_motor_speed = in->mate.trigger_right / 5;
 
         }
-        else if((in->mate.trigger_left > 0.01f))
+
+        //Not During Firing Mode, Left Trigger
+        else if((in->mate.trigger_left > 0.01f && r->shooter.firing_mode == false))
         {
             r->intake.intake_speed = -in->mate.trigger_left / 5;
             r->shooter.control_motor_speed = -in->mate.trigger_left / 5;
 
         }
-        else
+        //Not During Firing Mode, Nothing
+        else if (r->shooter.firing_mode == false)
         {
             r->intake.intake_speed = 0;
             r->shooter.control_motor_speed = 0;
         } 
+
+        // During Firing Mode Left Trigger
+        if(r->shooter.firing_mode == true && in->mate.trigger_left)
+        {
+            robotCmd(r, ANGLE_TO_SPEAKER);
+        }
+
+        //During Firing Mode Using Throttle
+        if (in->mate.trigger_right > 0.01f && r->shooter.firing_mode == true)
+        {
+            r->intake.intake_speed = in->mate.trigger_right / 5;
+            r->shooter.control_motor_speed = in->mate.trigger_right / 5;
+
+        }
+
+        //During Firing Mode, Nothing
+        else if(r->shooter.firing_mode == true)
+        {
+            r->intake.intake_speed = 0;
+            r->shooter.control_motor_speed = 0;
+        }
 
         if(in->mate.b.down)
         {
@@ -388,10 +413,9 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
     // int ntags = 0;
     Pose estimate;
-    estimate.position = { r->photon.global_pose.X(), r->photon.global_pose.Y() };
-    estimate.rotation = r->photon.global_pose.Rotation().
-}
-    auto estimate = 
+    // estimate.position = { r->photon.global_pose.X(), r->photon.global_pose.Y() };
+    // estimate.rotation = r->photon.global_pose.Rotation().
+    // auto estimate = 
 
     // frc::SmartDashboard::PutNumber("AX", estimate.position.x);
     // frc::SmartDashboard::PutNumber("AY", estimate.position.y);

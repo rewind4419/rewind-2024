@@ -1,7 +1,6 @@
 #pragma once
 
 #include "fennec/maths.h"
-constexpr int CFG_APRIL_TAG_COUNT = 16;
 
 struct AprilTagAnchor
 {

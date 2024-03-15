@@ -85,9 +85,13 @@ struct TaskData_FollowLine {
 struct TaskData_DrivetrainVelocity {
 	v2 target_velocity;
 	float target_angular_velocity;
-
     float timer;
     float length;
+
+	bool align;
+	float align_epsilon;
+	int align_tag_id;
+
 };
 
 struct TaskData_Hank {
