@@ -11,10 +11,9 @@ struct PhotonParameters
 
 	frc::AprilTagFieldLayout aprilTagFieldLayout = frc::LoadAprilTagLayoutField(frc::AprilTagField::k2024Crescendo);
 
-	frc::Transform3d robotToCam = frc::Transform3d( frc::Translation3d(0_m, 0_m, 0_m), frc::Rotation3d(0_rad, 0_rad, 0_rad));
+    frc::Transform3d tag_rel_robot;
 
-    v3 global_pose;
-
+    frc::Transform3d global_pose;
 };
 
 void updatePhoton(PhotonParameters* photon);

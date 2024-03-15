@@ -223,7 +223,10 @@ OdometryFrame getDrivetrainOdometry(Drivetrain* drivetrain)
         float DRIVE_WHEEL_RADIUS = 4 * INCH_TO_METER; // meters
 
         float drivePosition = module->drive_encoder->GetPosition();
-        float driveDelta = (drivePosition - module->previous_drive_encoder) / SWERVE_DRIVE_DRIVE_RATIO * (2 * M_PI * DRIVE_WHEEL_RADIUS);
+
+        float driveDelta = (((drivePosition - module->previous_drive_encoder) / (2 * M_PI)) * DRIVE_WHEEL_RADIUS) / SWERVE_DRIVE_DRIVE_RATIO;
+
+        // float driveDelta = (drivePosition - module->previous_drive_encoder) / SWERVE_DRIVE_DRIVE_RATIO * (2 * M_PI * DRIVE_WHEEL_RADIUS);
         travel_vectors[i] = module->current_vector * v2 { driveDelta, driveDelta };
         module->previous_drive_encoder = drivePosition;
     }

@@ -387,7 +387,11 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
     // Localiser code (not using IMU yet)
 
     // int ntags = 0;
-    // auto estimate = estimatePoseUsingAprilTags(degToRad( r->sensor_imu->GetYaw()) + r->auto_imu_basis, &ntags);
+    Pose estimate;
+    estimate.position = { r->photon.global_pose.X(), r->photon.global_pose.Y() };
+    estimate.rotation = r->photon.global_pose.Rotation().
+}
+    auto estimate = 
 
     // frc::SmartDashboard::PutNumber("AX", estimate.position.x);
     // frc::SmartDashboard::PutNumber("AY", estimate.position.y);
