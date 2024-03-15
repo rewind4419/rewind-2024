@@ -301,48 +301,56 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         // }
 
 
-        //Not During Firing Mode, Right Trigger
-        if (in->mate.trigger_right > 0.01f && r->shooter.firing_mode == false)
+        // Case that robot is in firing mode
+        if(r->shooter.firing_mode)
         {
-            r->intake.intake_speed = in->mate.trigger_right / 5;
-            r->shooter.control_motor_speed = in->mate.trigger_right / 5;
+            // During Firing Mode Left Trigger
+            if(in->mate.trigger_left > 0.01f && r->shooter.first_aim)
+            {
+                robotCmd(r, ANGLE_TO_SPEAKER);
+            }
 
+            //During Firing Mode Using Throttle
+            if (in->mate.trigger_right > 0.01f)
+            {
+                r->intake.intake_speed = in->mate.trigger_right / 5;
+                r->shooter.control_motor_speed = in->mate.trigger_right / 5;
+
+            }
+
+            //During Firing Mode, Nothing
+            else
+            {
+                r->intake.intake_speed = 0;
+                r->shooter.control_motor_speed = 0;
+            }
         }
-
-        //Not During Firing Mode, Left Trigger
-        else if((in->mate.trigger_left > 0.01f && r->shooter.firing_mode == false))
+        // Case that robot is in intake mode
+        else
         {
-            r->intake.intake_speed = -in->mate.trigger_left / 5;
-            r->shooter.control_motor_speed = -in->mate.trigger_left / 5;
+            //Not During Firing Mode, Right Trigger
+            if (in->mate.trigger_right > 0.01f)
+            {
+                r->intake.intake_speed = in->mate.trigger_right / 5;
+                r->shooter.control_motor_speed = in->mate.trigger_right / 5;
+            }
 
+            //Not During Firing Mode, Left Trigger
+            else if(in->mate.trigger_left > 0.01f)
+            {
+                r->intake.intake_speed = -in->mate.trigger_left / 5;
+                r->shooter.control_motor_speed = -in->mate.trigger_left / 5;
+
+            }
+            //Not During Firing Mode, Nothing
+            else
+            {
+                r->intake.intake_speed = 0;
+                r->shooter.control_motor_speed = 0;
+            } 
         }
-        //Not During Firing Mode, Nothing
-        else if (r->shooter.firing_mode == false)
-        {
-            r->intake.intake_speed = 0;
-            r->shooter.control_motor_speed = 0;
-        } 
-
-        // During Firing Mode Left Trigger
-        if(r->shooter.firing_mode == true && in->mate.trigger_left > 0.01f && r->shooter.first_aim == true)
-        {
-            robotCmd(r, ANGLE_TO_SPEAKER);
-        }
-
-        //During Firing Mode Using Throttle
-        if (in->mate.trigger_right > 0.01f && r->shooter.firing_mode == true)
-        {
-            r->intake.intake_speed = in->mate.trigger_right / 5;
-            r->shooter.control_motor_speed = in->mate.trigger_right / 5;
-
-        }
-
-        //During Firing Mode, Nothing
-        else if(r->shooter.firing_mode == true)
-        {
-            r->intake.intake_speed = 0;
-            r->shooter.control_motor_speed = 0;
-        }
+        
+    
 
         if(in->mate.b.down)
         {
