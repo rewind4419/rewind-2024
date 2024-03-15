@@ -96,7 +96,11 @@ static bool taskStep(Task* task, RobotData* robot)
 
 			robot->drivetrain_controller.ctrl.velocity.angular_velocity = angular_throttle;
 			// task_complete = fabsf(task->drivetrain_velocity.target_angular_velocity) < task->drivetrain_velocity.align_epsilon;
-			if(robot->input.mate.trigger_right < 0.01f) task_complete = true;
+			if(robot->input.mate.trigger_right < 0.01f) 
+			{
+				task_complete = true;
+				robot->shooter.first_aim = false;
+			}
 		}
 		else 
 		{

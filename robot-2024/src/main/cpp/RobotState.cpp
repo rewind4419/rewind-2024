@@ -115,6 +115,7 @@ void robotCmd(RobotData* r, RobotState state)
 
         case ANGLE_TO_SPEAKER:
         {
+            r->shooter.first_aim = false;
             {
                 Task t;
                 t.drivetrain_velocity.align = true;

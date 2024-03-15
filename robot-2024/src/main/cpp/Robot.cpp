@@ -324,7 +324,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         } 
 
         // During Firing Mode Left Trigger
-        if(r->shooter.firing_mode == true && in->mate.trigger_left)
+        if(r->shooter.firing_mode == true && in->mate.trigger_left > 0.01f && r->shooter.first_aim == true)
         {
             robotCmd(r, ANGLE_TO_SPEAKER);
         }
