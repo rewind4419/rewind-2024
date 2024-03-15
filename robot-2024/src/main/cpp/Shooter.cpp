@@ -44,7 +44,6 @@ void updateShooter(Shooter* shooter, RobotData* r)
     float inputted_angle;
 
     float interpol_diff;
-<<<<<<< HEAD
     if(shooter->intake_task) inputted_angle =  shooter->target_angle;
     else inputted_angle = target_angle_w_adjustment;
 
@@ -60,10 +59,6 @@ void updateShooter(Shooter* shooter, RobotData* r)
 
 
 
-=======
-    if(shooter->intake_task) interpol_diff =  shooter->target_angle - angle_interpol_val;
-    else interpol_diff = target_angle_w_adjustment - angle_interpol_val;
->>>>>>> a2913ae651515e0372e67140b162cb27fe395565
 
     float pid = evalPid(&shooter->shooter_pid, interpol_diff, CFG_DELTA_TIME);
     // printf("PID = %f \n", pid);

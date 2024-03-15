@@ -12,21 +12,18 @@ void updatePhoton(PhotonParameters* photon)
         for(int i = 0; i < targets.size(); i++)
         {
             photon::PhotonTrackedTarget working_target = targets[i];
+
             frc::Transform3d pose_rel_to_robot = working_target.GetBestCameraToTarget();
-            v2 pose_rel_to_tag = -v2{ static_cast<float>(pose_rel_to_robot.Y()) /* Horizontal axis */, static_cast<float>(pose_rel_to_robot.X()) /* Depth Axis */ };
 
-            AprilTagAnchor tag_anchor = APRIL_TAG_ANCHORS[working_target.fiducialId - 1];
+            frc::Transform3d pose_rel_to_tag = pose_rel_to_robot.Inverse();
 
-            float angle_of_tag = angleBetween( {1, 0}, tag_anchor.normal);
+            std::optional<frc::Pose3d> tag_pose = photon->aprilTagFieldLayout.GetTagPose(working_target.fiducialId);
 
-            float angle_tag_to_robot = degToRad(working_target.GetYaw());
+            frc::Pose3d robot_pose = tag_pose.value().TransformBy(pose_rel_to_tag);
 
-            float total_tag_angle = angle_of_tag + angle_tag_to_robot; // Test, TO BE CHANGED
+            printf("(x, y, z) = (%f, %f, %f)\n", robot_pose.X(), robot_pose.Y(), robot_pose.Z());
 
-            v2 actual_pose_rel_tag = rotate(pose_rel_to_tag, total_tag_angle);
-
-            photon->global_pose = tag_anchor.location + actual_pose_rel_tag;
-            
+            photon->global_pose = { static_cast<float>(robot_pose.X()), static_cast<float>(robot_pose.Y()), static_cast<float>(robot_pose.Z())};
         }
     }
 }
