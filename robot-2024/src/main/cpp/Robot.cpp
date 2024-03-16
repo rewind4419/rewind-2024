@@ -404,9 +404,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         // updateShooter(&r->shooter, r);
     }
     updatePhoton(&r->photon);
-
-    updatePhoton(&r->photon);
-
+    
     Pose estimate;
     estimate.position = { static_cast<float>(r->photon.global_pose.X()), static_cast<float>(r->photon.global_pose.Y()) };
     estimate.rotation = static_cast<float>(r->photon.global_pose.Rotation().Z());
