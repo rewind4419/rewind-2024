@@ -19,6 +19,8 @@ struct PhotonParameters
     frc::Transform3d tag_rel_robot[CFG_APRIL_TAG_COUNT];
 
     frc::Pose3d global_pose;
+
+    int n_tags = 0;
 };
 
 void updatePhoton(PhotonParameters* photon);
