@@ -115,13 +115,11 @@ void robotCmd(RobotData* r, RobotState state)
 
         case ANGLE_TO_SPEAKER:
         {
-            r->shooter.first_aim = false;
+            r->photon.first_aim = false;
             {
                 Task t;
-                t.drivetrain_velocity.align = true;
-                t.drivetrain_velocity.align_epsilon = 0.1f;
-                t.drivetrain_velocity.align_tag_id = 15;
-
+                t.type = TASK_ANGLE_TO_TAG;
+                t.photon_aligner.align_tag_id = 15;
                 pushTask(&r->taskmgr, t);
             }
 

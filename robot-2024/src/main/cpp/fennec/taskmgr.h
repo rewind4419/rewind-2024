@@ -38,6 +38,8 @@ enum TaskType {
 
 	TASK_SEAT_RING,
 
+	TASK_ANGLE_TO_TAG,
+
 	// TASK_FUNCTIONPTR, // TODO
 };
 
@@ -87,11 +89,10 @@ struct TaskData_DrivetrainVelocity {
 	float target_angular_velocity;
     float timer;
     float length;
+};
 
-	bool align;
-	float align_epsilon;
+struct TaskData_PhotonAligner {
 	int align_tag_id;
-
 };
 
 struct TaskData_Hank {
@@ -144,6 +145,7 @@ struct Task {
         TaskData_MiddleWheels middle_wheels;
         TaskData_FollowLine follow_line;
 		TaskData_FiringMotor firing_motor;
+		TaskData_PhotonAligner photon_aligner;
 	};
 };
 

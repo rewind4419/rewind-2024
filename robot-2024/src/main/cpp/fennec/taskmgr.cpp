@@ -84,32 +84,11 @@ static bool taskStep(Task* task, RobotData* robot)
 	{
 		robot->drivetrain_controller.mode = DRIVECTRL_VELOCITY;
 		robot->drivetrain_controller.ctrl.velocity.velocity = task->drivetrain_velocity.target_velocity;
-		bool task_complete = false;
+		robot->drivetrain_controller.ctrl.velocity.angular_velocity = task->drivetrain_velocity.target_angular_velocity;
 
-
-		if(task->drivetrain_velocity.align)
-		{
-			float tag_y_dist = static_cast<float>(robot->photon.tag_rel_robot[task->drivetrain_velocity.align_tag_id - 1].Y());
-			float angular_throttle = -1 * evalPid(&robot->drivetrain_controller.tag_aligner_pid, tag_y_dist, CFG_DELTA_TIME);
-
-			angular_throttle = CLAMP(angular_throttle, -CFG_MAX_TAG_ALIGN_THROTTLE, CFG_MAX_TAG_ALIGN_THROTTLE);
-
-			robot->drivetrain_controller.ctrl.velocity.angular_velocity = angular_throttle;
-			// task_complete = fabsf(task->drivetrain_velocity.target_angular_velocity) < task->drivetrain_velocity.align_epsilon;
-			if(robot->input.mate.trigger_right < 0.01f) 
-			{
-				task_complete = true;
-				robot->shooter.first_aim = false;
-			}
-		}
-		else 
-		{
-			robot->drivetrain_controller.ctrl.velocity.angular_velocity = task->drivetrain_velocity.target_angular_velocity;
-			task->drivetrain_velocity.timer += robot->delta_time;
-			task_complete = task->drivetrain_velocity.timer > task->drivetrain_velocity.length;
-		}
+        task->drivetrain_velocity.timer += robot->delta_time;
 		
-		return task_complete;
+		return task->drivetrain_velocity.timer > task->drivetrain_velocity.length;
 	} break;
 
     case TASK_MIDDLE_THE_WHEELS: {
@@ -301,6 +280,27 @@ static bool taskStep(Task* task, RobotData* robot)
 
 		return task_complete;
 	} break;
+
+	case TASK_ANGLE_TO_TAG:
+	{
+		bool task_complete = false;
+		float tag_y_dist = static_cast<float>(robot->photon.tag_rel_robot[task->photon_aligner.align_tag_id - 1].Y());
+		float angular_throttle = -1 * evalPid(&robot->drivetrain_controller.tag_aligner_pid, tag_y_dist, CFG_DELTA_TIME);
+
+		angular_throttle = CLAMP(angular_throttle, -CFG_MAX_TAG_ALIGN_THROTTLE, CFG_MAX_TAG_ALIGN_THROTTLE);
+			
+		robot->drivetrain_controller.mode = DRIVECTRL_THROTTLE;
+		robot->drivetrain_controller.ctrl.throttle.throttle = robot->global_input_translation;
+		robot->drivetrain_controller.ctrl.throttle.angular_throttle = angular_throttle;
+
+		if(robot->input.mate.trigger_right < 0.01f) 
+		{
+			robot->photon.first_aim = true;
+			task_complete = true;
+		}
+
+		return task_complete;
+	}break;
 
 
 	default: break;
