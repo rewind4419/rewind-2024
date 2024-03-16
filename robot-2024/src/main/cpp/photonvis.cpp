@@ -10,6 +10,8 @@ void updatePhoton(PhotonParameters* photon)
     if(result.HasTargets())
     {
         std::span<const photon::PhotonTrackedTarget> targets = result.GetTargets();
+        photon->n_tags = targets.size();
+
         for(int i = 0; i < targets.size(); i++)
         {
             photon::PhotonTrackedTarget working_target = targets[i];
@@ -29,4 +31,5 @@ void updatePhoton(PhotonParameters* photon)
             photon->global_pose = robot_pose;
         }
     }
+    else photon->n_tags = 0;
 }

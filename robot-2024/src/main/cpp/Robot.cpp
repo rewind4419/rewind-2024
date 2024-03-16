@@ -21,8 +21,8 @@ void initRobot(RobotData *r, RobotMode mode)
 
     initDrivetrain(&r->drivetrain);
     initDrivetrainController(&r->drivetrain_controller);
-    initIntake(&r->intake);
-    initShooter(&r->shooter);
+    // initIntake(&r->intake);
+    // initShooter(&r->shooter);
 
 
     r->taskmgr = TaskMgr();
@@ -182,6 +182,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         driver_joystick_right.y *= -1;
 
 
+        //USE THIS FOR APRIL TAG ALIGNER CODE IF THE OTHER ISNT EFFICIENT
 
         float angle_diff = acosf(dot(robot_dir, normalize( driver_joystick_right)));
         v2 robot_right = rotate(robot_dir, M_PI / 2);
@@ -399,38 +400,30 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
         // Update
         updateManager(&r->taskmgr, r);
-        updateIntake(&r->intake);
-        updateShooter(&r->shooter, r);
+        // updateIntake(&r->intake);
+        // updateShooter(&r->shooter, r);
     }
     updatePhoton(&r->photon);
 
+    updatePhoton(&r->photon);
 
-    // Localiser code (not using IMU yet)
-
-    // int ntags = 0;
     Pose estimate;
-    // estimate.position = { r->photon.global_pose.X(), r->photon.global_pose.Y() };
-    // estimate.rotation = r->photon.global_pose.Rotation().
-    // auto estimate = 
+    estimate.position = { static_cast<float>(r->photon.global_pose.X()), static_cast<float>(r->photon.global_pose.Y()) };
+    estimate.rotation = static_cast<float>(r->photon.global_pose.Rotation().Z());
 
-    // frc::SmartDashboard::PutNumber("AX", estimate.position.x);
-    // frc::SmartDashboard::PutNumber("AY", estimate.position.y);
-    // frc::SmartDashboard::PutNumber("AR", estimate.rotation);
+    stepLocaliser(&r->localiser, r->latest_odometry_frame, degToRad(r->sensor_imu->GetYaw()), estimate, r->photon.n_tags);
 
-    // stepLocaliser(&r.localiser, r->latest_odometry_frame, degToRad( r->sensor_imu->GetYaw()), estimate, ntags, CFG_APRIL_TAG_COUNT);
-    // r->localiser.pose_estimate.rotation = degToRad( r->sensor_imu->GetYaw()) + r->auto_imu_basis;
+    // r->localiser.pose_estimate.rotation = degToRad(r->sensor_imu->GetYaw()) + r->auto_imu_basis;
 
-    // auto localiser_pose = r->localiser.pose_estimate;
-
-    // frc::Pose2d pose(frc::Translation2d((units::meter_t)localiser_pose.position.x, (units::meter_t)-localiser_pose.position.y), frc::Rotation2d());
-    
-    // frc::SmartDashboard::PutNumber("LX", localiser_pose.position.x);
-    // frc::SmartDashboard::PutNumber("LY", localiser_pose.position.y);
-    // frc::SmartDashboard::PutNumber("LR", localiser_pose.rotation);
+    // frc::SmartDashboard::PutNumber("April Tag X", estimate.position.x);
+    // frc::SmartDashboard::PutNumber("April Tax Y", estimate.position.y);
+    // frc::SmartDashboard::PutNumber("April Tag R", estimate.rotation);
 
 
-    // frc::SmartDashboard::PutNumber("TaskMngr Diff", r->taskmgr.write_head - r->taskmgr.read_head);
+    Pose localiser_pose = r->localiser.pose_estimate;
 
-    // r.field.SetRobotPose(pose);
+    frc::Pose2d pose(frc::Translation2d((units::meter_t)localiser_pose.position.x, (units::meter_t) -localiser_pose.position.y), frc::Rotation2d());
+
+    r->field.SetRobotPose(pose);
 }
 

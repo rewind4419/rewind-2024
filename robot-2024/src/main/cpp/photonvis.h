@@ -21,6 +21,7 @@ struct PhotonParameters
     frc::Pose3d global_pose;
 
     bool first_aim = true;
+    int n_tags = 0;
 };
 
 void updatePhoton(PhotonParameters* photon);

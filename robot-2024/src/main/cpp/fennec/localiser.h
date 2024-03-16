@@ -23,4 +23,4 @@ struct Localiser_FirstOrderLag
   float prev_imu;
 };
 
-void stepLocaliser(Localiser_FirstOrderLag* localiser, OdometryFrame odometry_frame, float imu_rotation, Pose april_tag_pose, int april_tags_detected, int max_april_tag_count);
+void stepLocaliser(Localiser_FirstOrderLag* localiser, OdometryFrame odometry_frame, float imu_rotation, Pose april_tag_pose, int april_tags_detected);
