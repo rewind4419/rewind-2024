@@ -133,7 +133,9 @@ constexpr float CFG_SHOOTER_ANGLE_RANGE = 1.44862;
 constexpr float CFG_SHOOTER_START_ANGLE = 0;
 constexpr float CFG_SHOOTER_MAX_FIRING_SPEED = 1.0f;
 constexpr float CFG_SHOOTER_PERPENDICULAR_THROTTLE = 0.05f;
-
+constexpr float CFG_SHOOTER_RADIUS = 18.75 * INCH_TO_METER; // Change
+constexpr float CFG_SHOOTER_AXIS_HEIGHT = 9 * INCH_TO_METER; //Change
+constexpr float CFG_SHOOTER_DIST_CAM_TO_AXIS = 18 * INCH_TO_METER; //Change
 
 //////////////////////////////// Localiser ////////////////////////////////
 constexpr v2 CFG_APRILTAG_CAMERA_OFFSET = { 0, -13 * INCH_TO_METER };
@@ -157,5 +159,9 @@ constexpr float CFG_GRAVITATIONAL_CONSTANT = 9.8; // m/s/s
 //////// Photon Vision //////// 
 constexpr int CFG_APRIL_TAG_COUNT = 16;
 constexpr float CFG_MAX_TAG_ALIGN_THROTTLE = 0.2f;
+
+//////// Field Layout //////// 
+constexpr float CFG_SPEAKER_HEIGHT = 1;
+
 
 

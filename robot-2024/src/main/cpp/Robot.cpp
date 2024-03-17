@@ -403,6 +403,24 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         // updateIntake(&r->intake);
         // updateShooter(&r->shooter, r);
     }
+    else if(mode == ROBOT_AUTO)
+    {
+        {
+            Task t;
+            t.type = TASK_FOLLOW_LINE;
+            t.follow_line.starting_pose = Pose{{0, 0}, 0};
+            t.follow_line.ending_pose = Pose{{0, 10}, 0};
+
+            t.follow_line.start_speed = 1;
+            t.follow_line.mid_speed = 6;
+            t.follow_line.end_speed = 2;
+
+            t.follow_line.max_accel = 3;
+            t.follow_line.epsilon = 1;
+            t.follow_line.epsilon_rot = 10;
+            pushTask(&r->taskmgr, t);
+        }
+    }
     updatePhoton(&r->photon);
     
     Pose estimate;

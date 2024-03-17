@@ -283,15 +283,47 @@ static bool taskStep(Task* task, RobotData* robot)
 
 	case TASK_ANGLE_TO_TAG:
 	{
+		// Aim at tag
 		bool task_complete = false;
 		float tag_y_dist = static_cast<float>(robot->photon.tag_rel_robot[task->photon_aligner.align_tag_id - 1].Y());
 		float angular_throttle = -1 * evalPid(&robot->drivetrain_controller.tag_aligner_pid, tag_y_dist, CFG_DELTA_TIME);
 
+		printf("pid = %f", angular_throttle);
+
 		angular_throttle = CLAMP(angular_throttle, -CFG_MAX_TAG_ALIGN_THROTTLE, CFG_MAX_TAG_ALIGN_THROTTLE);
+
+		printf("angular throttle = %f", angular_throttle);
 			
 		robot->drivetrain_controller.mode = DRIVECTRL_THROTTLE;
 		robot->drivetrain_controller.ctrl.throttle.throttle = robot->global_input_translation;
-		robot->drivetrain_controller.ctrl.throttle.angular_throttle = angular_throttle;
+		// robot->drivetrain_controller.ctrl.throttle.angular_throttle = angular_throttle; // Uncomment to enable robot rotational movement
+		robot->drivetrain_controller.ctrl.throttle.angular_throttle = 0;
+
+
+		//Projectile Motion
+		v2 vect_to_tag = {static_cast<float>(robot->photon.tag_rel_robot[task->photon_aligner.align_tag_id - 1].Y()), static_cast<float>(robot->photon.tag_rel_robot[task->photon_aligner.align_tag_id - 1].X())};
+		float dist_from_tag = length(vect_to_tag);
+
+		float init_velocity = 15; // m/s Not constant, possibly make relative to shooters calculated speed
+		float shooter_height = 0.5; // Not constant, possibly change
+
+		// Uncomment after we see goodish results
+		float shooter_curr_angle = robot->shooter.sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE + CFG_SHOOTER_ANGLE_OFFSET;
+		// float shooter_height = CFG_SHOOTER_RADIUS * sinf( shooter_curr_angle ) + CFG_SHOOTER_AXIS_HEIGHT;
+		// float shooter_offset = CFG_SHOOTER_DIST_CAM_TO_AXIS - CFG_SHOOTER_RADIUS * shooter_curr_angle;
+		// dist_from_tag += shooter_offset;
+
+		float equation_term_1 = (CFG_GRAVITATIONAL_CONSTANT * std::pow(dist_from_tag, 2)) / std::pow(init_velocity, 2);
+
+		float solved_angle_1 = atan( (dist_from_tag - fabs( sqrtf( std::pow(dist_from_tag, 2) - 2 * equation_term_1 * ( 1/2 * equation_term_1 + CFG_SPEAKER_HEIGHT - shooter_height) ) ) ) / equation_term_1 );
+		float solved_angle_2 = atan( (dist_from_tag + fabs( sqrtf( std::pow(dist_from_tag, 2) - 2 * equation_term_1 * ( 1/2 * equation_term_1 + CFG_SPEAKER_HEIGHT - shooter_height) ) ) ) / equation_term_1 );
+
+		float solved_shooter_angle = (solved_angle_1 < solved_angle_2) ? solved_angle_1 : solved_angle_2;
+
+		printf("Projectile Motion Solved Angle = %f", solved_shooter_angle);
+
+		// robot->shooter.target_angle = solved_shooter_angle; // Uncomment to enable shooter a movement
+
 
 		if(robot->input.mate.trigger_right < 0.01f) 
 		{
@@ -301,6 +333,8 @@ static bool taskStep(Task* task, RobotData* robot)
 
 		return task_complete;
 	}break;
+
+
 
 
 	default: break;

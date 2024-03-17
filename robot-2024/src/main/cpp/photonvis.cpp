@@ -26,7 +26,7 @@ void updatePhoton(PhotonParameters* photon)
 
             frc::Pose3d robot_pose = tag_pose.value().TransformBy(pose_rel_to_tag);
 
-            printf("(x, y, z) = (%f, %f, %f)\n", robot_pose.X(), robot_pose.Y(), robot_pose.Z());
+            // printf("(x, y, z) = (%f, %f, %f)\n", robot_pose.X(), robot_pose.Y(), robot_pose.Z());
 
             photon->global_pose = robot_pose;
         }
