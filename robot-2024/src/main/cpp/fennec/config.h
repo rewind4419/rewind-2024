@@ -161,7 +161,19 @@ constexpr int CFG_APRIL_TAG_COUNT = 16;
 constexpr float CFG_MAX_TAG_ALIGN_THROTTLE = 0.2f;
 
 //////// Field Layout //////// 
-constexpr float CFG_SPEAKER_HEIGHT = 1;
+constexpr float CFG_SPEAKER_HEIGHT = 87.5413 * INCH_TO_METER;
+
+//////// Elevator //////// 
+constexpr int CFG_ELEVATOR_LEFT_MOTOR = 40; 
+constexpr int CFG_ELEVATOR_RIGHT_MOTOR = 41;  
+constexpr int CFG_ELEVATOR_ENCODER = 0; //Change  
+constexpr float CFG_ELEVATOR_MAX_ROTATION = 0.0f; //Change 
+constexpr float CFG_ELEVATOR_RANGE = 0.0f; //Change 
+constexpr float CFG_ELEVATOR_START_ROTATION = 0; 
+constexpr float CFG_ELEVATOR_THROTTLE = 0.5f; //Change
+
+
+
 
 
 

@@ -30,6 +30,7 @@
 #include "Shooter.h"
 #include "RobotState.h"
 #include "photonvis.h"
+#include "Elevator.h"
 
 
 
@@ -75,6 +76,7 @@ struct RobotData
 
   Intake intake;
   Shooter shooter;
+  Elevator elevator;
 
   PhotonParameters photon;
 

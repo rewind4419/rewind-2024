@@ -40,6 +40,8 @@ enum TaskType {
 
 	TASK_ANGLE_TO_TAG,
 
+	TASK_ELEVATOR_POSITIONING,
+
 	// TASK_FUNCTIONPTR, // TODO
 };
 
@@ -56,6 +58,12 @@ struct TaskData_Delay {
 
 	//state
 	float timer;
+};
+
+struct TaskData_Elevator
+{
+    float target_height;
+    float epsilon;
 };
 
 
@@ -146,6 +154,7 @@ struct Task {
         TaskData_FollowLine follow_line;
 		TaskData_FiringMotor firing_motor;
 		TaskData_PhotonAligner photon_aligner;
+		TaskData_Elevator elevator;
 	};
 };
 

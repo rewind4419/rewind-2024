@@ -14,7 +14,7 @@ void initElevator(Elevator* elevator)
 void updateElevator(Elevator* elevator, RobotData* r)
 {
     // Elevator angle calculation
-    float curr_height = elevator->elevator_encoder->GetAbsolutePosition();
+    float curr_height = elevator->elevator_encoder.GetAbsolutePosition();
     elevator->sum_rotation += curr_height - elevator->prev_height;
     elevator->prev_height = curr_height;
 
@@ -44,7 +44,7 @@ void updateElevator(Elevator* elevator, RobotData* r)
 void calibrateElevator(Elevator* elevator)
 {
     // Elevator angle calculation
-    float curr_height = elevator->elevator_encoder->GetAbsolutePosition();
+    float curr_height = elevator->elevator_encoder.GetAbsolutePosition();
     elevator->sum_rotation += curr_height - elevator->prev_height;
     elevator->prev_height = curr_height;
 

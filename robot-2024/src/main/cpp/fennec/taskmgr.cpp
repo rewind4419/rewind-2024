@@ -334,6 +334,20 @@ static bool taskStep(Task* task, RobotData* robot)
 		return task_complete;
 	}break;
 
+	case TASK_ELEVATOR_POSITIONING: 
+    {
+        // printf("Setting Angle\n");
+        robot->elevator.target_height = task->elevator.target_height;
+        float curr_angle = robot->elevator.sum_rotation / CFG_ELEVATOR_MAX_ROTATION * CFG_ELEVATOR_RANGE;
+        bool height_complete = ( fabsf(robot->elevator.target_height - curr_angle) < task->elevator.epsilon );
+        if (height_complete)
+        {
+            printf("Position Achieved\n");
+        }
+        printf("NOT COMPLETE delta = %f\n", fabsf(robot->elevator.target_height - curr_angle));
+        return height_complete;
+    } break;
+
 
 
 
