@@ -21,8 +21,8 @@ void initRobot(RobotData *r, RobotMode mode)
 
     initDrivetrain(&r->drivetrain);
     initDrivetrainController(&r->drivetrain_controller);
-    initIntake(&r->intake);
-    initShooter(&r->shooter);
+    // initIntake(&r->intake);
+    // initShooter(&r->shooter);
 
 
     r->taskmgr = TaskMgr();
@@ -83,8 +83,6 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         r->drivetrain_controller.ctrl.throttle.angular_throttle = 0;
     }
 
-    // update(&r.taskmgr, r);
-
     if (mode == ROBOT_TELEOP)
     {
         // Drivetrain
@@ -126,9 +124,6 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         float curr_speed = r->driver_speed;
         float curr_speed_rot = driver_speed_target_rotation;
 
-        // driver-oriented (as opposed to robot-oriented)
-
-        // printf("IMU ROT = %f \n\n", degToRad( r->sensor_imu->GetYaw()));
 
         // Resets the rotation of the drivetrain
         if ( r->input.driver.y.held)
@@ -136,32 +131,29 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             r->imu_basis = degToRad( r->sensor_imu->GetYaw());
         }
 
-        // if ( r->input.driver.x.held)
-        // {
-        //     r->imu_basis = degToRad( r->sensor_imu->GetYaw()) + M_PI / 2.0f;
-        // }
+        if ( r->input.driver.x.held)
+        {
+            r->imu_basis = degToRad( r->sensor_imu->GetYaw()) + M_PI / 2.0f;
+        }
 
-        // if ( r->input.driver.b.held)
-        // {
-        //     r->imu_basis = degToRad( r->sensor_imu->GetYaw()) - M_PI / 2.0f;
-        // }
+        if ( r->input.driver.b.held)
+        {
+            r->imu_basis = degToRad( r->sensor_imu->GetYaw()) - M_PI / 2.0f;
+        }
 
-        // if ( r->input.driver.a.held)
-        // {
-        //     r->imu_basis = degToRad( r->sensor_imu->GetYaw()) + M_PI;
-        // }
+        if ( r->input.driver.a.held)
+        {
+            r->imu_basis = degToRad( r->sensor_imu->GetYaw()) + M_PI;
+        }
 
         float imu_yaw = degToRad( r->sensor_imu->GetYaw()) - r->imu_basis;
         input_translation = rotate(input_translation, -imu_yaw);
 
-        if ( r->input.driver.x.held || r->input.driver.y.held || r->input.driver.b.held || r->input.driver.a.held)
-        {
-            r->held_rotation = imu_yaw;
-        }
-
+        if ( r->input.driver.x.held || r->input.driver.y.held || r->input.driver.b.held || r->input.driver.a.held) r->held_rotation = imu_yaw;
+    
         input_translation = input_translation * curr_speed;
 
-        // driver
+        r->global_input_translation = input_translation;
         
         if ( r->input.driver.big_button.held)
         {
@@ -182,10 +174,15 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
         v2 robot_dir = v2{sinf(imu_rotation_radians), cosf(imu_rotation_radians)};
 
+
+
         //Fixing wrong sided rotaton -Matteo
         v2 driver_joystick_right = r->input.driver.joystick_right;
         driver_joystick_right.x *= -1;
         driver_joystick_right.y *= -1;
+
+
+        //USE THIS FOR APRIL TAG ALIGNER CODE IF THE OTHER ISNT EFFICIENT
 
         float angle_diff = acosf(dot(robot_dir, normalize( driver_joystick_right)));
         v2 robot_right = rotate(robot_dir, M_PI / 2);
@@ -293,32 +290,62 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
         auto *in = &r->input;
 
-        in->mate = in->driver;
+        // in->mate = in->driver;
 
-        // if (in->mate.big_button.held)
-        // {
-        //     r->taskmgr = TaskMgr{};
-        // }
-
-
-        if (in->mate.trigger_right > 0.01f)
+        if (in->mate.big_button.held)
         {
-            r->intake.intake_speed = in->mate.trigger_right / 5;
-            r->shooter.control_motor_speed = in->mate.trigger_right / 5;
-
+            r->taskmgr = TaskMgr{};
         }
-        else if((in->mate.trigger_left > 0.01f))
+
+
+        // Case that robot is in firing mode
+        if(r->shooter.firing_mode)
         {
-            r->intake.intake_speed = -in->mate.trigger_left / 5;
-            r->shooter.control_motor_speed = -in->mate.trigger_left / 5;
+            // During Firing Mode Left Trigger
+            if(in->mate.trigger_left > 0.01f && r->photon.first_aim)
+            {
+                robotCmd(r, ANGLE_TO_SPEAKER);
+            }
 
+            //During Firing Mode Using Right Trigger
+            if (in->mate.trigger_right > 0.01f)
+            {
+                r->intake.intake_speed = in->mate.trigger_right / 5;
+                r->shooter.control_motor_speed = in->mate.trigger_right / 5;
+
+            }
+            //During Firing Mode, Nothing
+            else
+            {
+                r->intake.intake_speed = 0;
+                r->shooter.control_motor_speed = 0;
+            }
         }
+        // Case that robot is in intake mode
         else
         {
-            r->intake.intake_speed = 0;
-            r->shooter.control_motor_speed = 0;
-        } 
+            //Not During Firing Mode, Right Trigger
+            if (in->mate.trigger_right > 0.01f)
+            {
+                r->intake.intake_speed = in->mate.trigger_right / 5;
+                r->shooter.control_motor_speed = in->mate.trigger_right / 5;
+            }
 
+            //Not During Firing Mode, Left Trigger
+            else if(in->mate.trigger_left > 0.01f)
+            {
+                r->intake.intake_speed = -in->mate.trigger_left / 5;
+                r->shooter.control_motor_speed = -in->mate.trigger_left / 5;
+
+            }
+            //Not During Firing Mode, Nothing
+            else
+            {
+                r->intake.intake_speed = 0;
+                r->shooter.control_motor_speed = 0;
+            } 
+        }
+        
         if(in->mate.b.down)
         {
             {
@@ -350,7 +377,6 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         {
             robotCmd(r, SHOOTER_STOP);
             r->shooter.shooter_first_time = false;
-
         }
         else if(in->mate.bumper_right.down && r->shooter.firing_motor_task == true && r->shooter.shooter_first_time == true) 
         {
@@ -372,45 +398,48 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             }
         }
 
-        
-
         // Update
         updateManager(&r->taskmgr, r);
-        updateIntake(&r->intake);
-        updateShooter(&r->shooter, r);
-        updatePhoton(&r->photon);
+        // updateIntake(&r->intake);
+        // updateShooter(&r->shooter, r);
     }
+    else if(mode == ROBOT_AUTO)
+    {
+        {
+            Task t;
+            t.type = TASK_FOLLOW_LINE;
+            t.follow_line.starting_pose = Pose{{0, 0}, 0};
+            t.follow_line.ending_pose = Pose{{0, 10}, 0};
 
+            t.follow_line.start_speed = 1;
+            t.follow_line.mid_speed = 6;
+            t.follow_line.end_speed = 2;
 
+            t.follow_line.max_accel = 3;
+            t.follow_line.epsilon = 1;
+            t.follow_line.epsilon_rot = 10;
+            pushTask(&r->taskmgr, t);
+        }
+    }
+    updatePhoton(&r->photon);
     
-
-    // Localiser code (not using IMU yet)
-
-    // int ntags = 0;
     Pose estimate;
-    estimate.position = { r->photon.global_pose.X(), r->photon.global_pose.Y() };
-    estimate.rotation = r->photon.global_pose.Rotation().
-}
-    auto estimate = 
+    estimate.position = { static_cast<float>(r->photon.global_pose.X()), static_cast<float>(r->photon.global_pose.Y()) };
+    estimate.rotation = static_cast<float>(r->photon.global_pose.Rotation().Z());
 
-    // frc::SmartDashboard::PutNumber("AX", estimate.position.x);
-    // frc::SmartDashboard::PutNumber("AY", estimate.position.y);
-    // frc::SmartDashboard::PutNumber("AR", estimate.rotation);
+    stepLocaliser(&r->localiser, r->latest_odometry_frame, degToRad(r->sensor_imu->GetYaw()), estimate, r->photon.n_tags);
 
-    // stepLocaliser(&r.localiser, r->latest_odometry_frame, degToRad( r->sensor_imu->GetYaw()), estimate, ntags, CFG_APRIL_TAG_COUNT);
-    // r->localiser.pose_estimate.rotation = degToRad( r->sensor_imu->GetYaw()) + r->auto_imu_basis;
+    // r->localiser.pose_estimate.rotation = degToRad(r->sensor_imu->GetYaw()) + r->auto_imu_basis;
 
-    // auto localiser_pose = r->localiser.pose_estimate;
-
-    // frc::Pose2d pose(frc::Translation2d((units::meter_t)localiser_pose.position.x, (units::meter_t)-localiser_pose.position.y), frc::Rotation2d());
-    
-    // frc::SmartDashboard::PutNumber("LX", localiser_pose.position.x);
-    // frc::SmartDashboard::PutNumber("LY", localiser_pose.position.y);
-    // frc::SmartDashboard::PutNumber("LR", localiser_pose.rotation);
+    // frc::SmartDashboard::PutNumber("April Tag X", estimate.position.x);
+    // frc::SmartDashboard::PutNumber("April Tax Y", estimate.position.y);
+    // frc::SmartDashboard::PutNumber("April Tag R", estimate.rotation);
 
 
-    // frc::SmartDashboard::PutNumber("TaskMngr Diff", r->taskmgr.write_head - r->taskmgr.read_head);
+    Pose localiser_pose = r->localiser.pose_estimate;
 
-    // r.field.SetRobotPose(pose);
+    frc::Pose2d pose(frc::Translation2d((units::meter_t)localiser_pose.position.x, (units::meter_t) -localiser_pose.position.y), frc::Rotation2d());
+
+    r->field.SetRobotPose(pose);
 }
 

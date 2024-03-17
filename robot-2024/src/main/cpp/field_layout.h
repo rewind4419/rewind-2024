@@ -1,7 +1,6 @@
 #pragma once
 
 #include "fennec/maths.h"
-constexpr int CFG_APRIL_TAG_COUNT = 16;
 
 struct AprilTagAnchor
 {
@@ -29,3 +28,4 @@ AprilTagAnchor APRIL_TAG_ANCHORS [CFG_APRIL_TAG_COUNT] = {
 	{ { 182.73 * INCH_TO_METER, 177.10 * INCH_TO_METER }, rotate( {1, 0}, degToRad(120)) },
 	{ { 182.73 * INCH_TO_METER, 146.19 * INCH_TO_METER }, rotate( {1, 0}, degToRad(240)) },
 };
+

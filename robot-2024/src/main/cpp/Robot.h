@@ -92,6 +92,8 @@ struct RobotData
 
   float held_rotation;
 
+  v2 global_input_translation;
+
   v3 integrated_imu_pos;
 
   // misc
