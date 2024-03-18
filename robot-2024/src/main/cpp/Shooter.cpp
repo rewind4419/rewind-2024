@@ -29,7 +29,7 @@ void updateShooter(Shooter* shooter, RobotData* r)
     float delta_firing_angle = firing_curr_angle - shooter->firing_prev_angle;
     shooter->firing_prev_angle = firing_curr_angle;
 
-    printf("delta throttle = %f\n", delta_firing_angle);
+    // printf("delta angle = %f\n", delta_firing_angle);
 
 
     if(delta_throttle > 0) 

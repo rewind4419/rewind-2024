@@ -287,36 +287,31 @@ static bool taskStep(Task* task, RobotData* robot)
 		
 
 		bool task_complete = false;
-		float tag_y_dist = static_cast<float>(robot->photon.tag_rel_robot[task->photon_aligner.align_tag_id - 1].Y());
 
-		float angular_throttle = 0;
 
-		if(tag_y_dist != task->photon_aligner.prev_tag_y)
+		if(robot->photon.n_tags != 0)
 		{
-			angular_throttle = evalPid(&robot->drivetrain_controller.tag_aligner_pid, tag_y_dist, CFG_DELTA_TIME);
+			float calculated_throttle = 0;
+			float tag_y_dist = static_cast<float>(robot->photon.tag_rel_robot[task->photon_aligner.align_tag_id - 1].Y());
+			calculated_throttle = evalPid(&robot->drivetrain_controller.tag_aligner_pid, tag_y_dist, CFG_DELTA_TIME);
 
 			// printf("pid = %f\n", angular_throttle);
 
-			angular_throttle = CLAMP(angular_throttle, -CFG_MAX_TAG_ALIGN_THROTTLE, CFG_MAX_TAG_ALIGN_THROTTLE);
+			calculated_throttle = CLAMP(calculated_throttle, -CFG_MAX_TAG_ALIGN_THROTTLE, CFG_MAX_TAG_ALIGN_THROTTLE);
 
 			task->photon_aligner.angular_throttle = mix(
         	task->photon_aligner.angular_throttle,
-        	angular_throttle,
+        	calculated_throttle,
         	0.2f
     		);
 
-			// printf("angular throttle = %f\n", angular_throttle);
+			// printf("calculated throttle = %f\n", angular_throttle);
 		}
 		else task->photon_aligner.angular_throttle = 0;
-
-		task->photon_aligner.prev_tag_y = tag_y_dist;
 
 		robot->drivetrain_controller.mode = DRIVECTRL_THROTTLE;
 		robot->drivetrain_controller.ctrl.throttle.throttle = robot->global_input_translation;
 		robot->drivetrain_controller.ctrl.throttle.angular_throttle = task->photon_aligner.angular_throttle; // Uncomment to enable robot rotational movement
-
-		// robot->drivetrain_controller.ctrl.throttle.throttle = {0,0};
-		// robot->drivetrain_controller.ctrl.throttle.angular_throttle = 0;
 
 
 		//Projectile Motion
@@ -324,13 +319,14 @@ static bool taskStep(Task* task, RobotData* robot)
 		float dist_from_tag = length(vect_to_tag);
 
 		float init_velocity = 15; // m/s Not constant, possibly make relative to shooters calculated speed
-		float shooter_height = 0.5; // Not constant, possibly change
+		// float shooter_height = 0.5; // Not constant, possibly change
 
 		// Uncomment after we see goodish results
 		float shooter_curr_angle = robot->shooter.sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE + CFG_SHOOTER_ANGLE_OFFSET;
-		// float shooter_height = CFG_SHOOTER_RADIUS * sinf( shooter_curr_angle ) + CFG_SHOOTER_AXIS_HEIGHT;
-		// float shooter_offset = CFG_SHOOTER_DIST_CAM_TO_AXIS - CFG_SHOOTER_RADIUS * shooter_curr_angle;
-		// dist_from_tag += shooter_offset;
+		float shooter_height = CFG_SHOOTER_RADIUS * sinf( shooter_curr_angle ) + CFG_SHOOTER_AXIS_HEIGHT;
+		
+		float shooter_offset = CFG_SHOOTER_DIST_CAM_TO_AXIS - CFG_SHOOTER_RADIUS * cosf(shooter_curr_angle);
+		dist_from_tag += shooter_offset;
 
 		float equation_term_1 = (CFG_GRAVITATIONAL_CONSTANT * std::pow(dist_from_tag, 2)) / std::pow(init_velocity, 2);
 

@@ -101,7 +101,6 @@ struct TaskData_DrivetrainVelocity {
 
 struct TaskData_PhotonAligner {
 	int align_tag_id;
-	float prev_tag_y;
 	float angular_throttle;
 };
 
