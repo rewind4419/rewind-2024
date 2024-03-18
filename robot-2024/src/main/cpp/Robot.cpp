@@ -21,9 +21,9 @@ void initRobot(RobotData *r, RobotMode mode)
 
     initDrivetrain(&r->drivetrain);
     initDrivetrainController(&r->drivetrain_controller);
-    // initIntake(&r->intake);
-    // initShooter(&r->shooter);
-    //initElevator (&r->elevator);
+    initIntake(&r->intake);
+    initShooter(&r->shooter);
+    initElevator (&r->elevator);
 
 
 
@@ -61,13 +61,14 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
     // calibrateShooter(&r->shooter);
     // printCalibrationData(&r->drivetrain);
+    // calibrateElevator(&r->elevator);
+
 
     if (mode == ROBOT_DISABLE) return;
 
     r->enable_time +=r->delta_time;
     r->delta_time = time_step;
 
-    // Update gamepad
     updateGamepad(&r->input);
 
 
@@ -283,9 +284,10 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 r->drivetrain_controller.ctrl.throttle.throttle = input_translation;
                 r->drivetrain_controller.ctrl.throttle.angular_throttle = power_curve + adjustment_rotation + evalPid(&r->holder_pid, -1 * hold_angle01, r->delta_time);
 
+                // printf("real angle throttle = %f\n", power_curve + adjustment_rotation + evalPid(&r->holder_pid, -1 * hold_angle01, r->delta_time));
+
                 // drivetrainUpdate(&r->drivetrain, input_translation, power_curve + adjustment_rotation + evalPid(&r->holder_pid, hold_angle01, r->delta_time), r->delta_time);
             }
-            updateDrivetrainController(r, &r->drivetrain_controller, &r->drivetrain, r->latest_odometry_frame, r->delta_time);
         }
 
 
@@ -301,14 +303,13 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
 
         // Case that robot is in firing mode
-        if(r->shooter.firing_mode)
+        if(r->shooter.firing_mode && !r->shooter.intake_task)
         {
             // During Firing Mode Left Trigger
             if(in->mate.trigger_left > 0.01f && r->photon.first_aim)
             {
                 robotCmd(r, ANGLE_TO_SPEAKER);
             }
-
             //During Firing Mode Using Right Trigger
             if (in->mate.trigger_right > 0.01f)
             {
@@ -324,7 +325,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             }
         }
         // Case that robot is in intake mode
-        else
+        else if(!r->shooter.intake_task)
         {
             //Not During Firing Mode, Right Trigger
             if (in->mate.trigger_right > 0.01f)
@@ -373,6 +374,8 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         if(in->mate.a.down)
         {
             robotCmd(r, INTAKE_TRANSFER);
+            // r->intake.intake_speed = CFG_INTAKE_MAX_SPEED;
+            // r->shooter.control_motor_speed = in->mate.trigger_right / 5;
         }
       
         if (in->mate.trigger_right > 0.01 && r->shooter.firing_motor_task == true && r->shooter.shooter_first_time == true) 
@@ -386,7 +389,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             r->shooter.shooter_first_time = false;
         }
         else if (in->mate.bumper_right.held && r->shooter.firing_motor_task == false)  r->shooter.firing_motor_speed = -CFG_SHOOTER_MAX_FIRING_SPEED;
-        else if (r->shooter.firing_motor_task == false) r->shooter.firing_motor_speed = 0;
+        else if (r->shooter.firing_motor_task == false && r->shooter.brake == false) r->shooter.firing_motor_speed = 0;
 
         if(in->driver.bumper_left.down)
         {
@@ -401,30 +404,31 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         }
 
         // Update
-        // updateIntake(&r->intake);
-        // updateShooter(&r->shooter, r);
+
         // updateElevator(&r->elevator, r);
-
+        updateManager(&r->taskmgr, r);
+        updateIntake(&r->intake);
+        updateShooter(&r->shooter, r);
+        updateDrivetrainController(r, &r->drivetrain_controller, &r->drivetrain, r->latest_odometry_frame, r->delta_time);
     }
-    else if(mode == ROBOT_AUTO)
-    {
-        // {
-        //     Task t;
-        //     t.type = TASK_FOLLOW_LINE;
-        //     t.follow_line.starting_pose = Pose{{0, 0}, 0};
-        //     t.follow_line.ending_pose = Pose{{0, 10}, 0};
+    // else if(mode == ROBOT_AUTO)
+    // {
+    //     // {
+    //     //     Task t;
+    //     //     t.type = TASK_FOLLOW_LINE;
+    //     //     t.follow_line.starting_pose = Pose{{0, 0}, 0};
+    //     //     t.follow_line.ending_pose = Pose{{0, 10}, 0};
 
-        //     t.follow_line.start_speed = 1;
-        //     t.follow_line.mid_speed = 6;
-        //     t.follow_line.end_speed = 2;
+    //     //     t.follow_line.start_speed = 1;
+    //     //     t.follow_line.mid_speed = 6;
+    //     //     t.follow_line.end_speed = 2;
 
-        //     t.follow_line.max_accel = 3;
-        //     t.follow_line.epsilon = 1;
-        //     t.follow_line.epsilon_rot = 10;
-        //     pushTask(&r->taskmgr, t);
-        // }
-    }
-    updateManager(&r->taskmgr, r);
+    //     //     t.follow_line.max_accel = 3;
+    //     //     t.follow_line.epsilon = 1;
+    //     //     t.follow_line.epsilon_rot = 10;
+    //     //     pushTask(&r->taskmgr, t);
+    //     // }
+    // }
     updatePhoton(&r->photon);
     
     Pose estimate;
@@ -434,7 +438,6 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
     stepLocaliser(&r->localiser, r->latest_odometry_frame, degToRad(r->sensor_imu->GetYaw()), estimate, r->photon.n_tags);
 
     // r->localiser.pose_estimate.rotation = degToRad(r->sensor_imu->GetYaw()) + r->auto_imu_basis;
-
     // frc::SmartDashboard::PutNumber("April Tag X", estimate.position.x);
     // frc::SmartDashboard::PutNumber("April Tax Y", estimate.position.y);
     // frc::SmartDashboard::PutNumber("April Tag R", estimate.rotation);

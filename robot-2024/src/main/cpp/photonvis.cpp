@@ -17,6 +17,8 @@ void updatePhoton(PhotonParameters* photon)
             photon::PhotonTrackedTarget working_target = targets[i];
 
             frc::Transform3d working_tag_rel_robot = working_target.GetBestCameraToTarget();
+            // printf("(x, y, z) = (%f, %f, %f)\n", working_tag_rel_robot.X(), working_tag_rel_robot.Y(), working_tag_rel_robot.Z());
+
 
             photon->tag_rel_robot[working_target.fiducialId - 1] = working_tag_rel_robot;
 

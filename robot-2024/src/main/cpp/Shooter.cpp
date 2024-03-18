@@ -10,6 +10,8 @@ void initShooter(Shooter* shooter)
     shooter->axis_motors[1] = new rev::CANSparkFlex(CFG_SHOOTER_AXIS_RIGHT, rev::CANSparkFlex::MotorType::kBrushless);
 
     shooter->shooter_encoder = std::make_unique<rev::SparkMaxRelativeEncoder>(shooter->axis_motors[0]->GetEncoder());
+    shooter->firing_encoder = std::make_unique<rev::SparkMaxRelativeEncoder>(shooter->firing_motor->GetEncoder());
+
 
     shooter->deliver_angle_offset = 0;
 
@@ -18,11 +20,49 @@ void initShooter(Shooter* shooter)
 
 void updateShooter(Shooter* shooter, RobotData* r)
 {
-    shooter->beam_break_val = shooter->beam_break.Get();
+    // shooter->beam_break_val = shooter->beam_break.Get();
+
+    float delta_throttle = shooter->firing_motor_speed - shooter->firing_motor_prev_throttle;
+    shooter->firing_motor_prev_throttle = shooter->firing_motor_speed;
+    
+    float firing_curr_angle = shooter->firing_encoder->GetPosition();
+    float delta_firing_angle = firing_curr_angle - shooter->firing_prev_angle;
+    shooter->firing_prev_angle = firing_curr_angle;
+
+    printf("delta throttle = %f\n", delta_firing_angle);
+
+
+    if(delta_throttle > 0) 
+    {
+        shooter->brake = true;
+        printf("brake\n");
+    }
+    else if(delta_throttle < 0) 
+    {
+        shooter->brake = false;
+        printf("gas\n");
+    }
+
+    float firing_throttle;
+
+    if(shooter->brake)
+    {
+        firing_throttle = 1;
+        if(fabs(delta_firing_angle) < 0.02)
+        {
+            shooter->brake = false;
+        }
+    }
+    else
+    {
+        firing_throttle = shooter->firing_motor_speed;
+    }
+    // printf("firing throttle = %f\n", firing_throttle);
+
+    shooter->firing_motor->Set(firing_throttle);
 
     shooter->control_motor->Set(shooter->control_motor_speed);
 
-    shooter->firing_motor->Set(shooter->firing_motor_speed);
 
     float shooter_angle = shooter->sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE + CFG_SHOOTER_ANGLE_OFFSET;
 
@@ -52,12 +92,7 @@ void updateShooter(Shooter* shooter, RobotData* r)
 
     interpol_diff = inputted_angle - angle_interpol_val;
 
-    printf("Current Angle = %f\n", inputted_angle );
-
-
-     
-
-
+    // printf("Current Angle = %f\n", inputted_angle );
 
 
     float pid = evalPid(&shooter->shooter_pid, interpol_diff, CFG_DELTA_TIME);
@@ -68,7 +103,7 @@ void updateShooter(Shooter* shooter, RobotData* r)
     shooter->axis_throttle = mix(
         shooter->axis_throttle,
         target_throttle,
-        0.8f
+        0.9f
     );
 
     // printf("THROTTLE PRIOR = %f\n", shooter->axis_throttle);

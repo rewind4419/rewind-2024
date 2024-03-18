@@ -31,7 +31,7 @@ void robotCmd(RobotData* r, RobotState state)
             {
                 Task t;
                 t.type = TASK_SHOOTER_POSITIONING;
-                t.shooter.target_angle = 1.4f;
+                t.shooter.target_angle = 1.2f;
                 t.shooter.epsilon = 0.4f;
                 pushTask(&r->taskmgr, t);
             }     
@@ -56,8 +56,8 @@ void robotCmd(RobotData* r, RobotState state)
                 Task t;
                 t.type = TASK_SEAT_RING;
                 t.shooter.delay_timer = 0;
-                t.shooter.delay_length = 0.2f;
-                t.shooter.seat_speed = -0.1f;
+                t.shooter.delay_length = 0.05f;
+                t.shooter.seat_speed = -0.8f;
                 pushTask(&r->taskmgr, t);
             }
 
@@ -119,7 +119,7 @@ void robotCmd(RobotData* r, RobotState state)
             {
                 Task t;
                 t.type = TASK_ANGLE_TO_TAG;
-                t.photon_aligner.align_tag_id = 15;
+                t.photon_aligner.align_tag_id = 8;
                 pushTask(&r->taskmgr, t);
             }
 

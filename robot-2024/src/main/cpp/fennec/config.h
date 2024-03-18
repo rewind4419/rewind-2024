@@ -110,7 +110,7 @@ constexpr int CFG_INTAKE_MOTOR = 10;
 
 constexpr int CFG_INTAKE_BB_DIO = 1;
 
-constexpr float CFG_INTAKE_MAX_SPEED = 0.5;
+constexpr float CFG_INTAKE_MAX_SPEED = 0.8;
 
 
 
@@ -127,12 +127,12 @@ constexpr int CFG_SHOOTER_BB_DIO = 0;
 
 constexpr float CFG_SHOOTER_ANGLE_OFFSET = 0.279253; //In radians - 16 degrees
 constexpr float CFG_SHOOTER_AXIS_THROTTLE = 0.18f;
-constexpr float CFG_SHOOTER_CONTROL_MAX_SPEED = 0.4f;
+constexpr float CFG_SHOOTER_CONTROL_MAX_SPEED = 0.6f;
 constexpr float CFG_SHOOTER_MAX_ANGLE = 10.558441; 
 constexpr float CFG_SHOOTER_ANGLE_RANGE = 1.44862;
 constexpr float CFG_SHOOTER_START_ANGLE = 0;
 constexpr float CFG_SHOOTER_MAX_FIRING_SPEED = 1.0f;
-constexpr float CFG_SHOOTER_PERPENDICULAR_THROTTLE = 0.05f;
+constexpr float CFG_SHOOTER_PERPENDICULAR_THROTTLE = 0.07f;
 constexpr float CFG_SHOOTER_RADIUS = 18.75 * INCH_TO_METER; // Change
 constexpr float CFG_SHOOTER_AXIS_HEIGHT = 9 * INCH_TO_METER; //Change
 constexpr float CFG_SHOOTER_DIST_CAM_TO_AXIS = 18 * INCH_TO_METER; //Change
@@ -158,7 +158,7 @@ constexpr float CFG_GRAVITATIONAL_CONSTANT = 9.8; // m/s/s
 
 //////// Photon Vision //////// 
 constexpr int CFG_APRIL_TAG_COUNT = 16;
-constexpr float CFG_MAX_TAG_ALIGN_THROTTLE = 0.2f;
+constexpr float CFG_MAX_TAG_ALIGN_THROTTLE = 0.4f;
 
 //////// Field Layout //////// 
 constexpr float CFG_SPEAKER_HEIGHT = 87.5413 * INCH_TO_METER;
@@ -166,11 +166,14 @@ constexpr float CFG_SPEAKER_HEIGHT = 87.5413 * INCH_TO_METER;
 //////// Elevator //////// 
 constexpr int CFG_ELEVATOR_LEFT_MOTOR = 40; 
 constexpr int CFG_ELEVATOR_RIGHT_MOTOR = 41;  
-constexpr int CFG_ELEVATOR_ENCODER = 0; //Change  
-constexpr float CFG_ELEVATOR_MAX_ROTATION = 0.0f; //Change 
-constexpr float CFG_ELEVATOR_RANGE = 0.0f; //Change 
+constexpr int CFG_ELEVATOR_ENCODER = 3; //Change  
+constexpr float CFG_ELEVATOR_MIN_ROTATION = 0.27; //Change 
+constexpr float CFG_ELEVATOR_MAX_ROTATION = 2.4; //Change 
+constexpr float CFG_ELEVATOR_RANGE = 11.25f * INCH_TO_METER; //Change 
 constexpr float CFG_ELEVATOR_START_ROTATION = 0; 
-constexpr float CFG_ELEVATOR_THROTTLE = 0.5f; //Change
+constexpr float CFG_ELEVATOR_THROTTLE = 0.2f; //Change
+
+// 11.25 + 17.5
 
 
 

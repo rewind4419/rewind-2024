@@ -224,7 +224,7 @@ static bool taskStep(Task* task, RobotData* robot)
 		{
 			printf("Position Achieved\n");
 		}
-		printf("NOT COMPLETE delta = %f\n", fabsf(robot->shooter.target_angle - curr_angle));
+		// printf("NOT COMPLETE delta = %f\n", fabsf(robot->shooter.target_angle - curr_angle));
 		return angle_complete;
 	} break;
 
@@ -284,20 +284,39 @@ static bool taskStep(Task* task, RobotData* robot)
 	case TASK_ANGLE_TO_TAG:
 	{
 		// Aim at tag
+		
+
 		bool task_complete = false;
 		float tag_y_dist = static_cast<float>(robot->photon.tag_rel_robot[task->photon_aligner.align_tag_id - 1].Y());
-		float angular_throttle = -1 * evalPid(&robot->drivetrain_controller.tag_aligner_pid, tag_y_dist, CFG_DELTA_TIME);
 
-		printf("pid = %f", angular_throttle);
+		float angular_throttle = 0;
 
-		angular_throttle = CLAMP(angular_throttle, -CFG_MAX_TAG_ALIGN_THROTTLE, CFG_MAX_TAG_ALIGN_THROTTLE);
+		if(tag_y_dist != task->photon_aligner.prev_tag_y)
+		{
+			angular_throttle = evalPid(&robot->drivetrain_controller.tag_aligner_pid, tag_y_dist, CFG_DELTA_TIME);
 
-		printf("angular throttle = %f", angular_throttle);
-			
+			// printf("pid = %f\n", angular_throttle);
+
+			angular_throttle = CLAMP(angular_throttle, -CFG_MAX_TAG_ALIGN_THROTTLE, CFG_MAX_TAG_ALIGN_THROTTLE);
+
+			task->photon_aligner.angular_throttle = mix(
+        	task->photon_aligner.angular_throttle,
+        	angular_throttle,
+        	0.2f
+    		);
+
+			// printf("angular throttle = %f\n", angular_throttle);
+		}
+		else task->photon_aligner.angular_throttle = 0;
+
+		task->photon_aligner.prev_tag_y = tag_y_dist;
+
 		robot->drivetrain_controller.mode = DRIVECTRL_THROTTLE;
 		robot->drivetrain_controller.ctrl.throttle.throttle = robot->global_input_translation;
-		// robot->drivetrain_controller.ctrl.throttle.angular_throttle = angular_throttle; // Uncomment to enable robot rotational movement
-		robot->drivetrain_controller.ctrl.throttle.angular_throttle = 0;
+		robot->drivetrain_controller.ctrl.throttle.angular_throttle = task->photon_aligner.angular_throttle; // Uncomment to enable robot rotational movement
+
+		// robot->drivetrain_controller.ctrl.throttle.throttle = {0,0};
+		// robot->drivetrain_controller.ctrl.throttle.angular_throttle = 0;
 
 
 		//Projectile Motion
@@ -320,9 +339,9 @@ static bool taskStep(Task* task, RobotData* robot)
 
 		float solved_shooter_angle = (solved_angle_1 < solved_angle_2) ? solved_angle_1 : solved_angle_2;
 
-		printf("Projectile Motion Solved Angle = %f", solved_shooter_angle);
+		printf("Projectile Motion Solved Angle = %f\n", solved_shooter_angle);
 
-		// robot->shooter.target_angle = solved_shooter_angle; // Uncomment to enable shooter a movement
+		robot->shooter.target_angle = solved_shooter_angle - CFG_SHOOTER_ANGLE_OFFSET; // Uncomment to enable shooter a movement
 
 
 		if(robot->input.mate.trigger_right < 0.01f) 

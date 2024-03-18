@@ -8,19 +8,34 @@ void initElevator(Elevator* elevator)
     elevator->right_motor = new rev::CANSparkMax(CFG_ELEVATOR_RIGHT_MOTOR, rev::CANSparkMax::MotorType::kBrushless);
 
     //In this case, the height represents the angle recorded from the encoder that caused the elevator to go up or down
+    // elevator->target_height = CFG_ELEVATOR_MIN_ROTATION
+    elevator->min_encoder_value = elevator->elevator_encoder.GetAbsolutePosition();
+    elevator->max_encoder_value = elevator->min_encoder_value + 2.1;
     elevator->prev_height = elevator->elevator_encoder.GetAbsolutePosition();
+
+
 }
 
 void updateElevator(Elevator* elevator, RobotData* r)
 {
     // Elevator angle calculation
-    float curr_height = elevator->elevator_encoder.GetAbsolutePosition();
-    elevator->sum_rotation += curr_height - elevator->prev_height;
+    float curr_height = -elevator->elevator_encoder.GetAbsolutePosition();
+    float rot_delta = curr_height - elevator->prev_height;
+
+    if(rot_delta < -0.5f) elevator->sum_rotation += 1;
+    else if(rot_delta > 0.5) elevator->sum_rotation -= 1;
+
+    elevator->sum_rotation += rot_delta;
     elevator->prev_height = curr_height;
 
-    float current_height = elevator->sum_rotation / CFG_ELEVATOR_MAX_ROTATION * CFG_ELEVATOR_RANGE;
+    //Current rot should be 0
+    printf("current ROT = %f\n", elevator->sum_rotation);
 
-    elevator->target_height = CLAMP(elevator->target_height, 0, CFG_ELEVATOR_RANGE);
+
+    float current_height = (elevator->sum_rotation) / (fabs(elevator->max_encoder_value) + fabs(elevator->min_encoder_value)) * CFG_ELEVATOR_RANGE;
+    printf("current height = %f\n", current_height);
+
+    // elevator->target_height = CLAMP(elevator->target_height, , CFG_ELEVATOR_RANGE );
 
     float target_diff = elevator->target_height - current_height;
 
@@ -31,21 +46,29 @@ void updateElevator(Elevator* elevator, RobotData* r)
     elevator->curr_throttle = mix(
         elevator->curr_throttle,
         ideal_throttle,
-        0.8f //Change
+        0.2f //Change
     );
 
     elevator->curr_throttle = CLAMP(elevator->curr_throttle, -CFG_ELEVATOR_THROTTLE, CFG_ELEVATOR_THROTTLE);
 
-    elevator->left_motor->Set(elevator->curr_throttle);
-    elevator->right_motor->Set(elevator->curr_throttle);
+    // printf("target height = %f\n", elevator->target_height);
+    // printf("throttle = %f\n", pid);
+    
+    // elevator->right_motor->Set(-elevator->curr_throttle);
+    // elevator->left_motor->Set(-elevator->curr_throttle);
 
 }
 
 void calibrateElevator(Elevator* elevator)
-{
+{   
     // Elevator angle calculation
-    float curr_height = elevator->elevator_encoder.GetAbsolutePosition();
-    elevator->sum_rotation += curr_height - elevator->prev_height;
+    float curr_height = -elevator->elevator_encoder.GetAbsolutePosition();
+    float rot_delta = curr_height - elevator->prev_height;
+
+    if(rot_delta < -0.5f) elevator->sum_rotation += 1;
+    else if(rot_delta > 0.5) elevator->sum_rotation -= 1;
+
+    elevator->sum_rotation += rot_delta;
     elevator->prev_height = curr_height;
 
     printf("Elevator Height = %f\n", elevator->sum_rotation);

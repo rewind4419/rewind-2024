@@ -6,6 +6,7 @@
 #include <frc/DigitalInput.h>
 #include "fennec/config.h"
 #include "fennec/pid.h"
+#include "fennec/maths.h"
 #include <numbers>
 
 struct RobotData;
@@ -21,9 +22,12 @@ struct Elevator
 
     bool intake_assignment = false;
 
-    frc::DutyCycleEncoder elevator_encoder {CFG_ELEVATOR_ENCODER};
+    frc::DutyCycleEncoder elevator_encoder{CFG_ELEVATOR_ENCODER};
 
-    PID elevator_pid = { .kP = 0.9f, .kI = 0, .kD = 0,  .errorAccum = 0, .lastError = 0 };
+    PID elevator_pid = { .kP = 0.5f, .kI = 0, .kD = 0,  .errorAccum = 0, .lastError = 0 };
+
+    float min_encoder_value;
+    float max_encoder_value;
     
     rev::CANSparkMax* left_motor;
     rev::CANSparkMax* right_motor;

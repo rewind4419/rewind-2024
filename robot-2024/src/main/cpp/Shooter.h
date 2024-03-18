@@ -20,15 +20,20 @@ struct Shooter
     float axis_throttle;
     float prev_angle;
     float shooter_delay_timer = 0;
+    float firing_motor_prev_throttle = 0;
+    float firing_prev_angle = 0;
 
     bool firing_motor_task = false;
     bool shooter_first_time = true;
     bool intake_task = false;
     bool firing_mode = false;
+    bool brake = false;
+
 
     PID shooter_pid = { .kP = 0.9f, .kI = 0, .kD = 0,  .errorAccum = 0, .lastError = 0 };
 
     std::unique_ptr<rev::SparkMaxRelativeEncoder> shooter_encoder;
+    std::unique_ptr<rev::SparkMaxRelativeEncoder> firing_encoder;
     
     rev::CANSparkFlex* axis_motors[CFG_SHOOTER_AXIS_MOTOR_COUNT];
     rev::CANSparkFlex* control_motor;
