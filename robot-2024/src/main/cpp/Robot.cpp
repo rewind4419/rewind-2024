@@ -138,20 +138,20 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             r->imu_basis = degToRad( r->sensor_imu->GetYaw());
         }
 
-        if ( r->input.driver.x.held)
-        {
-            r->imu_basis = degToRad( r->sensor_imu->GetYaw()) + M_PI / 2.0f;
-        }
+        // if ( r->input.driver.x.held)
+        // {
+        //     r->imu_basis = degToRad( r->sensor_imu->GetYaw()) + M_PI / 2.0f;
+        // }
 
-        if ( r->input.driver.b.held)
-        {
-            r->imu_basis = degToRad( r->sensor_imu->GetYaw()) - M_PI / 2.0f;
-        }
+        // if ( r->input.driver.b.held)
+        // {
+        //     r->imu_basis = degToRad( r->sensor_imu->GetYaw()) - M_PI / 2.0f;
+        // }
 
-        if ( r->input.driver.a.held)
-        {
-            r->imu_basis = degToRad( r->sensor_imu->GetYaw()) + M_PI;
-        }
+        // if ( r->input.driver.a.held)
+        // {
+        //     r->imu_basis = degToRad( r->sensor_imu->GetYaw()) + M_PI;
+        // }
 
         float imu_yaw = degToRad( r->sensor_imu->GetYaw()) - r->imu_basis;
         input_translation = rotate(input_translation, -imu_yaw);
@@ -298,7 +298,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
         auto *in = &r->input;
 
-        // in->mate = in->driver;
+        in->mate = in->driver;
 
         if (in->mate.big_button.held)
         {
@@ -378,10 +378,10 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             robotCmd(r, SHOOTER_DELIVER_SPEAKER);
         }
 
-        if(in->mate.y.down)
-        {
-            robotCmd(r, SHOOTER_DELIVER_AMP);
-        }
+        // if(in->mate.y.down)
+        // {
+        //     robotCmd(r, SHOOTER_DELIVER_AMP);
+        // }
 
 
         if(in->mate.a.down)
@@ -500,7 +500,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
     stepLocaliser(&r->localiser, r->latest_odometry_frame, degToRad(r->sensor_imu->GetYaw()), estimate, r->photon.n_tags);
 
-    printf("Pose (x, y) = (%f, %f)\n",r->localiser.pose_estimate.position.x, r->localiser.pose_estimate.position.y);
+    // printf("Pose (x, y) = (%f, %f)\n",r->localiser.pose_estimate.position.x, r->localiser.pose_estimate.position.y);
 
     // r->localiser.pose_estimate.rotation = degToRad(r->sensor_imu->GetYaw()) + r->auto_imu_basis;
     // frc::SmartDashboard::PutNumber("April Tag X", estimate.position.x);

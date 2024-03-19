@@ -31,7 +31,7 @@ void updateShooter(Shooter* shooter, RobotData* r)
     float firing_curr_angle = shooter->firing_encoder->GetPosition();
     float delta_firing_angle = firing_curr_angle - shooter->firing_prev_angle;
     shooter->firing_prev_angle = firing_curr_angle;
-    shooter->firing_encoder.
+    // shooter->firing_encoder.
 
     // printf("delta angle = %f\n", delta_firing_angle);
 
@@ -69,7 +69,7 @@ void updateShooter(Shooter* shooter, RobotData* r)
 
     shooter->firing_motor->Set(firing_throttle);
 
-    shooter->control_motor->Set(shooter->control_motor_speed);
+    shooter->control_motor->Set(-1 * shooter->control_motor_speed);
 
 
     float shooter_angle = shooter->sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE + CFG_SHOOTER_ANGLE_OFFSET;

@@ -171,7 +171,7 @@ void drivetrainUpdateRawVectors(Drivetrain* drivetrain, v2* target_vectors, floa
         // if (steer_throttle < -.5) steer_throttle = -.5;
         module->steer_motor->Set( steer_throttle);
 
-        printf("steer speed = %f\n", steer_throttle);
+        // printf("steer speed = %f\n", steer_throttle);
 		
 		float driveSpeed = 1.0;
 
@@ -195,7 +195,7 @@ void drivetrainUpdateRawVectors(Drivetrain* drivetrain, v2* target_vectors, floa
     
         module->drive_motor->Set(drive_throttle);
 
-        printf("drive speed = %f\n", drive_throttle);
+        // printf("drive speed = %f\n", drive_throttle);
 
 
 
