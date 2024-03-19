@@ -84,7 +84,6 @@ void drivetrainUpdate(Drivetrain* drivetrain, v2 translation, float rotation, fl
     
     v2 target_vectors[DrivetrainSwerve_Count];
 
-
     // Calculate the target vectors of each wheel
     // (Magnitude is the speed of the wheel and direction is the direction)
     for (int i = 0; i < DrivetrainSwerve_Count; i++)
@@ -172,6 +171,7 @@ void drivetrainUpdateRawVectors(Drivetrain* drivetrain, v2* target_vectors, floa
         // if (steer_throttle < -.5) steer_throttle = -.5;
         module->steer_motor->Set( steer_throttle);
 
+        printf("steer speed = %f\n", steer_throttle);
 		
 		float driveSpeed = 1.0;
 
@@ -194,6 +194,9 @@ void drivetrainUpdateRawVectors(Drivetrain* drivetrain, v2* target_vectors, floa
 
     
         module->drive_motor->Set(drive_throttle);
+
+        printf("drive speed = %f\n", drive_throttle);
+
 
 
         // float cancoder_position = module->direction_encoder->GetAbsolutePosition() * M_PI / 180;
@@ -224,9 +227,8 @@ OdometryFrame getDrivetrainOdometry(Drivetrain* drivetrain)
 
         float drivePosition = module->drive_encoder->GetPosition();
 
-        float driveDelta = (((drivePosition - module->previous_drive_encoder) / (2 * M_PI)) * DRIVE_WHEEL_RADIUS) / SWERVE_DRIVE_DRIVE_RATIO;
-
-        // float driveDelta = (drivePosition - module->previous_drive_encoder) / SWERVE_DRIVE_DRIVE_RATIO * (2 * M_PI * DRIVE_WHEEL_RADIUS);
+        // float driveDelta = (((drivePosition - module->previous_drive_encoder) / (2 * M_PI)) * DRIVE_WHEEL_RADIUS) / SWERVE_DRIVE_DRIVE_RATIO;
+        float driveDelta = (drivePosition - module->previous_drive_encoder) / SWERVE_DRIVE_DRIVE_RATIO * (2 * M_PI * DRIVE_WHEEL_RADIUS);
         travel_vectors[i] = module->current_vector * v2 { driveDelta, driveDelta };
         module->previous_drive_encoder = drivePosition;
     }

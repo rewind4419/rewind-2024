@@ -17,20 +17,24 @@ struct Elevator
     float right_motor_speed = 0;
     float sum_rotation = 0;
     float prev_height;
-    float target_height = CFG_ELEVATOR_START_ROTATION;
+    float target_height = 0;
     float curr_throttle;
 
     bool intake_assignment = false;
 
     frc::DutyCycleEncoder elevator_encoder{CFG_ELEVATOR_ENCODER};
 
-    PID elevator_pid = { .kP = 0.5f, .kI = 0, .kD = 0,  .errorAccum = 0, .lastError = 0 };
+    PID elevator_pid = { .kP = 20.0f, .kI = 0, .kD = 0,  .errorAccum = 0, .lastError = 0 };
 
     float min_encoder_value;
     float max_encoder_value;
     
     rev::CANSparkMax* left_motor;
     rev::CANSparkMax* right_motor;
+
+    bool test_first_frame = true;
+    float elevator_timer = 0;
+    bool reverse = false;
 };
 
 void initElevator(Elevator* elevator);

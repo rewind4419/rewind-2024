@@ -12,15 +12,54 @@ void initElevator(Elevator* elevator)
     elevator->min_encoder_value = elevator->elevator_encoder.GetAbsolutePosition();
     elevator->max_encoder_value = elevator->min_encoder_value + 2.1;
     elevator->prev_height = elevator->elevator_encoder.GetAbsolutePosition();
-
+    printf("curr rot = %f\n", elevator->min_encoder_value);
+    printf("init prev = %f\n", elevator->prev_height);
 
 }
 
 void updateElevator(Elevator* elevator, RobotData* r)
 {
     // Elevator angle calculation
-    float curr_height = -elevator->elevator_encoder.GetAbsolutePosition();
-    float rot_delta = curr_height - elevator->prev_height;
+
+
+
+    // if(elevator->elevator_timer > 0.1f && elevator->test_first_frame)
+    // {
+    //     elevator->sum_rotation = 0;
+    //     elevator->min_encoder_value = elevator->elevator_encoder.GetAbsolutePosition();
+    //     elevator->max_encoder_value = elevator->min_encoder_value + 2.1;
+    //     elevator->prev_height = elevator->elevator_encoder.GetAbsolutePosition();
+    //     elevator->test_first_frame = false;
+    //     printf("Initializing Elevator\n");
+    // }
+    // else elevator->elevator_timer += CFG_DELTA_TIME;
+
+    if(elevator->test_first_frame)
+    {
+
+        if(elevator->elevator_encoder.GetAbsolutePosition() < 0)
+        {
+            elevator->reverse = true;
+            elevator->prev_height = 1 + elevator->elevator_encoder.GetAbsolutePosition();
+        }
+        else 
+        {
+            elevator->prev_height = elevator->elevator_encoder.GetAbsolutePosition();
+            elevator->reverse = false;
+        }
+
+        elevator->test_first_frame = false;
+    }
+
+    float curr_height;
+
+    if(elevator->reverse)
+    {
+        curr_height = 1 + elevator->elevator_encoder.GetAbsolutePosition();
+    }
+    else curr_height = elevator->elevator_encoder.GetAbsolutePosition();
+    
+    float rot_delta = -1 * (curr_height - elevator->prev_height);
 
     if(rot_delta < -0.5f) elevator->sum_rotation += 1;
     else if(rot_delta > 0.5) elevator->sum_rotation -= 1;
@@ -28,16 +67,18 @@ void updateElevator(Elevator* elevator, RobotData* r)
     elevator->sum_rotation += rot_delta;
     elevator->prev_height = curr_height;
 
+    // printf("current rotation = %f\n", curr_height);
+
     //Current rot should be 0
-    printf("current ROT = %f\n", elevator->sum_rotation);
 
+    float current_height = (elevator->sum_rotation) / CFG_ELEVATOR_MAX_ROTATION * CFG_ELEVATOR_RANGE;
 
-    float current_height = (elevator->sum_rotation) / (fabs(elevator->max_encoder_value) + fabs(elevator->min_encoder_value)) * CFG_ELEVATOR_RANGE;
-    printf("current height = %f\n", current_height);
-
-    // elevator->target_height = CLAMP(elevator->target_height, , CFG_ELEVATOR_RANGE );
+    elevator->target_height = CLAMP(elevator->target_height, 0, 0.271f );
 
     float target_diff = elevator->target_height - current_height;
+
+    frc::SmartDashboard::PutNumber("Height Diff Elevator", target_diff);
+    frc::SmartDashboard::PutNumber("Current Height", current_height);
 
     float pid = evalPid(&elevator->elevator_pid, target_diff, CFG_DELTA_TIME);
 
@@ -53,9 +94,9 @@ void updateElevator(Elevator* elevator, RobotData* r)
 
     // printf("target height = %f\n", elevator->target_height);
     // printf("throttle = %f\n", pid);
-    
-    // elevator->right_motor->Set(-elevator->curr_throttle);
-    // elevator->left_motor->Set(-elevator->curr_throttle);
+
+    elevator->right_motor->Set(-elevator->curr_throttle);
+    elevator->left_motor->Set(-elevator->curr_throttle);
 
 }
 

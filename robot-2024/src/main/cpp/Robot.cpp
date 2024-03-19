@@ -63,6 +63,10 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
     // printCalibrationData(&r->drivetrain);
     // calibrateElevator(&r->elevator);
 
+    r->temp_amp_height = frc::SmartDashboard::GetNumber("Amp Pose", 0);
+
+    
+
 
     if (mode == ROBOT_DISABLE) return;
 
@@ -353,12 +357,21 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         {
             {
                 Task t;
+                t.type = TASK_ELEVATOR_POSITIONING;
+                t.elevator.target_height = 0;
+                t.shooter.epsilon = 0.2f;
+                pushTask(&r->taskmgr, t);
+            }   
+            {
+                Task t;
                 t.type = TASK_SHOOTER_POSITIONING;
                 t.shooter.target_angle = 0;
                 t.shooter.epsilon = 0.4f;
                 pushTask(&r->taskmgr, t);
-            }        
+            }     
+
         }
+
 
         if(in->mate.x.down)
         {
@@ -403,39 +416,91 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             }
         }
 
+        // if(in->mate.bumper_left.down)
+        // {
+
+        // }
+
         // Update
 
-        // updateElevator(&r->elevator, r);
         updateManager(&r->taskmgr, r);
+        updateElevator(&r->elevator, r);
         updateIntake(&r->intake);
         updateShooter(&r->shooter, r);
         updateDrivetrainController(r, &r->drivetrain_controller, &r->drivetrain, r->latest_odometry_frame, r->delta_time);
     }
-    // else if(mode == ROBOT_AUTO)
-    // {
-    //     // {
-    //     //     Task t;
-    //     //     t.type = TASK_FOLLOW_LINE;
-    //     //     t.follow_line.starting_pose = Pose{{0, 0}, 0};
-    //     //     t.follow_line.ending_pose = Pose{{0, 10}, 0};
+    else if(mode == ROBOT_AUTO)
+    {
 
-    //     //     t.follow_line.start_speed = 1;
-    //     //     t.follow_line.mid_speed = 6;
-    //     //     t.follow_line.end_speed = 2;
+        if(r->auto_first)
+        {
+            r->auto_first = false;
+            {
+                Task t;
+                t.type = TASK_SHOOTER_FIRE;
+                pushTask(&r->taskmgr, t);
+            }
 
-    //     //     t.follow_line.max_accel = 3;
-    //     //     t.follow_line.epsilon = 1;
-    //     //     t.follow_line.epsilon_rot = 10;
-    //     //     pushTask(&r->taskmgr, t);
-    //     // }
-    // }
+            {
+                Task t;
+                t.type = TASK_FOLLOW_LINE;
+                t.follow_line.starting_pose = Pose{{0, 0}, 0};
+                t.follow_line.ending_pose = Pose{{0, 1}, 0};
+
+                t.follow_line.start_speed = 1;
+                t.follow_line.mid_speed = 6;
+                t.follow_line.end_speed = 2;
+
+                t.follow_line.max_accel = 3;
+                t.follow_line.epsilon = 1;
+                t.follow_line.epsilon_rot = 10;
+                pushTask(&r->taskmgr, t);
+            }
+
+            {
+                Task t;
+                t.type = TASK_ANGLE_TO_TAG_AUTO;
+                t.photon_aligner.align_tag_id = 8;
+                t.photon_aligner.shooter_align_epsilon = 0.2f;
+                pushTask(&r->taskmgr, t);
+            }
+        
+            {
+                Task t;
+                t.type = TASK_SEAT_RING;
+                t.shooter.delay_timer = 0;
+                t.shooter.delay_length = 0.1f;
+                t.shooter.seat_speed = 0.1f;
+                pushTask(&r->taskmgr, t);
+            }
+
+            pushTask(&r->taskmgr, genTaskDelay(1));
+
+            {
+                Task t;
+                t.type = TASK_SHOOTER_STOP;
+                pushTask(&r->taskmgr, t);
+            }
+
+        }
+
+        updateManager(&r->taskmgr, r);
+        updateElevator(&r->elevator, r);
+        updateIntake(&r->intake);
+        updateShooter(&r->shooter, r);
+        updateDrivetrainController(r, &r->drivetrain_controller, &r->drivetrain, r->latest_odometry_frame, r->delta_time);
+
+  
+    }
     updatePhoton(&r->photon);
     
     Pose estimate;
-    estimate.position = { static_cast<float>(r->photon.global_pose.X()), static_cast<float>(r->photon.global_pose.Y()) };
-    estimate.rotation = static_cast<float>(r->photon.global_pose.Rotation().Z());
+    // estimate.position = { static_cast<float>(r->photon.global_pose.X()), static_cast<float>(r->photon.global_pose.Y()) };
+    // estimate.rotation = static_cast<float>(r->photon.global_pose.Rotation().Z());
 
     stepLocaliser(&r->localiser, r->latest_odometry_frame, degToRad(r->sensor_imu->GetYaw()), estimate, r->photon.n_tags);
+
+    printf("Pose (x, y) = (%f, %f)\n",r->localiser.pose_estimate.position.x, r->localiser.pose_estimate.position.y);
 
     // r->localiser.pose_estimate.rotation = degToRad(r->sensor_imu->GetYaw()) + r->auto_imu_basis;
     // frc::SmartDashboard::PutNumber("April Tag X", estimate.position.x);

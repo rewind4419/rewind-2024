@@ -35,12 +35,12 @@ void updateShooter(Shooter* shooter, RobotData* r)
     if(delta_throttle > 0) 
     {
         shooter->brake = true;
-        printf("brake\n");
+        printf("brake started\n");
     }
     else if(delta_throttle < 0) 
     {
         shooter->brake = false;
-        printf("gas\n");
+        printf("gas started\n");
     }
 
     float firing_throttle;
@@ -48,7 +48,9 @@ void updateShooter(Shooter* shooter, RobotData* r)
     if(shooter->brake)
     {
         firing_throttle = 1;
-        if(fabs(delta_firing_angle) < 0.02)
+        printf("braking\n");
+
+        if(fabs(delta_firing_angle) < 0.2)
         {
             shooter->brake = false;
         }
@@ -59,6 +61,8 @@ void updateShooter(Shooter* shooter, RobotData* r)
     }
     // printf("firing throttle = %f\n", firing_throttle);
 
+    // frc::SmartDashboard::PutNumber("RPM", shooter->firing_motor.Get);
+
     shooter->firing_motor->Set(firing_throttle);
 
     shooter->control_motor->Set(shooter->control_motor_speed);
@@ -68,12 +72,23 @@ void updateShooter(Shooter* shooter, RobotData* r)
 
     float counter_throttle = CFG_SHOOTER_PERPENDICULAR_THROTTLE * cos(shooter_angle);
 
+    float elevator_dist = (r->elevator.sum_rotation / CFG_ELEVATOR_MAX_ROTATION * CFG_ELEVATOR_RANGE);
+
+    float cg_hypo = sqrtf(std::pow(4.5 * INCH_TO_METER, 2) + std::pow(elevator_dist + 14 * INCH_TO_METER, 2) );
+
+    float cg_extension_coeff = cg_hypo / (14.705 * INCH_TO_METER);
+    counter_throttle *= cg_extension_coeff;
+
+    frc::SmartDashboard::PutNumber("counter#2", cg_extension_coeff);
+
     // Shooter angle code
     float curr_angle = shooter->shooter_encoder->GetPosition();
 
     shooter->sum_angle += curr_angle - shooter->prev_angle;
 
     float angle_interpol_val = shooter->sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE;
+
+    frc::SmartDashboard::PutNumber("Current Angle", angle_interpol_val);
 
     shooter->target_angle = CLAMP(shooter->target_angle, 0, CFG_SHOOTER_ANGLE_RANGE);
 

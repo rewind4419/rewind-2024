@@ -90,7 +90,7 @@ constexpr float CFG_DRIVETRAIN_ANTIDRIFT = 0.0; // @Try, lets see if 0.1 works?
 constexpr float CFG_DRIVER_SPEED_NORMAL  = 0.7;
 constexpr float CFG_DRIVER_SPEED_NORMAL_ROT = 0.7;
 
-constexpr float CFG_DRIVER_SPEED_SURGERY = 0.59;
+constexpr float CFG_DRIVER_SPEED_SURGERY = 0.4;
 constexpr float CFG_DRIVER_SPEED_SURGERY_ROT = 0.4;
 
 constexpr float CFG_DRIVER_SPEED_SPRINT  = 1;
@@ -125,9 +125,9 @@ constexpr int CFG_SHOOTER_AXIS_MOTOR_COUNT = 2;
 
 constexpr int CFG_SHOOTER_BB_DIO = 0;
 
-constexpr float CFG_SHOOTER_ANGLE_OFFSET = 0.279253; //In radians - 16 degrees
+constexpr float CFG_SHOOTER_ANGLE_OFFSET = 0.3175; //In radians - 16 degrees
 constexpr float CFG_SHOOTER_AXIS_THROTTLE = 0.18f;
-constexpr float CFG_SHOOTER_CONTROL_MAX_SPEED = 0.6f;
+constexpr float CFG_SHOOTER_CONTROL_MAX_SPEED = 0.3f;
 constexpr float CFG_SHOOTER_MAX_ANGLE = 10.558441; 
 constexpr float CFG_SHOOTER_ANGLE_RANGE = 1.44862;
 constexpr float CFG_SHOOTER_START_ANGLE = 0;
@@ -166,12 +166,12 @@ constexpr float CFG_SPEAKER_HEIGHT = 87.5413 * INCH_TO_METER;
 //////// Elevator //////// 
 constexpr int CFG_ELEVATOR_LEFT_MOTOR = 40; 
 constexpr int CFG_ELEVATOR_RIGHT_MOTOR = 41;  
-constexpr int CFG_ELEVATOR_ENCODER = 3; //Change  
-constexpr float CFG_ELEVATOR_MIN_ROTATION = 0.27; //Change 
-constexpr float CFG_ELEVATOR_MAX_ROTATION = 2.4; //Change 
+constexpr int CFG_ELEVATOR_ENCODER = 2; //Change  
+// constexpr float CFG_ELEVATOR_MIN_ROTATION = 0.27; //Change 
+constexpr float CFG_ELEVATOR_MAX_ROTATION = 2.1746f; //Change 
 constexpr float CFG_ELEVATOR_RANGE = 11.25f * INCH_TO_METER; //Change 
 constexpr float CFG_ELEVATOR_START_ROTATION = 0; 
-constexpr float CFG_ELEVATOR_THROTTLE = 0.2f; //Change
+constexpr float CFG_ELEVATOR_THROTTLE = 1.0f; //Change
 
 // 11.25 + 17.5
 

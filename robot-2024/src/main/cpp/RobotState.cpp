@@ -42,15 +42,7 @@ void robotCmd(RobotData* r, RobotState state)
                 pushTask(&r->taskmgr, t);
             }
 
-            pushTask(&r->taskmgr, genTaskDelay(0.5));
-
-            {
-                Task t;
-                t.type = TASK_SHOOTER_POSITIONING;
-                t.shooter.target_angle = 0;
-                t.shooter.epsilon = 0.4f;
-                pushTask(&r->taskmgr, t);
-            }
+            // pushTask(&r->taskmgr, genTaskDelay(0.5));
 
             {
                 Task t;
@@ -66,6 +58,18 @@ void robotCmd(RobotData* r, RobotState state)
                 t.type = TASK_SHOOTER_FIRE;
                 pushTask(&r->taskmgr, t);
             }
+
+            {
+                Task t;
+                t.type = TASK_SHOOTER_POSITIONING;
+                t.shooter.target_angle = 0;
+                t.shooter.epsilon = 0.4f;
+                pushTask(&r->taskmgr, t);
+            }
+
+
+
+
             
         } break;
 
@@ -96,20 +100,30 @@ void robotCmd(RobotData* r, RobotState state)
 
         case SHOOTER_DELIVER_AMP:
         {
+
+            
+            {
+                Task t;
+                t.type = TASK_SHOOTER_FIRE;
+                t.firing_motor.direction = -0.9f;
+                pushTask(&r->taskmgr, t);
+            }
+            {
+                Task t;
+                t.type = TASK_ELEVATOR_POSITIONING;
+                t.elevator.target_height = 0.27f;
+                t.elevator.epsilon = 0.2f;
+                pushTask(&r->taskmgr, t);
+            }
+
             {
                 Task t;
                 t.type = TASK_SHOOTER_POSITIONING;
-                t.shooter.target_angle = 1.5f;
+                t.shooter.target_angle = 1.472f;
                 t.shooter.epsilon = 0.4f;
                 pushTask(&r->taskmgr, t);
             }   
 
-            {
-                Task t;
-                t.type = TASK_SHOOTER_FIRE;
-                t.firing_motor.direction = -0.4f;
-                pushTask(&r->taskmgr, t);
-            }
 
         } break;
 

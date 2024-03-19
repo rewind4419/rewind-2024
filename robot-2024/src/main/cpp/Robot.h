@@ -61,6 +61,10 @@ struct RobotData
   // high level
   TaskMgr taskmgr;
 
+  bool auto_first = true;
+
+  float temp_amp_height = 0;
+
   // control
 	float delta_time;
   float enable_time;

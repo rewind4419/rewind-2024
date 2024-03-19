@@ -13,13 +13,10 @@ void stepLocaliser(Localiser_FirstOrderLag* localiser, OdometryFrame odometry_fr
   localiser->pose_estimate.rotation += imu_rotation - localiser->prev_imu;
   localiser->prev_imu = imu_rotation;
   
-  if (april_tags_detected > 0)
+  // if (april_tags_detected == 0)
   {
-    localiser->pose_estimate = april_tag_pose;
-  }
-  else 
-  {
-      localiser->pose_estimate.position = localiser->pose_estimate.position + rotate(odometry_frame.delta_position, localiser->pose_estimate.rotation);
+    // localiser->pose_estimate = april_tag_pose;
+    localiser->pose_estimate.position = localiser->pose_estimate.position + rotate(odometry_frame.delta_position, localiser->pose_estimate.rotation);
   }
 
   localiser->pose_estimate.rotation = fmod(localiser->pose_estimate.rotation, 2 * M_PI);

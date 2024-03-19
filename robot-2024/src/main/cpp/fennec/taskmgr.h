@@ -42,6 +42,8 @@ enum TaskType {
 
 	TASK_ELEVATOR_POSITIONING,
 
+	TASK_ANGLE_TO_TAG_AUTO,
+
 	// TASK_FUNCTIONPTR, // TODO
 };
 
@@ -102,6 +104,7 @@ struct TaskData_DrivetrainVelocity {
 struct TaskData_PhotonAligner {
 	int align_tag_id;
 	float angular_throttle;
+	float shooter_align_epsilon;
 };
 
 struct TaskData_Hank {
