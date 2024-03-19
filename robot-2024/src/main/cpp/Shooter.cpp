@@ -22,12 +22,16 @@ void updateShooter(Shooter* shooter, RobotData* r)
 {
     // shooter->beam_break_val = shooter->beam_break.Get();
 
+    // Method to get velocity
+    // shooter->firing_encoder->GetVelocity();
+
     float delta_throttle = shooter->firing_motor_speed - shooter->firing_motor_prev_throttle;
     shooter->firing_motor_prev_throttle = shooter->firing_motor_speed;
     
     float firing_curr_angle = shooter->firing_encoder->GetPosition();
     float delta_firing_angle = firing_curr_angle - shooter->firing_prev_angle;
     shooter->firing_prev_angle = firing_curr_angle;
+    shooter->firing_encoder.
 
     // printf("delta angle = %f\n", delta_firing_angle);
 
