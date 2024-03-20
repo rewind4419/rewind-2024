@@ -71,6 +71,8 @@ void updateDrivetrainController(RobotData* r, DrivetrainController* controller, 
 			v2 move_to = target_pose.position - current_pose.position;
 
 
+
+
 			v2 current_facing = rotate(v2{ 0, 1 }, current_pose.rotation);
 			v2 target_facing  = rotate(v2{ 0, 1 }, target_pose.rotation);
 
@@ -82,6 +84,9 @@ void updateDrivetrainController(RobotData* r, DrivetrainController* controller, 
 
 			move_to.x = evalPid(&controller->linear_x_pid, move_to.x, r->delta_time);
 			move_to.y = evalPid(&controller->linear_y_pid, move_to.y, r->delta_time);
+
+			frc::SmartDashboard::PutNumber("throttle to X", move_to.x);
+			frc::SmartDashboard::PutNumber("throttle to Y", move_to.y);
 
 
 			if (length(move_to) > 1)
@@ -118,6 +123,9 @@ void updateDrivetrainController(RobotData* r, DrivetrainController* controller, 
 				float rotation = evalPid(&controller->angular_pid, rot - current_angular_velocity, dt);
 
 				translation.x -= rotation * CFG_DRIVETRAIN_ANTIDRIFT;
+
+				frc::SmartDashboard::PutNumber("Translation X", translation.x);
+				frc::SmartDashboard::PutNumber("Translation Y", translation.y);
 
 				drivetrainUpdate(drivetrain, translation, rotation, dt);
 		    }

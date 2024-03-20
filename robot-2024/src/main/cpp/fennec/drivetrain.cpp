@@ -1,6 +1,7 @@
 #include "drivetrain.h"
 #include <frc/Joystick.h>
 #include <rev/CANSparkMax.h>
+#include<frc/smartdashboard/SmartDashboard.h>
 #include "config.h"
 
 #include "pid.h"
@@ -110,7 +111,6 @@ void drivetrainUpdateRawVectors(Drivetrain* drivetrain, v2* target_vectors, floa
 	// 		wheel_speed_maximum = speed;
 	// }
 
-
     for (int i = 0; i < DrivetrainSwerve_Count; i++)
     {
         // int i = DrivetrainSwerve_FL;
@@ -171,6 +171,8 @@ void drivetrainUpdateRawVectors(Drivetrain* drivetrain, v2* target_vectors, floa
         // if (steer_throttle < -.5) steer_throttle = -.5;
         module->steer_motor->Set( steer_throttle);
 
+        frc::SmartDashboard::PutNumber("Final Steer", steer_throttle);
+
         // printf("steer speed = %f\n", steer_throttle);
 		
 		float driveSpeed = 1.0;
@@ -194,6 +196,8 @@ void drivetrainUpdateRawVectors(Drivetrain* drivetrain, v2* target_vectors, floa
 
     
         module->drive_motor->Set(drive_throttle);
+        frc::SmartDashboard::PutNumber("Final Drive", drive_throttle);
+
 
         // printf("drive speed = %f\n", drive_throttle);
 

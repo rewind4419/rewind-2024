@@ -73,7 +73,7 @@ void updateElevator(Elevator* elevator, RobotData* r)
 
     float current_height = (elevator->sum_rotation) / CFG_ELEVATOR_MAX_ROTATION * CFG_ELEVATOR_RANGE;
 
-    elevator->target_height = CLAMP(elevator->target_height, 0, 0.271f );
+    elevator->target_height = CLAMP(elevator->target_height, 0, 0.275f );
 
     float target_diff = elevator->target_height - current_height;
 

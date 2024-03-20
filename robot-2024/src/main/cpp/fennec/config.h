@@ -126,7 +126,7 @@ constexpr int CFG_SHOOTER_AXIS_MOTOR_COUNT = 2;
 constexpr int CFG_SHOOTER_BB_DIO = 0;
 
 constexpr float CFG_SHOOTER_ANGLE_OFFSET = 0.3175; //In radians - 16 degrees
-constexpr float CFG_SHOOTER_AXIS_THROTTLE = 0.18f;
+constexpr float CFG_SHOOTER_AXIS_THROTTLE = 0.25f;
 constexpr float CFG_SHOOTER_CONTROL_MAX_SPEED = 0.3f;
 constexpr float CFG_SHOOTER_MAX_ANGLE = 10.558441; 
 constexpr float CFG_SHOOTER_ANGLE_RANGE = 1.44862;
@@ -162,6 +162,7 @@ constexpr float CFG_MAX_TAG_ALIGN_THROTTLE = 0.4f;
 
 //////// Field Layout //////// 
 constexpr float CFG_SPEAKER_HEIGHT = 87.5413 * INCH_TO_METER;
+// constexpr float CFG_SPEAKER_HEIGHT = 90 * INCH_TO_METER;
 
 //////// Elevator //////// 
 constexpr int CFG_ELEVATOR_LEFT_MOTOR = 40; 

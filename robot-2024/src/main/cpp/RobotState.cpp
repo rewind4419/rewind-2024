@@ -105,24 +105,26 @@ void robotCmd(RobotData* r, RobotState state)
             {
                 Task t;
                 t.type = TASK_SHOOTER_FIRE;
-                t.firing_motor.direction = -0.9f;
+                t.firing_motor.direction = -0.8f;
                 pushTask(&r->taskmgr, t);
             }
-            {
-                Task t;
-                t.type = TASK_ELEVATOR_POSITIONING;
-                t.elevator.target_height = 0.27f;
-                t.elevator.epsilon = 0.2f;
-                pushTask(&r->taskmgr, t);
-            }
+
 
             {
                 Task t;
                 t.type = TASK_SHOOTER_POSITIONING;
-                t.shooter.target_angle = 1.472f;
+                t.shooter.target_angle = 1.6f;
                 t.shooter.epsilon = 0.4f;
                 pushTask(&r->taskmgr, t);
             }   
+
+            {
+                Task t;
+                t.type = TASK_ELEVATOR_POSITIONING;
+                t.elevator.target_height = 0.275f;
+                t.elevator.epsilon = 0.2f;
+                pushTask(&r->taskmgr, t);
+            }
 
 
         } break;

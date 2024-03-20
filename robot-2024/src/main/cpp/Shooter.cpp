@@ -16,6 +16,8 @@ void initShooter(Shooter* shooter)
     shooter->deliver_angle_offset = 0;
 
     shooter->prev_angle = shooter->shooter_encoder->GetPosition();
+
+    shooter->shooter_firing_calibrate_speed = 1.0f;
 }
 
 void updateShooter(Shooter* shooter, RobotData* r)
@@ -31,33 +33,43 @@ void updateShooter(Shooter* shooter, RobotData* r)
     float firing_curr_angle = shooter->firing_encoder->GetPosition();
     float delta_firing_angle = firing_curr_angle - shooter->firing_prev_angle;
     shooter->firing_prev_angle = firing_curr_angle;
-    // shooter->firing_encoder.
 
     // printf("delta angle = %f\n", delta_firing_angle);
 
 
-    if(delta_throttle > 0) 
-    {
-        shooter->brake = true;
-        printf("brake started\n");
-    }
-    else if(delta_throttle < 0) 
-    {
-        shooter->brake = false;
-        printf("gas started\n");
-    }
+    // if(fabs(delta_throttle) > 0.9) 
+    // {
+    //     shooter->brake = true;
+    //     printf("brake started\n");
+    // }
+
 
     float firing_throttle;
 
+    float firing_motor_velocity = shooter->firing_encoder->GetVelocity();
+
+    frc::SmartDashboard::PutNumber("Current Firing Motor Velocity", firing_motor_velocity);
+
+
+    if(fabs(firing_motor_velocity) < 400.0f)
+    {
+        shooter->brake = false;
+    }
     if(shooter->brake)
     {
-        firing_throttle = 1;
+        
+
+
+        if(firing_motor_velocity < 0)
+        {
+            firing_throttle = 1;
+        }
+        else if(firing_motor_velocity > 0)
+        {
+            firing_throttle = -1;
+        }
         printf("braking\n");
 
-        if(fabs(delta_firing_angle) < 0.2)
-        {
-            shooter->brake = false;
-        }
     }
     else
     {
@@ -92,9 +104,11 @@ void updateShooter(Shooter* shooter, RobotData* r)
 
     float angle_interpol_val = shooter->sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE;
 
-    frc::SmartDashboard::PutNumber("Current Angle", angle_interpol_val);
+    frc::SmartDashboard::PutNumber("Shooter Current Angle", angle_interpol_val);
+    frc::SmartDashboard::PutNumber("Shooter Target Angle", shooter->target_angle);
 
-    shooter->target_angle = CLAMP(shooter->target_angle, 0, CFG_SHOOTER_ANGLE_RANGE);
+
+    shooter->target_angle = CLAMP(shooter->target_angle, 0, 1.6);
 
     float target_angle_w_adjustment = shooter->target_angle + ( r->input.mate.joystick_right.y * CFG_SHOOTER_ANGLE_RANGE / 10);
 
@@ -111,13 +125,29 @@ void updateShooter(Shooter* shooter, RobotData* r)
 
     interpol_diff = inputted_angle - angle_interpol_val;
 
+    frc::SmartDashboard::PutNumber("Shooter Diff Angle", interpol_diff);
+
+
     // printf("Current Angle = %f\n", inputted_angle );
 
 
     float pid = evalPid(&shooter->shooter_pid, interpol_diff, CFG_DELTA_TIME);
     // printf("PID = %f \n", pid);
 
+    frc::SmartDashboard::PutNumber("Shooter PID error accum", shooter->shooter_pid.errorAccum);
+    frc::SmartDashboard::PutNumber("Shooter PID last error", shooter->shooter_pid.lastError);
+frc::SmartDashboard::PutNumber("Shooter PID kool p", shooter->shooter_pid.kP);
+frc::SmartDashboard::PutNumber("Shooter PID koolaid i", shooter->shooter_pid.kI);
+frc::SmartDashboard::PutNumber("Shooter PID d", shooter->shooter_pid.kD);
+
+
+    frc::SmartDashboard::PutNumber("Shooter PID", pid);
+
+
     float target_throttle = CLAMP(pid, -CFG_SHOOTER_AXIS_THROTTLE, CFG_SHOOTER_AXIS_THROTTLE);
+
+    frc::SmartDashboard::PutNumber(" PID  After clamp", target_throttle);
+
 
     shooter->axis_throttle = mix(
         shooter->axis_throttle,
@@ -125,13 +155,19 @@ void updateShooter(Shooter* shooter, RobotData* r)
         0.9f
     );
 
+    frc::SmartDashboard::PutNumber("PID after mix", shooter->axis_throttle);
+
+
     // printf("THROTTLE PRIOR = %f\n", shooter->axis_throttle);
 
     shooter->axis_throttle += counter_throttle;
+    frc::SmartDashboard::PutNumber("PID after counter", shooter->axis_throttle);
+    frc::SmartDashboard::PutNumber("Counter Throttle", counter_throttle);
 
-    // printf("THROTTLE = %f\n", shooter->axis_throttle);
 
     shooter->axis_throttle = CLAMP(shooter->axis_throttle, -CFG_SHOOTER_AXIS_THROTTLE, CFG_SHOOTER_AXIS_THROTTLE);
+
+    frc::SmartDashboard::PutNumber("Shooter Throttle", shooter->axis_throttle);
 
 
     for(int i = 0; i < CFG_SHOOTER_AXIS_MOTOR_COUNT; i++)
@@ -141,10 +177,9 @@ void updateShooter(Shooter* shooter, RobotData* r)
     }
 
     shooter->prev_angle = curr_angle;
-    
 }
 
-void calibrateShooter(Shooter* shooter)
+void calibrateShooterAngle(Shooter* shooter)
 {
     shooter->sum_angle += shooter->shooter_encoder->GetPosition() - shooter->prev_angle;
     shooter->prev_angle = shooter->shooter_encoder->GetPosition();
@@ -152,3 +187,11 @@ void calibrateShooter(Shooter* shooter)
     printf("Shooter Sum Angle = %f\n", shooter->sum_angle);
 }
 
+
+void calibrateShooterFiringMotor(Shooter* shooter)
+{
+    shooter->firing_motor->Set(shooter->firing_motor_speed);
+    shooter->control_motor->Set(-1 * shooter->control_motor_speed);
+    frc::SmartDashboard::PutNumber("Current Firing Motor Throttle", shooter->firing_motor_speed);
+    frc::SmartDashboard::PutNumber("Current Control Motor Throttle", -shooter->control_motor_speed);
+}

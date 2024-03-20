@@ -1,4 +1,5 @@
 #include "pid.h"
+#include "maths.h"
 
 // PID
 
@@ -17,7 +18,10 @@ float evalPid(PID* pid, float error, float dt)
 		pid->first = false;
 	}
 
-	pid->errorAccum += error * dt;
+	if(isnanf(error) == 0)
+	{
+		pid->errorAccum += error * dt;
+	}
 
 	float output = 
 		(pid->kP * error) +

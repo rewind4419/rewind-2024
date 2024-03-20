@@ -23,11 +23,14 @@ struct Shooter
     float firing_motor_prev_throttle = 0;
     float firing_prev_angle = 0;
 
+    float shooter_firing_calibrate_speed;
+
     bool firing_motor_task = false;
     bool shooter_first_time = true;
     bool intake_task = false;
     bool firing_mode = false;
     bool brake = false;
+
 
 
     PID shooter_pid = { .kP = 0.9f, .kI = 0, .kD = 0,  .errorAccum = 0, .lastError = 0 };
@@ -44,5 +47,7 @@ struct Shooter
 void initShooter(Shooter* shooter);
 void updateShooter(Shooter* shooter, RobotData* r);
 void calibrateShooter(Shooter* shooter);
+void calibrateShooterFiringMotor(Shooter* shooter);
+
 
 

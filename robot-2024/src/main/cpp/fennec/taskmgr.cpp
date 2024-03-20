@@ -27,7 +27,7 @@ static void doTask(TaskMgr* mgr, Task* task, RobotData* robot) {
 
 	bool complete = taskStep(task, robot);
 	if (complete) {
-		printf("Task Complete!\n");
+		printf("Task Complete %d\n", task->type);
 		if (task->type == TASK_LIST) free(task->list);
 		*task = { };
 		mgr->read_head = (mgr->read_head + 1) % TASKMGR_MAX_TASKS;
@@ -258,6 +258,8 @@ static bool taskStep(Task* task, RobotData* robot)
 	case TASK_SHOOTER_STOP:
 	{
 		robot->shooter.firing_motor_speed = 0;
+        robot->shooter.brake = true;
+
 		//Im prob making duplicates of bools but i cant remember XD
 		robot->shooter.firing_motor_task = false;
 		robot->shooter.shooter_first_time = true;
@@ -269,6 +271,7 @@ static bool taskStep(Task* task, RobotData* robot)
 	case TASK_SEAT_RING: 
 	{
 		robot->shooter.control_motor_speed = task->shooter.seat_speed;
+		robot->shooter.firing_motor_speed = 1;
 		task->shooter.delay_timer += robot->delta_time;
 		bool task_complete = false;
 		robot->shooter.intake_task = false;
@@ -295,8 +298,8 @@ static bool taskStep(Task* task, RobotData* robot)
 			float tag_y_dist = static_cast<float>(robot->photon.tag_rel_robot[task->photon_aligner.align_tag_id - 1].Y());
 			calculated_throttle = 2 * evalPid(&robot->drivetrain_controller.tag_aligner_pid, tag_y_dist, CFG_DELTA_TIME);
 
-			// printf("pid = %f\n", calculated_throttle);
-
+			frc::SmartDashboard::PutNumber("Tag Calculated Y Dist", tag_y_dist);
+			
 			calculated_throttle = CLAMP(calculated_throttle, -CFG_MAX_TAG_ALIGN_THROTTLE, CFG_MAX_TAG_ALIGN_THROTTLE);
 
 			// task->photon_aligner.angular_throttle = mix(
@@ -321,8 +324,8 @@ static bool taskStep(Task* task, RobotData* robot)
 
 		// printf("Dist From Tag = %f\n", dist_from_tag);
 
-		float init_velocity = 11.276; // m/s Not constant, possibly make relative to shooters calculated speed
-		// float shooter_height = 0.5; // Not constant, possibly change
+		// float init_velocity = 11.276; // m/s Not constant, possibly make relative to shooters calculated speed
+		float init_velocity = 0.00195305 * robot->shooter.firing_encoder->GetVelocity() + 1.49364;
 
 		// Uncomment after we see goodish results
 		float shooter_curr_angle = robot->shooter.sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE + CFG_SHOOTER_ANGLE_OFFSET;
@@ -338,12 +341,18 @@ static bool taskStep(Task* task, RobotData* robot)
 
 		float solved_shooter_angle = (solved_angle_1 < solved_angle_2) ? solved_angle_1 : solved_angle_2;
 
+		if (isnanf(solved_shooter_angle) == 0)
+		{
+			robot->shooter.target_angle = solved_shooter_angle - CFG_SHOOTER_ANGLE_OFFSET; // Uncomment to enable shooter a movement
+		}
+
+		frc::SmartDashboard::PutNumber("Calculated Angle", solved_shooter_angle);
+
 		// printf("Projectile Motion Solved Angle = %f\n", solved_shooter_angle);
 
-		robot->shooter.target_angle = solved_shooter_angle - CFG_SHOOTER_ANGLE_OFFSET; // Uncomment to enable shooter a movement
 
 
-		if(robot->input.mate.trigger_right < 0.01f) 
+		if(robot->input.mate.trigger_left < 0.01f) 
 		{
 			robot->photon.first_aim = true;
 			task_complete = true;
@@ -452,6 +461,8 @@ bool pushTask(TaskMgr* mgr, Task task) {
 		printf("TaskMgr; Failed to add task, queue is full!\n");
 		return false;
 	}
+
+	printf("Task Pushed %d\n", task.type);
 
 	mgr->task_buffer[mgr->write_head] = task;
 	mgr->write_head = (mgr->write_head + 1) % TASKMGR_MAX_TASKS;
