@@ -301,9 +301,9 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
         // in->mate = in->driver;
 
-        if (in->mate.big_button.held)
+        if (in->mate.big_button.down)
         {
-            r->taskmgr = TaskMgr{};
+            r->taskmgr = TaskMgr {};
         }
 
 
@@ -354,6 +354,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             } 
         }
         
+        //Return to Rest Position
         if(in->mate.b.down)
         {
             {
@@ -363,6 +364,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 t.shooter.epsilon = 0.2f;
                 pushTask(&r->taskmgr, t);
             }   
+
             {
                 Task t;
                 t.type = TASK_SHOOTER_POSITIONING;
@@ -372,7 +374,6 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             }     
 
         }
-
 
         if(in->mate.x.down)
         {
@@ -384,25 +385,26 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             robotCmd(r, SHOOTER_DELIVER_AMP);
         }
 
-
         if(in->mate.a.down)
         {
             robotCmd(r, INTAKE_TRANSFER);
-            // r->intake.intake_speed = CFG_INTAKE_MAX_SPEED;
-            // r->shooter.control_motor_speed = in->mate.trigger_right / 5;
         }
       
+        // Press Right Trigger And firing motor task is on, 3rd is just to make sure it only queues once
         if (in->mate.trigger_right > 0.01 && r->shooter.firing_motor_task == true && r->shooter.shooter_first_time == true) 
         {
             robotCmd(r, SHOOTER_STOP);
             r->shooter.shooter_first_time = false;
         }
+        // Press Right Bumper And firing motor task is on, 3rd is just to make sure it only queues once
         else if(in->mate.bumper_right.down && r->shooter.firing_motor_task == true && r->shooter.shooter_first_time == true) 
         {
             robotCmd(r, SHOOTER_STOP);
             r->shooter.shooter_first_time = false;
         }
+        // Hold Right Bumper And firing motor task is off
         else if (in->mate.bumper_right.held && r->shooter.firing_motor_task == false)  r->shooter.firing_motor_speed = -CFG_SHOOTER_MAX_FIRING_SPEED;
+        // Do Nothing And firing motor task is off
         else if (r->shooter.firing_motor_task == false && r->shooter.brake == false) 
         {
             r->shooter.firing_motor_speed = 0;
@@ -418,16 +420,10 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 t.shooter.delay_length = 0.05f;
                 t.shooter.seat_speed_control = -0.8f;
                 t.shooter.seat_speed_firing = 1;
+                t.shooter.seat_first = true;
                 pushTask(&r->taskmgr, t);
             }
         }
-
-        r->drivetrain_controller.tag_aligner_pid.kP = frc::SmartDashboard::GetNumber("Tag Aligner kP", 0.35f);
-        r->drivetrain_controller.tag_aligner_pid.kI = frc::SmartDashboard::GetNumber("Tag Aligner kI", 0);
-        r->drivetrain_controller.tag_aligner_pid.kD = frc::SmartDashboard::GetNumber("Tag Aligner kD", 0);
-
-
-
 
         //////// REMOVE AFTER CALIBRATION TEST ////////
         // if(in->mate.big_button.down)
@@ -515,6 +511,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 t.shooter.delay_length = 0.1f;
                 t.shooter.seat_speed_control = 0.8f;
                 t.shooter.seat_speed_firing = 0;
+                t.shooter.seat_first = true;
                 pushTask(&r->taskmgr, t);
             }
 
@@ -531,7 +528,6 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 t.shooter.epsilon = 0.4f;
                 pushTask(&r->taskmgr, t);
             }   
-
         }
         
         if ( r->middle_wheels)
@@ -550,27 +546,9 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
     updateIntake(&r->intake);
     updateShooter(&r->shooter, r);
     updateDrivetrainController(r, &r->drivetrain_controller, &r->drivetrain, r->latest_odometry_frame, r->delta_time);
-    frc::SmartDashboard::PutNumber("Drive Controller Mode", r->drivetrain_controller.mode);
-    frc::SmartDashboard::PutNumber("Drive Controller Throttle Y", r->drivetrain_controller.ctrl.throttle.throttle.y);
-    frc::SmartDashboard::PutNumber("Drive Controller Throttle X", r->drivetrain_controller.ctrl.throttle.throttle.x);
 
     updatePhoton(&r->photon);
-    
-    Pose estimate = {};
-    // estimate.position = { static_cast<float>(r->photon.global_pose.X()), static_cast<float>(r->photon.global_pose.Y()) };
-    // estimate.rotation = static_cast<float>(r->photon.global_pose.Rotation().Z());
-
-    stepLocaliser(&r->localiser, r->latest_odometry_frame, degToRad(r->sensor_imu->GetYaw()), estimate, 0, 16);
-
-    // printf("Pose (x, y) = (%f, %f)\n",r->localiser.pose_estimate.position.x, r->localiser.pose_estimate.position.y);
-    frc::SmartDashboard::PutNumber("Localiser Pose X", r->localiser.pose_estimate.position.x);
-    frc::SmartDashboard::PutNumber("Localiser Pose Y", r->localiser.pose_estimate.position.y);
-
-    // r->localiser.pose_estimate.rotation = degToRad(r->sensor_imu->GetYaw()) + r->auto_imu_basis;
-    // frc::SmartDashboard::PutNumber("April Tag X", estimate.position.x);
-    // frc::SmartDashboard::PutNumber("April Tax Y", estimate.position.y);
-    // frc::SmartDashboard::PutNumber("April Tag R", estimate.rotation);
-
+    stepLocaliser(r);
 
     Pose localiser_pose = r->localiser.pose_estimate;
 

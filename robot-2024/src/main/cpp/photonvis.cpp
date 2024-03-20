@@ -19,7 +19,6 @@ void updatePhoton(PhotonParameters* photon)
             frc::Transform3d working_tag_rel_robot = working_target.GetBestCameraToTarget();
             // printf("(x, y, z) = (%f, %f, %f)\n", working_tag_rel_robot.X(), working_tag_rel_robot.Y(), working_tag_rel_robot.Z());
 
-
             photon->tag_rel_robot[working_target.fiducialId - 1] = working_tag_rel_robot;
 
             frc::Transform3d pose_rel_to_tag = working_tag_rel_robot.Inverse();
@@ -30,7 +29,7 @@ void updatePhoton(PhotonParameters* photon)
 
             // printf("(x, y, z) = (%f, %f, %f)\n", robot_pose.X(), robot_pose.Y(), robot_pose.Z());
 
-            photon->global_pose = robot_pose;
+            photon->global_tags.push_back( TagPosition {robot_pose, working_target.fiducialId});
         }
     }
     else photon->n_tags = 0;

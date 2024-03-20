@@ -1,29 +1,32 @@
 #include "localiser.h"
-
-// Particle Filter
-
-
-// First order lag
+#include "../Robot.h"
 
 #include <frc/smartdashboard/SmartDashboard.h>
 
-
-void stepLocaliser(Localiser_FirstOrderLag* localiser, OdometryFrame odometry_frame, float imu_rotation, Pose april_tag_pose, int april_tags_detected, int max_april_tag_count)
+void initLocaliser(Localiser_FirstOrderLag* localiser)
 {
-  // drivetrain odometry
-  localiser->pose_estimate.position = localiser->pose_estimate.position + rotate(odometry_frame.delta_position, -localiser->pose_estimate.rotation);
-  // localiser->pose_estimate.rotation = localiser->pose_estimate.rotation + odometry_frame.delta_rotation;
+  float init_angle = frc::SmartDashboard::GetNumber("Auto Init Angle", 0);
+  localiser->pose_estimate.rotation = init_angle;
+  localiser->pose_estimate.rotation = - M_PI / 2;
+  // Bottom of speaker should be 36.17 inches from april tag
+  // Bottom of speaker should be 36.17 inches from april tag
+  v2 init_pose = {52.17 * INCH_TO_METER, 218.42 * INCH_TO_METER};
 
-    frc::SmartDashboard::PutNumber("YeetX", rotate(odometry_frame.delta_position, localiser->pose_estimate.rotation).x);
-    frc::SmartDashboard::PutNumber("YeetY", rotate(odometry_frame.delta_position, localiser->pose_estimate.rotation).y);
-        frc::SmartDashboard::PutNumber("Delta Position x", odometry_frame.delta_position.x);
-    frc::SmartDashboard::PutNumber("Delta Position y", odometry_frame.delta_position.y);
-    frc::SmartDashboard::PutNumber("Rotation", localiser->pose_estimate.rotation);
+  localiser->pose_estimate.position = init_pose;
 
+}
+
+void stepLocaliser(RobotData* robot)
+{
+
+  Localiser_FirstOrderLag* localiser = &robot->localiser;
+  OdometryFrame odometry_frame = robot->latest_odometry_frame;
+  float imu_rotation = degToRad(robot->sensor_imu->GetYaw());
 
   if (localiser->first)
   {
     localiser->first = false;
+    initLocaliser(localiser);
     localiser->prev_imu = imu_rotation;
   }
 
@@ -31,42 +34,34 @@ void stepLocaliser(Localiser_FirstOrderLag* localiser, OdometryFrame odometry_fr
   localiser->pose_estimate.rotation +=  -1 * delta_rot;
   localiser->prev_imu = imu_rotation;
 
-  // if(delta_rot < 3.0)
-  // {
-  //   localiser->
-  // }
+    frc::SmartDashboard::PutNumber("Localiser X", rotate(odometry_frame.delta_position, -localiser->pose_estimate.rotation).x);
+    frc::SmartDashboard::PutNumber("Localiser Y", rotate(odometry_frame.delta_position, -localiser->pose_estimate.rotation).y);
+    frc::SmartDashboard::PutNumber("Localiser Rotation", localiser->pose_estimate.rotation);
 
 
-  // if()
-
-  // localiser->pose_estimate.rotation = fmod(localiser->pose_estimate.rotation, M_PI);
-  // if (localiser->pose_estimate.rotation < 0) localiser->pose_estimate.rotation += 2 * M_PI;
-
-
-  // april_tag_pose.rotation = fmod(april_tag_pose.rotation, 2 * M_PI);
-  // if (april_tag_pose.rotation < 0) april_tag_pose.rotation += 2 * M_PI;
-
-  // april tag fusion
-  float apriltag_first_order_lag_damping = 0;
-  if (april_tags_detected > 0)
+  float apriltag_first_order_lag_damping = 0.1;
+  for (int i = 0; i < robot->photon.global_tags.size(); i++)
   {
-    apriltag_first_order_lag_damping = 0.6; // + 0.1 * april_tags_detected / (float)max_april_tag_count;
+    v2 curr_tag_pose = { static_cast<float>(robot->photon.global_tags[i].pose.Y()), static_cast<float>(robot->photon.global_tags[i].pose.X()) };
+
+    frc::SmartDashboard::PutNumber("April Tag Global Pose X", curr_tag_pose.x);
+    frc::SmartDashboard::PutNumber("April Tag Global Pose Y", curr_tag_pose.y);
+
+    float curr_tag_rotation = static_cast<float>(robot->photon.global_tags[i].pose.Rotation().Z());
+
+    frc::SmartDashboard::PutNumber("April Tag Global Rotation", curr_tag_rotation);
+
+    // localiser->pose_estimate.position = mix(localiser->pose_estimate.position, 
+    //                                         curr_tag_pose, 
+    //                                         apriltag_first_order_lag_damping);
+
+    // localiser->pose_estimate.rotation = mix(localiser->pose_estimate.rotation, 
+    //                                         , 
+    //                                         apriltag_first_order_lag_damping);
+    
   }
+  // if(robot->photon.n_tags == 0) localiser->pose_estimate.position = localiser->pose_estimate.position + rotate(odometry_frame.delta_position, -localiser->pose_estimate.rotation);
+  localiser->pose_estimate.position = localiser->pose_estimate.position + rotate(odometry_frame.delta_position, -localiser->pose_estimate.rotation);
 
-    // printf("cheese %f\n", apriltag_first_order_lag_damping);
-
-  localiser->pose_estimate.position = mix(localiser->pose_estimate.position, 
-                                           april_tag_pose.position, 
-                                           apriltag_first_order_lag_damping);
-
-  localiser->pose_estimate.rotation = mix(localiser->pose_estimate.rotation, 
-                                           april_tag_pose.rotation, 
-                                           apriltag_first_order_lag_damping);
-
-
-
-
-  // localiser->pose_estimate.rotation = mix(localiser->pose_estimate.rotation, 
-  //                                          imu_rotation, 
-  //                                          );
+  robot->photon.global_tags.clear();
 }

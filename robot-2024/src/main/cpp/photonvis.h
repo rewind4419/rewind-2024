@@ -9,6 +9,11 @@
 #include "fennec/config.h"
 
 
+struct TagPosition
+{
+    frc::Pose3d pose;
+    int tag_id;
+};
 
 struct PhotonParameters
 {
@@ -18,7 +23,7 @@ struct PhotonParameters
 
     frc::Transform3d tag_rel_robot[CFG_APRIL_TAG_COUNT];
 
-    frc::Pose3d global_pose;
+    std::vector<TagPosition> global_tags;
 
     bool first_aim = true;
     int n_tags = 0;

@@ -66,10 +66,6 @@ void robotCmd(RobotData* r, RobotState state)
                 t.shooter.epsilon = 0.4f;
                 pushTask(&r->taskmgr, t);
             }
-
-
-
-
             
         } break;
 

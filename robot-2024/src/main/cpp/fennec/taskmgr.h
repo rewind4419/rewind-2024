@@ -135,6 +135,8 @@ struct TaskData_Shooter {
 	float delay_length;
 	float seat_speed_firing;
 	float seat_speed_control;
+	float seat_prior_firing_throttle;
+	bool seat_first;
 };
 
 struct TaskData_IntakePuller {
