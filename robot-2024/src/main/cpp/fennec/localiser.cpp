@@ -5,15 +5,20 @@
 
 void initLocaliser(Localiser_FirstOrderLag* localiser)
 {
-  float init_angle = frc::SmartDashboard::GetNumber("Auto Init Angle", 0);
-  localiser->pose_estimate.rotation = init_angle;
-  localiser->pose_estimate.rotation = - M_PI / 2;
+  std::string side = frc::SmartDashboard::GetString("Auto Init Side", "Blue");
+  if(side == "left" || side == "Left" || side == "left " || side == "Left "|| side == "blue", side == "Blue" || side == "blue " || side == "Blue ")
+  {
+    localiser->pose_estimate.rotation = - M_PI / 2;
+  }
+  else if(side == "right" || side == "Right" || side == "right " || side == "Right "|| side == "re", side == "Red" || side == "red " || side == "Red ")
+  {
+    localiser->pose_estimate.rotation = M_PI / 2;
+  }
+
   // Bottom of speaker should be 36.17 inches from april tag
   // Bottom of speaker should be 36.17 inches from april tag
   v2 init_pose = {52.17 * INCH_TO_METER, 218.42 * INCH_TO_METER};
-
   localiser->pose_estimate.position = init_pose;
-
 }
 
 void stepLocaliser(RobotData* robot)
