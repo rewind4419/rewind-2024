@@ -26,6 +26,7 @@ static void doTask(TaskMgr* mgr, Task* task, RobotData* robot) {
 	}
 
 	bool complete = taskStep(task, robot);
+	// printf("Currently Completing Task %d\n", task->type);
 	if (complete) {
 		printf("Task Complete %d\n", task->type);
 		if (task->type == TASK_LIST) free(task->list);
@@ -76,6 +77,10 @@ static bool taskStep(Task* task, RobotData* robot)
 		{
 			return true;
 		}
+
+		v2 translation = robot->localiser.pose_estimate.position - task->waypoint.target_pose.position;
+		frc::SmartDashboard::PutNumber("task translation x", translation.x);
+		frc::SmartDashboard::PutNumber("task translation y", translation.y);
 
 		return false;
 
@@ -270,8 +275,13 @@ static bool taskStep(Task* task, RobotData* robot)
 
 	case TASK_SEAT_RING: 
 	{
-		robot->shooter.control_motor_speed = task->shooter.seat_speed;
-		robot->shooter.firing_motor_speed = 1;
+		if(task->shooter.seat_speed_firing != 0) robot->shooter.firing_motor_speed = task->shooter.seat_speed_firing;
+		if(task->shooter.seat_speed_control != 0) 
+		{
+			printf("seating shooter \n");
+			robot->shooter.control_motor_speed = task->shooter.seat_speed_control;
+		}
+
 		task->shooter.delay_timer += robot->delta_time;
 		bool task_complete = false;
 		robot->shooter.intake_task = false;
@@ -279,7 +289,6 @@ static bool taskStep(Task* task, RobotData* robot)
 		{
 			task_complete = true;
 			robot->shooter.control_motor_speed = 0;
-			printf("Ring Seated \n");
 		}
 
 		return task_complete;
@@ -299,7 +308,7 @@ static bool taskStep(Task* task, RobotData* robot)
 			calculated_throttle = 2 * evalPid(&robot->drivetrain_controller.tag_aligner_pid, tag_y_dist, CFG_DELTA_TIME);
 
 			frc::SmartDashboard::PutNumber("Tag Calculated Y Dist", tag_y_dist);
-			
+
 			calculated_throttle = CLAMP(calculated_throttle, -CFG_MAX_TAG_ALIGN_THROTTLE, CFG_MAX_TAG_ALIGN_THROTTLE);
 
 			// task->photon_aligner.angular_throttle = mix(
@@ -321,8 +330,6 @@ static bool taskStep(Task* task, RobotData* robot)
 		//Projectile Motion
 		v2 vect_to_tag = {static_cast<float>(robot->photon.tag_rel_robot[task->photon_aligner.align_tag_id - 1].Y()), static_cast<float>(robot->photon.tag_rel_robot[task->photon_aligner.align_tag_id - 1].X())};
 		float dist_from_tag = length(vect_to_tag);
-
-		// printf("Dist From Tag = %f\n", dist_from_tag);
 
 		// float init_velocity = 11.276; // m/s Not constant, possibly make relative to shooters calculated speed
 		float init_velocity = 0.00195305 * robot->shooter.firing_encoder->GetVelocity() + 1.49364;
@@ -367,6 +374,8 @@ static bool taskStep(Task* task, RobotData* robot)
 
 		// printf("n_tags = %d", robot->photon.n_tags);
 
+		bool aim_at_tag = false;
+
 		if(robot->photon.n_tags != 0)
 		{
 			float calculated_throttle = 0;
@@ -384,6 +393,8 @@ static bool taskStep(Task* task, RobotData* robot)
     		// );
 			task->photon_aligner.angular_throttle = calculated_throttle;
 
+			if(tag_y_dist < 0.1) aim_at_tag = true;
+
 			// printf("calculated throttle = %f\n", angular_throttle);
 		}
 		else task->photon_aligner.angular_throttle = 0;
@@ -397,17 +408,14 @@ static bool taskStep(Task* task, RobotData* robot)
 		v2 vect_to_tag = {static_cast<float>(robot->photon.tag_rel_robot[task->photon_aligner.align_tag_id - 1].Y()), static_cast<float>(robot->photon.tag_rel_robot[task->photon_aligner.align_tag_id - 1].X())};
 		float dist_from_tag = length(vect_to_tag);
 
-		// printf("Dist From Tag = %f\n", dist_from_tag);
-
-		float init_velocity = 11.276; // m/s Not constant, possibly make relative to shooters calculated speed
-		// float shooter_height = 0.5; // Not constant, possibly change
+		// float init_velocity = 11.276; // m/s Not constant, possibly make relative to shooters calculated speed
+		float init_velocity = 0.00195305 * robot->shooter.firing_encoder->GetVelocity() + 1.49364;
 
 		// Uncomment after we see goodish results
-		float shooter_curr_angle_total = robot->shooter.sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE + CFG_SHOOTER_ANGLE_OFFSET;
-		float shooter_curr_angle = robot->shooter.sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE;
-		float shooter_height = CFG_SHOOTER_RADIUS * sinf( shooter_curr_angle_total ) + CFG_SHOOTER_AXIS_HEIGHT;
+		float shooter_total_angle = robot->shooter.sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE + CFG_SHOOTER_ANGLE_OFFSET;
+		float shooter_height = CFG_SHOOTER_RADIUS * sinf( shooter_total_angle ) + CFG_SHOOTER_AXIS_HEIGHT;
 
-		// float shooter_offset = CFG_SHOOTER_DIST_CAM_TO_AXIS - CFG_SHOOTER_RADIUS * cosf(shooter_curr_angle_total);
+		// float shooter_offset = CFG_SHOOTER_DIST_CAM_TO_AXIS - CFG_SHOOTER_RADIUS * cosf(shooter_total_angle);
 		// dist_from_tag += shooter_offset;
 
 		float equation_term_1 = (CFG_GRAVITATIONAL_CONSTANT * std::pow(dist_from_tag, 2)) / std::pow(init_velocity, 2);
@@ -417,14 +425,35 @@ static bool taskStep(Task* task, RobotData* robot)
 
 		float solved_shooter_angle = (solved_angle_1 < solved_angle_2) ? solved_angle_1 : solved_angle_2;
 
+		if (isnanf(solved_shooter_angle) == 0)
+		{
+			robot->shooter.target_angle = solved_shooter_angle - CFG_SHOOTER_ANGLE_OFFSET; // Uncomment to enable shooter a movement
+		}
+
+		float shooter_curr_angle = robot->shooter.sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE;
+
 		// printf("Projectile Motion Solved Angle = %f\n", solved_shooter_angle);
 
-		robot->shooter.target_angle = solved_shooter_angle - CFG_SHOOTER_ANGLE_OFFSET; // Uncomment to enable shooter a movement
+		bool final_task = false;
 
 		bool task_complete = (robot->shooter.target_angle - shooter_curr_angle) < task->photon_aligner.shooter_align_epsilon;
-		// if(task_complete)robot->photon.first_aim = true;
-		
-		return task_complete;
+
+		if(task_complete && task->photon_aligner.timer_first && aim_at_tag)
+		{
+			task->photon_aligner.timer = 0;
+			task->photon_aligner.timer_first = false;
+		}
+		else if(task_complete && aim_at_tag)
+		{
+			task->photon_aligner.timer += CFG_DELTA_TIME;
+		}
+
+		if(task->photon_aligner.timer > 4.0f && task_complete && aim_at_tag)
+		{
+			final_task = true;
+		}
+			
+		return final_task;
 	}break;
 
 	case TASK_ELEVATOR_POSITIONING: 

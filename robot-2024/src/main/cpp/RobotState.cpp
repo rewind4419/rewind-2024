@@ -49,7 +49,7 @@ void robotCmd(RobotData* r, RobotState state)
                 t.type = TASK_SEAT_RING;
                 t.shooter.delay_timer = 0;
                 t.shooter.delay_length = 0.05f;
-                t.shooter.seat_speed = -0.8f;
+                t.shooter.seat_speed_control = -0.8f;
                 pushTask(&r->taskmgr, t);
             }
 

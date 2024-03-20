@@ -11,11 +11,14 @@
 void stepLocaliser(Localiser_FirstOrderLag* localiser, OdometryFrame odometry_frame, float imu_rotation, Pose april_tag_pose, int april_tags_detected, int max_april_tag_count)
 {
   // drivetrain odometry
-  localiser->pose_estimate.position = localiser->pose_estimate.position + rotate(odometry_frame.delta_position, localiser->pose_estimate.rotation);
+  localiser->pose_estimate.position = localiser->pose_estimate.position + rotate(odometry_frame.delta_position, -localiser->pose_estimate.rotation);
   // localiser->pose_estimate.rotation = localiser->pose_estimate.rotation + odometry_frame.delta_rotation;
 
     frc::SmartDashboard::PutNumber("YeetX", rotate(odometry_frame.delta_position, localiser->pose_estimate.rotation).x);
     frc::SmartDashboard::PutNumber("YeetY", rotate(odometry_frame.delta_position, localiser->pose_estimate.rotation).y);
+        frc::SmartDashboard::PutNumber("Delta Position x", odometry_frame.delta_position.x);
+    frc::SmartDashboard::PutNumber("Delta Position y", odometry_frame.delta_position.y);
+    frc::SmartDashboard::PutNumber("Rotation", localiser->pose_estimate.rotation);
 
 
   if (localiser->first)
@@ -24,15 +27,24 @@ void stepLocaliser(Localiser_FirstOrderLag* localiser, OdometryFrame odometry_fr
     localiser->prev_imu = imu_rotation;
   }
 
-  localiser->pose_estimate.rotation += imu_rotation - localiser->prev_imu;
+  float delta_rot = imu_rotation - localiser->prev_imu;
+  localiser->pose_estimate.rotation +=  -1 * delta_rot;
   localiser->prev_imu = imu_rotation;
 
-  localiser->pose_estimate.rotation = fmod(localiser->pose_estimate.rotation, 2 * M_PI);
-  if (localiser->pose_estimate.rotation < 0) localiser->pose_estimate.rotation += 2 * M_PI;
+  // if(delta_rot < 3.0)
+  // {
+  //   localiser->
+  // }
 
 
-  april_tag_pose.rotation = fmod(april_tag_pose.rotation, 2 * M_PI);
-  if (april_tag_pose.rotation < 0) april_tag_pose.rotation += 2 * M_PI;
+  // if()
+
+  // localiser->pose_estimate.rotation = fmod(localiser->pose_estimate.rotation, M_PI);
+  // if (localiser->pose_estimate.rotation < 0) localiser->pose_estimate.rotation += 2 * M_PI;
+
+
+  // april_tag_pose.rotation = fmod(april_tag_pose.rotation, 2 * M_PI);
+  // if (april_tag_pose.rotation < 0) april_tag_pose.rotation += 2 * M_PI;
 
   // april tag fusion
   float apriltag_first_order_lag_damping = 0;

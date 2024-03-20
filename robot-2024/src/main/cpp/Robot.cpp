@@ -416,7 +416,8 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 t.type = TASK_SEAT_RING;
                 t.shooter.delay_timer = 0;
                 t.shooter.delay_length = 0.05f;
-                t.shooter.seat_speed = -0.8f;
+                t.shooter.seat_speed_control = -0.8f;
+                t.shooter.seat_speed_firing = 1;
                 pushTask(&r->taskmgr, t);
             }
         }
@@ -462,22 +463,39 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         if(r->auto_first)
         {
             r->auto_first = false;
+
+            //TODO:
+            // Check if auto firing at distance is different, if so just lower target height
+            // check if encoder velocity is different from auto to teleop
+            // Add dynamic smart dash delay
+            // Shoot from ground into trap using april tags
+            // Code an auto based on rishis research
+
+            float auto_init_delay = frc::SmartDashboard::GetNumber("Auto Initial Delay", 0);
+            pushTask(&r->taskmgr, genTaskDelay(auto_init_delay));
+
+            {
+                Task t;
+                t.type = TASK_WAYPOINT;
+                t.waypoint.target_pose = {{0, 3}, 0};
+                t.waypoint.epsilon = 0.4f;
+                t.waypoint.epsilon_rot = 0.4f;
+                t.waypoint.speed = 6.0f;
+                t.waypoint.speed_rot = 1.0f;
+
+                pushTask(&r->taskmgr, t);
+            }
+
             {
                 Task t;
                 t.type = TASK_SHOOTER_FIRE;
                 pushTask(&r->taskmgr, t);
             }
 
-
             {
                 Task t;
-                t.type = TASK_WAYPOINT;
-                t.waypoint.target_pose = {{0, 1}, 0};
-                t.waypoint.epsilon = 0.4f;
-                t.waypoint.epsilon_rot = 0.4f;
-                t.waypoint.speed = 1.0f;
-                t.waypoint.speed_rot = 1.0f;
-
+                t.type = TASK_MIDDLE_THE_WHEELS;
+                t.middle_wheels.enabled = true;
                 pushTask(&r->taskmgr, t);
             }
 
@@ -486,6 +504,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 t.type = TASK_ANGLE_TO_TAG_AUTO;
                 t.photon_aligner.align_tag_id = 8;
                 t.photon_aligner.shooter_align_epsilon = 0.2f;
+                t.photon_aligner.timer_first = true;
                 pushTask(&r->taskmgr, t);
             }
         
@@ -493,12 +512,11 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 Task t;
                 t.type = TASK_SEAT_RING;
                 t.shooter.delay_timer = 0;
-                t.shooter.delay_length = 0.05f;
-                t.shooter.seat_speed = 0.8f;
+                t.shooter.delay_length = 0.1f;
+                t.shooter.seat_speed_control = 0.8f;
+                t.shooter.seat_speed_firing = 0;
                 pushTask(&r->taskmgr, t);
             }
-
-            pushTask(&r->taskmgr, genTaskDelay(1));
 
             {
                 Task t;
@@ -506,6 +524,24 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 pushTask(&r->taskmgr, t);
             }
 
+            {
+                Task t;
+                t.type = TASK_SHOOTER_POSITIONING;
+                t.shooter.target_angle = 0;
+                t.shooter.epsilon = 0.4f;
+                pushTask(&r->taskmgr, t);
+            }   
+
+        }
+        
+        if ( r->middle_wheels)
+        {
+            v2 targets[DrivetrainSwerve_Count];
+            targets[DrivetrainSwerve_BL] = v2{1, 1};
+            targets[DrivetrainSwerve_BR] = v2{-1, 1};
+            targets[DrivetrainSwerve_FL] = v2{1, -1};
+            targets[DrivetrainSwerve_FR] = v2{-1, -1};
+            drivetrainUpdateRawVectors(&r->drivetrain, targets, r->delta_time, true);
         }
     }
 
@@ -524,9 +560,11 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
     // estimate.position = { static_cast<float>(r->photon.global_pose.X()), static_cast<float>(r->photon.global_pose.Y()) };
     // estimate.rotation = static_cast<float>(r->photon.global_pose.Rotation().Z());
 
-    stepLocaliser(&r->localiser, r->latest_odometry_frame, degToRad(r->sensor_imu->GetYaw()), estimate, r->photon.n_tags, 16);
+    stepLocaliser(&r->localiser, r->latest_odometry_frame, degToRad(r->sensor_imu->GetYaw()), estimate, 0, 16);
 
     // printf("Pose (x, y) = (%f, %f)\n",r->localiser.pose_estimate.position.x, r->localiser.pose_estimate.position.y);
+    frc::SmartDashboard::PutNumber("Localiser Pose X", r->localiser.pose_estimate.position.x);
+    frc::SmartDashboard::PutNumber("Localiser Pose Y", r->localiser.pose_estimate.position.y);
 
     // r->localiser.pose_estimate.rotation = degToRad(r->sensor_imu->GetYaw()) + r->auto_imu_basis;
     // frc::SmartDashboard::PutNumber("April Tag X", estimate.position.x);

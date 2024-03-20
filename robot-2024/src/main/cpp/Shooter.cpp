@@ -68,7 +68,7 @@ void updateShooter(Shooter* shooter, RobotData* r)
         {
             firing_throttle = -1;
         }
-        printf("braking\n");
+        // printf("braking\n");
 
     }
     else
@@ -82,7 +82,6 @@ void updateShooter(Shooter* shooter, RobotData* r)
     shooter->firing_motor->Set(firing_throttle);
 
     shooter->control_motor->Set(-1 * shooter->control_motor_speed);
-
 
     float shooter_angle = shooter->sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE + CFG_SHOOTER_ANGLE_OFFSET;
 
@@ -107,9 +106,9 @@ void updateShooter(Shooter* shooter, RobotData* r)
     frc::SmartDashboard::PutNumber("Shooter Current Angle", angle_interpol_val);
     frc::SmartDashboard::PutNumber("Shooter Target Angle", shooter->target_angle);
 
-
     shooter->target_angle = CLAMP(shooter->target_angle, 0, 1.6);
 
+    if(r->)
     float target_angle_w_adjustment = shooter->target_angle + ( r->input.mate.joystick_right.y * CFG_SHOOTER_ANGLE_RANGE / 10);
 
     target_angle_w_adjustment = CLAMP(target_angle_w_adjustment, 0, CFG_SHOOTER_ANGLE_RANGE);

@@ -105,6 +105,8 @@ struct TaskData_PhotonAligner {
 	int align_tag_id;
 	float angular_throttle;
 	float shooter_align_epsilon;
+	bool timer_first;
+	float timer;
 };
 
 struct TaskData_Hank {
@@ -131,7 +133,8 @@ struct TaskData_Shooter {
 	float epsilon;
 	float delay_timer;
 	float delay_length;
-	float seat_speed;
+	float seat_speed_firing;
+	float seat_speed_control;
 };
 
 struct TaskData_IntakePuller {
