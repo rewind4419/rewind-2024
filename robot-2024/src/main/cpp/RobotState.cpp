@@ -100,13 +100,10 @@ void robotCmd(RobotData* r, RobotState state)
                 pushTask(&r->taskmgr, t);
             }
 
-
-
         } break;
 
         case SHOOTER_DELIVER_AMP:
         {
-            
             
             {
                 Task t;
@@ -161,3 +158,269 @@ void robotCmd(RobotData* r, RobotState state)
     }   
     
 }
+
+
+void autoCmd(RobotData* r, AutoState state)
+{
+    switch(state)
+    {
+        case AUTO_BLUE_1_PIECE_AUTO:
+        {
+            frc::SmartDashboard::PutNumber("Auto init Delay", r->auto_init_delay);
+            pushTask(&r->taskmgr, genTaskDelay(r->auto_init_delay));
+
+            {
+                Task t;
+                t.type = TASK_SHOOTER_FIRE;
+                t.firing_motor.direction = 0;
+                pushTask(&r->taskmgr, t);
+            }
+
+            // Blue uses tag 7
+            {
+                Task t;
+                t.type = TASK_ANGLE_TO_TAG_AUTO;
+                t.photon_aligner.align_tag_id = 7;
+                t.photon_aligner.shooter_align_epsilon = 0.2f;
+                t.photon_aligner.delay_length = 0.0f;
+                t.photon_aligner.timer_first = true;
+                pushTask(&r->taskmgr, t);
+            }
+
+            {
+                Task t;
+                t.type = TASK_WAIT_FOR_FIRING_RPM;
+                t.wait_rpm.rpm = 4000;
+                pushTask(&r->taskmgr, t);
+            }
+        
+            {
+                Task t;
+                t.type = TASK_SEAT_RING;
+                t.shooter.delay_timer = 0;
+                t.shooter.delay_length = 0.1f;
+                t.shooter.seat_speed_control = 0.8f;
+                t.shooter.seat_speed_firing = 0;
+                t.shooter.seat_first = false;
+                pushTask(&r->taskmgr, t);
+            }
+
+            {
+                Task t;
+                t.type = TASK_SHOOTER_STOP;
+                pushTask(&r->taskmgr, t);
+            }
+
+            {
+                Task t;
+                t.type = TASK_WAYPOINT;
+                t.waypoint.target_pose = {{1.861133, 4.162126}, - M_PI / 2};
+                t.waypoint.epsilon = 0.5f;
+                t.waypoint.epsilon_rot = 0.1f;
+                t.waypoint.speed = 8.0f;
+                t.waypoint.speed_rot = 3.5f;
+
+                pushTask(&r->taskmgr, t);
+            }
+
+
+            {
+                Task t;
+                t.type = TASK_SHOOTER_POSITIONING;
+                t.shooter.target_angle = 1.2f;
+                t.shooter.epsilon = 0.4f;
+                pushTask(&r->taskmgr, t);
+            }     
+
+            {
+                Task t;
+                t.type = TASK_SHOOTER_PULLER_START;
+                pushTask(&r->taskmgr, t);
+            }
+
+            {
+                Task t;
+                t.type = TASK_WAYPOINT;
+                t.waypoint.target_pose = {{2.363779, 4.158030}, - M_PI / 2};
+                t.waypoint.epsilon = 0.4f;
+                t.waypoint.epsilon_rot = 0.2f;
+                t.waypoint.speed = 8.0f;
+                t.waypoint.speed_rot = 1.2f;
+
+                pushTask(&r->taskmgr, t);
+            }
+
+            {
+                Task t;
+                t.type = TASK_MIDDLE_THE_WHEELS;
+                t.middle_wheels.enabled = true;
+                pushTask(&r->taskmgr, t);
+            }
+
+            pushTask(&r->taskmgr, genTaskDelay(0.1));
+
+            {
+                Task t;
+                t.type = TASK_MIDDLE_THE_WHEELS;
+                t.middle_wheels.enabled = false;
+                pushTask(&r->taskmgr, t);
+            }
+
+            pushTask(&r->taskmgr, genTaskDelay(0.8));
+
+
+            {
+                Task t;
+                t.type = TASK_SHOOTER_PULLER_STOP;
+                pushTask(&r->taskmgr, t);
+            }
+
+            {
+                Task t;
+                t.type = TASK_SEAT_RING;
+                t.shooter.delay_timer = 0;
+                t.shooter.delay_length = 0.05f;
+                t.shooter.seat_speed_control = -0.8f;
+                t.shooter.seat_speed_firing = 0.0f;
+                pushTask(&r->taskmgr, t);
+            }
+
+            {
+                Task t;
+                t.type = TASK_SHOOTER_FIRE;
+                t.firing_motor.direction = 0;
+                pushTask(&r->taskmgr, t);
+            }
+
+            // Blue uses tag 7
+            {
+                Task t;
+                t.type = TASK_ANGLE_TO_TAG_AUTO;
+                t.photon_aligner.align_tag_id = 7;
+                t.photon_aligner.shooter_align_epsilon = 0.2f;
+                t.photon_aligner.delay_length = 0.5;
+                t.photon_aligner.timer_first = true;
+                pushTask(&r->taskmgr, t);
+            }
+
+            {
+                Task t;
+                t.type = TASK_WAIT_FOR_FIRING_RPM;
+                t.wait_rpm.rpm = 5000;
+                pushTask(&r->taskmgr, t);
+            }
+        
+            {
+                Task t;
+                t.type = TASK_SEAT_RING;
+                t.shooter.delay_timer = 0;
+                t.shooter.delay_length = 0.1f;
+                t.shooter.seat_speed_control = 0.8f;
+                t.shooter.seat_speed_firing = 0;
+                t.shooter.seat_first = false;
+                pushTask(&r->taskmgr, t);
+            }
+
+            {
+                Task t;
+                t.type = TASK_SHOOTER_STOP;
+                pushTask(&r->taskmgr, t);
+            }
+
+            {
+                Task t;
+                t.type = TASK_SHOOTER_POSITIONING;
+                t.shooter.target_angle = 0;
+                t.shooter.epsilon = 0.4f;
+                pushTask(&r->taskmgr, t);
+            }
+ 
+        } break;
+
+        case AUTO_RED_1_PIECE_AUTO:
+        {
+            pushTask(&r->taskmgr, genTaskDelay(r->auto_init_delay));
+            {
+                Task t;
+                t.type = TASK_SHOOTER_FIRE;
+                t.firing_motor.direction = 0;
+                pushTask(&r->taskmgr, t);
+            }
+
+            {
+                Task t;
+                t.type = TASK_WAYPOINT;
+                t.waypoint.target_pose = {{14.95, 5.64}, M_PI / 2};
+                t.waypoint.epsilon = 0.4f;
+                t.waypoint.epsilon_rot = 0.2f;
+                t.waypoint.speed = 6.0f;
+                t.waypoint.speed_rot = 1.0f;
+
+                pushTask(&r->taskmgr, t);
+            }
+
+            {
+                Task t;
+                t.type = TASK_MIDDLE_THE_WHEELS;
+                t.middle_wheels.enabled = true;
+                pushTask(&r->taskmgr, t);
+            }
+
+            pushTask(&r->taskmgr, genTaskDelay(0.1));
+
+            {
+                Task t;
+                t.type = TASK_MIDDLE_THE_WHEELS;
+                t.middle_wheels.enabled = false;
+                pushTask(&r->taskmgr, t);
+            }
+
+            // Red uses tag 4
+            {
+                Task t;
+                t.type = TASK_ANGLE_TO_TAG_AUTO;
+                t.photon_aligner.align_tag_id = 4;
+                t.photon_aligner.shooter_align_epsilon = 0.2f;
+                t.photon_aligner.delay_length = 0.5;
+                t.photon_aligner.timer_first = true;
+                pushTask(&r->taskmgr, t);
+            }
+
+
+            {
+                Task t;
+                t.type = TASK_WAIT_FOR_FIRING_RPM;
+                pushTask(&r->taskmgr, t);
+            }
+        
+            {
+                Task t;
+                t.type = TASK_SEAT_RING;
+                t.shooter.delay_timer = 0;
+                t.shooter.delay_length = 0.1f;
+                t.shooter.seat_speed_control = 0.8f;
+                t.shooter.seat_speed_firing = 0;
+                t.shooter.seat_first = false;
+                pushTask(&r->taskmgr, t);
+            }
+
+            {
+                Task t;
+                t.type = TASK_SHOOTER_STOP;
+                pushTask(&r->taskmgr, t);
+            }
+
+            {
+                Task t;
+                t.type = TASK_SHOOTER_POSITIONING;
+                t.shooter.target_angle = 0;
+                t.shooter.epsilon = 0.4f;
+                pushTask(&r->taskmgr, t);
+            }  break;
+        }
+    }
+
+    return;
+}
+
+

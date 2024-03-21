@@ -22,4 +22,17 @@ enum RobotState
 };
 
 
+enum AutoState
+{
+    AUTO_STATE_NONE = 0,
+
+    AUTO_BLUE_1_PIECE_AUTO,
+
+    AUTO_RED_1_PIECE_AUTO,
+};
+
+
 void robotCmd(RobotData* r, RobotState state);
+
+void autoCmd(RobotData* r, AutoState state);
+

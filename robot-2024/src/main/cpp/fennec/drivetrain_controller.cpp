@@ -73,6 +73,9 @@ void updateDrivetrainController(RobotData* r, DrivetrainController* controller, 
 			frc::SmartDashboard::PutNumber("Waypoint Difference y", move_to.y);
 
 
+			frc::SmartDashboard::PutNumber("Side", r->side);
+
+
 
 
 			v2 current_facing = rotate(v2{ 0, 1 }, current_pose.rotation);
@@ -96,7 +99,14 @@ void updateDrivetrainController(RobotData* r, DrivetrainController* controller, 
 
 			move_to = move_to * controller->ctrl.waypoint.speed;
 
-			move_to = rotate(move_to, current_pose.rotation + r->localiser.starting_rotation + M_PI/2);
+			if(r->side == 1)
+			{
+				move_to = rotate(move_to, current_pose.rotation + r->localiser.starting_rotation + (3 * M_PI) / 2);
+			}
+			else if (r->side == 0) 
+			{
+				move_to = rotate(move_to, current_pose.rotation + r->localiser.starting_rotation + M_PI / 2);
+			}
 
 
 			float rot = error;

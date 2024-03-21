@@ -179,6 +179,9 @@ constexpr float CFG_ELEVATOR_THROTTLE = 1.0f; //Change
 
 // 11.25 + 17.5
 
+constexpr float CFG_CONTROL_PULLER_MAX_SPEED = 0.2f;
+constexpr float CFG_INTAKE_PULLER_MAX_SPEED = 0.6f;
+
 
 
 

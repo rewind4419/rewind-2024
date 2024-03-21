@@ -48,6 +48,10 @@ enum TaskType {
 
 	TASK_AMP_READY,
 
+	TASK_SHOOTER_PULLER_START,
+
+	TASK_SHOOTER_PULLER_STOP,
+
 	// TASK_FUNCTIONPTR, // TODO
 };
 
@@ -70,6 +74,11 @@ struct TaskData_Elevator
 {
     float target_height;
     float epsilon;
+};
+
+struct TaskData_Wait_For_RPM
+{
+	float rpm;
 };
 
 
@@ -140,6 +149,7 @@ struct TaskData_Shooter {
 	float delay_length;
 	float seat_speed_firing;
 	float seat_speed_control;
+	float seat_speed_intake;
 	float seat_prior_firing_throttle;
 	bool seat_first;
 	float fire_direction;
@@ -157,7 +167,7 @@ struct TaskData_MiddleWheels {
 
 struct Task {
 	TaskType type = TASK_NONE;
-	bool started  = false;
+	bool started = false;
 
 	union {
 		TaskMgr* list;
@@ -171,6 +181,7 @@ struct Task {
 		TaskData_FiringMotor firing_motor;
 		TaskData_PhotonAligner photon_aligner;
 		TaskData_Elevator elevator;
+		TaskData_Wait_For_RPM wait_rpm;
 	};
 };
 

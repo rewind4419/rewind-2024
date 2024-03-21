@@ -37,19 +37,17 @@ static void doTask(TaskMgr* mgr, Task* task, RobotData* robot) {
 
 void updateManager(TaskMgr* mgr, RobotData* robot) {
 
-	if(mgr->write_head > mgr->read_head)
-	{
-		// printf("Task Manager Num Tasks = %d \n", mgr->write_head - mgr->read_head);
-	}
-
 	if (mgr->is_parallel) {
 		for (uint64_t i=0; i<mgr->write_head; i++) {
 			doTask(mgr, &mgr->task_buffer[i], robot);
 		}
 	}
-	else {
+	else 
+	{
 		if (mgr->read_head != mgr->write_head)
+		{
 			doTask(mgr, &mgr->task_buffer[mgr->read_head], robot);
+		}
 	}
 }
 
@@ -257,11 +255,30 @@ static bool taskStep(Task* task, RobotData* robot)
     
     } break;
 
+	case TASK_SHOOTER_PULLER_START: 
+	{
+		robot->shooter.control_motor_speed = CFG_CONTROL_PULLER_MAX_SPEED;
+		robot->intake.intake_speed = CFG_INTAKE_PULLER_MAX_SPEED;
+		return true;
+    } break;
+
+	case TASK_SHOOTER_PULLER_STOP: 
+	{
+		robot->shooter.control_motor_speed = 0;
+		robot->intake.intake_speed = 0;
+		return true;
+    } break;
+
 	case TASK_SHOOTER_FIRE:
 	{
 		robot->shooter.firing_motor_speed = -CFG_SHOOTER_MAX_FIRING_SPEED;
-		if(task->firing_motor.direction != 0) robot->shooter.firing_motor_speed *= task->firing_motor.direction;
-		printf("shooter fire speed = %f\n", robot->shooter.firing_motor_speed);
+		if(task->firing_motor.direction != 0) 
+		{
+			robot->shooter.firing_motor_speed *= task->firing_motor.direction;
+			printf("Firing Direction != 0\n");
+		}
+		frc::SmartDashboard::PutNumber("Firing Motor Throttle Task", robot->shooter.firing_motor_speed);
+
 		robot->shooter.firing_motor_task = true;
 		robot->shooter.firing_mode = true;
 		return true;
@@ -290,6 +307,7 @@ static bool taskStep(Task* task, RobotData* robot)
 
 		if(task->shooter.seat_speed_firing != 0) robot->shooter.firing_motor_speed = task->shooter.seat_speed_firing;
 		if(task->shooter.seat_speed_control != 0) robot->shooter.control_motor_speed = task->shooter.seat_speed_control;
+		// if(task->shooter.seat_speed_intake != 0) robot->intake.intake_speed = task->shooter.seat_speed_intake;
 
 		task->shooter.delay_timer += robot->delta_time;
 		bool task_complete = false;
@@ -370,7 +388,7 @@ static bool taskStep(Task* task, RobotData* robot)
 			calculated_throttle = CLAMP(calculated_throttle, -CFG_MAX_TAG_ALIGN_THROTTLE, CFG_MAX_TAG_ALIGN_THROTTLE);
 			task->photon_aligner.angular_throttle = calculated_throttle;
 
-			if(tag_y_dist < 0.2) aim_at_tag = true;
+			if(tag_y_dist < 0.5) aim_at_tag = true;
 		}
 		else task->photon_aligner.angular_throttle = 0;
 
@@ -385,11 +403,24 @@ static bool taskStep(Task* task, RobotData* robot)
 
 		frc::SmartDashboard::PutNumber("Dist from tag", dist_from_tag);
 
-		float init_velocity = 0.00195305 * robot->shooter.firing_encoder->GetVelocity() + 1.49364;
+		float shooter_encoder_velocity = robot->shooter.firing_encoder->GetVelocity();
+		float init_velocity;
+		// if (isnanf(shooter_encoder_velocity) == 0)
+		// {
+		// 	init_velocity = 0.00195305 * shooter_encoder_velocity + 1.49364;
+		// }
+		// else
+		{
+			init_velocity = 12.43072;
+		}
+
+		frc::SmartDashboard::PutNumber("Initial Velocity", init_velocity);
 
 		// Uncomment after we see goodish results
 		float shooter_total_angle = robot->shooter.sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE + CFG_SHOOTER_ANGLE_OFFSET;
 		float shooter_height = CFG_SHOOTER_RADIUS * sinf( shooter_total_angle ) + CFG_SHOOTER_AXIS_HEIGHT;
+
+		frc::SmartDashboard::PutNumber("Shooter Height", shooter_height);
 
 		// float shooter_offset = CFG_SHOOTER_DIST_CAM_TO_AXIS - CFG_SHOOTER_RADIUS * cosf(shooter_total_angle);
 		// dist_from_tag += shooter_offset;
@@ -447,7 +478,7 @@ static bool taskStep(Task* task, RobotData* robot)
 	case TASK_WAIT_FOR_FIRING_RPM:
 	{
 		bool task_complete = false;
-		if(fabs(robot->shooter.firing_encoder->GetVelocity()) > 5000) task_complete = true;
+		if(fabs(robot->shooter.firing_encoder->GetVelocity()) > task->wait_rpm.rpm) task_complete = true;
 		return task_complete;
 	}
 	
@@ -456,9 +487,6 @@ static bool taskStep(Task* task, RobotData* robot)
 		robot->ready_fire_amp = true;
 		return true;
 	}
-
-
-
 
 
 	default: break;

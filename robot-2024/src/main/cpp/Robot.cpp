@@ -39,32 +39,39 @@ void initRobot(RobotData *r, RobotMode mode)
 void robotModeInit(RobotData *r, RobotMode new_mode)
 {
 
+    
+    r->taskmgr = TaskMgr{};
+
     if(new_mode == ROBOT_AUTO)
     {
-        r->auto_first = true;
+        resetShooter(&r->shooter);
+        resetElevator(&r->elevator);
+        if(r->side == 0)
+        {
+            autoCmd(r, AUTO_BLUE_1_PIECE_AUTO);
+        }
+        else if(r->side == 1)
+        {
+            autoCmd(r, AUTO_RED_1_PIECE_AUTO);
+        }
     }
 
+    
     if(new_mode == ROBOT_TELEOP)
     {
         resetShooter(&r->shooter);
         resetElevator(&r->elevator);
     }
+
     // Change to dependent on case later
     r->enable_time = 0;
     r->localiser = {};
 
-    {
-        r->taskmgr = TaskMgr{};
-    }
-
     r->sensor_imu->ZeroYaw();
-
     r->aligner = ALGN_NONE;
-
     r->drivetrain_controller.mode = DRIVECTRL_VELOCITY;
     r->drivetrain_controller.ctrl.velocity.velocity = {0, 0};
     r->drivetrain_controller.ctrl.velocity.angular_velocity = 0;
-
 
     r->imu_basis = 0;
 
@@ -72,12 +79,20 @@ void robotModeInit(RobotData *r, RobotMode new_mode)
 
 void updateRobot(RobotData *r, float time_step, RobotMode mode)
 {
+    r->auto_init_delay = frc::SmartDashboard::GetNumber("Auto Initial Delay", 0);
 
     // calibrateShooter(&r->shooter);
     // printCalibrationData(&r->drivetrain);
     // calibrateElevator(&r->elevator);
-    r->side = frc::SmartDashboard::GetNumber("Init Side", 0);
+    // r->side = frc::SmartDashboard::GetNumber("Init Side", 0);
 
+    r->driverstation_side = frc::DriverStation::GetAlliance();
+
+    if(r->driverstation_side == frc::DriverStation::kRed) r->side = 1;
+    else if(r->driverstation_side == frc::DriverStation::kBlue) r->side = 0;
+
+    //Red = 1; Blue = 0;
+    frc::SmartDashboard::PutNumber("Side", r->side);
 
     if (mode == ROBOT_DISABLE) return;
 
@@ -487,91 +502,6 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         if(r->auto_first)
         {
             r->auto_first = false;
-
-            //TODO:
-            // Check if auto firing at distance is different, if so just lower target height
-            // check if encoder velocity is different from auto to teleop
-            // Add dynamic smart dash delay
-            // Shoot from ground into trap using april tags
-            // Code an auto based on rishis research
-
-            float auto_init_delay = frc::SmartDashboard::GetNumber("Auto Initial Delay", 0);
-            pushTask(&r->taskmgr, genTaskDelay(auto_init_delay));
-
-            {
-                Task t;
-                t.type = TASK_SHOOTER_FIRE;
-                t.shooter.fire_direction = 1;
-                pushTask(&r->taskmgr, t);
-            }
-
-            {
-                Task t;
-                t.type = TASK_WAYPOINT;
-                t.waypoint.target_pose = {{2.6, 4.8}, - M_PI / 2};
-                t.waypoint.epsilon = 0.4f;
-                t.waypoint.epsilon_rot = 0.2f;
-                t.waypoint.speed = 6.0f;
-                t.waypoint.speed_rot = 1.0f;
-
-                pushTask(&r->taskmgr, t);
-            }
-
-            {
-                Task t;
-                t.type = TASK_MIDDLE_THE_WHEELS;
-                t.middle_wheels.enabled = true;
-                pushTask(&r->taskmgr, t);
-            }
-            pushTask(&r->taskmgr, genTaskDelay(0.1));
-            {
-                Task t;
-                t.type = TASK_MIDDLE_THE_WHEELS;
-                t.middle_wheels.enabled = false;
-                pushTask(&r->taskmgr, t);
-            }
-
-            {
-                Task t;
-                t.type = TASK_ANGLE_TO_TAG_AUTO;
-                t.photon_aligner.align_tag_id = 8;
-                t.photon_aligner.shooter_align_epsilon = 0.2f;
-                t.photon_aligner.delay_length = 0.5;
-                t.photon_aligner.timer_first = true;
-                pushTask(&r->taskmgr, t);
-            }
-
-            {
-                Task t;
-                t.type = TASK_WAIT_FOR_FIRING_RPM;
-                pushTask(&r->taskmgr, t);
-            }
-        
-            {
-                Task t;
-                t.type = TASK_SEAT_RING;
-                t.shooter.delay_timer = 0;
-                t.shooter.delay_length = 0.1f;
-                t.shooter.seat_speed_control = 0.8f;
-                t.shooter.seat_speed_firing = 0;
-                t.shooter.seat_first = false;
-                pushTask(&r->taskmgr, t);
-            }
-
-            {
-                Task t;
-                t.type = TASK_SHOOTER_STOP;
-                pushTask(&r->taskmgr, t);
-            }
-
-            {
-                Task t;
-                t.type = TASK_SHOOTER_POSITIONING;
-                t.shooter.target_angle = 0;
-                t.shooter.epsilon = 0.4f;
-                pushTask(&r->taskmgr, t);
-            }   
-
         }
         
         if ( r->middle_wheels)
@@ -585,6 +515,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         }
     }
 
+    // printf("Just before updates \n");
     updateManager(&r->taskmgr, r);
     updateElevator(&r->elevator, r);
     updateIntake(&r->intake);

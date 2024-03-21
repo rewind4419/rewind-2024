@@ -4,6 +4,8 @@
 #include <iostream>
 // #include <photon/PhotonUtils.h>
 #include <photon/PhotonCamera.h>
+#include <frc/DriverStation.h>
+
 
 
 
@@ -62,7 +64,9 @@ struct RobotData
   TaskMgr taskmgr;
 
   bool auto_first = true;
+  float auto_init_delay = 0;
 
+  std::optional<frc::DriverStation::Alliance> driverstation_side;
   float side = 0;
   // control
 	float delta_time;

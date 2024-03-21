@@ -30,7 +30,7 @@ struct DrivetrainController
 
 	// Tag aligner pid
 	PID tag_aligner_pid = { .kP = 0.25f, .kI = 0, .kD = 0.0f,  .errorAccum = 0, .lastError = 0 };
-	PID tag_aligner_pid_auto = { .kP = 0.25f, .kI = 0, .kD = 0.0f,  .errorAccum = 0, .lastError = 0 };
+	PID tag_aligner_pid_auto = { .kP = 0.2f, .kI = 0, .kD = 0.0f,  .errorAccum = 0, .lastError = 0 };
 
 
 
