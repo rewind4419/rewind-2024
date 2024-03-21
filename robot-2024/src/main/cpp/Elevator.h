@@ -40,6 +40,7 @@ struct Elevator
 void initElevator(Elevator* elevator);
 void updateElevator(Elevator* elevator, RobotData* r);
 void calibrateElevator(Elevator* elevator);
+void resetElevator( Elevator* elevator);
 
 
 

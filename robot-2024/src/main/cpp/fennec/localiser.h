@@ -15,5 +15,9 @@ struct Localiser_FirstOrderLag
   bool first = true;
   Pose pose_estimate;
   float prev_imu;
+  float starting_rotation;
 };
+
+void initLocaliser(RobotData* robot);
+
 

@@ -72,9 +72,16 @@ static bool taskStep(Task* task, RobotData* robot)
 		robot->drivetrain_controller.ctrl.waypoint.speed = task->waypoint.speed;
 		robot->drivetrain_controller.ctrl.waypoint.speed_rot = task->waypoint.speed_rot;
 
+		// if (length(task->waypoint.target_pose.position - robot->localiser.pose_estimate.position) < task->waypoint.epsilon)
+
+		float angular_error = leastAngularError(robot->localiser.pose_estimate.rotation,  task->waypoint.target_pose.rotation);
 		if (length(robot->localiser.pose_estimate.position - task->waypoint.target_pose.position) < task->waypoint.epsilon
-			&& fabsf(robot->localiser.pose_estimate.rotation - task->waypoint.target_pose.rotation) < task->waypoint.epsilon_rot)
+			&& fabsf(angular_error) < task->waypoint.epsilon_rot)
 		{
+			// robot->drivetrain_controller.mode = DRIVECTRL_THROTTLE;
+			// robot->drivetrain_controller.ctrl.throttle.throttle = {0,0};
+			// robot->drivetrain_controller.ctrl.throttle.angular_throttle = 0;
+			robot->middle_wheels = task->middle_wheels.enabled;
 			return true;
 		}
 
@@ -253,10 +260,10 @@ static bool taskStep(Task* task, RobotData* robot)
 	case TASK_SHOOTER_FIRE:
 	{
 		robot->shooter.firing_motor_speed = -CFG_SHOOTER_MAX_FIRING_SPEED;
-		if(task->firing_motor.direction != NULL) robot->shooter.firing_motor_speed *= task->firing_motor.direction;
+		if(task->firing_motor.direction != 0) robot->shooter.firing_motor_speed *= task->firing_motor.direction;
+		printf("shooter fire speed = %f\n", robot->shooter.firing_motor_speed);
 		robot->shooter.firing_motor_task = true;
 		robot->shooter.firing_mode = true;
-		printf("Shooter Fire\n");
 		return true;
 	} break;
 
@@ -291,7 +298,8 @@ static bool taskStep(Task* task, RobotData* robot)
 		{
 			task_complete = true;
 			robot->shooter.control_motor_speed = 0;
-			robot->shooter.firing_motor_speed = task->shooter.seat_prior_firing_throttle;
+			if(task->shooter.maintain_prev_throttle) robot->shooter.firing_motor_speed = task->shooter.seat_prior_firing_throttle;
+
 		}
 
 		return task_complete;
@@ -358,11 +366,11 @@ static bool taskStep(Task* task, RobotData* robot)
 		{
 			float calculated_throttle = 0;
 			float tag_y_dist = static_cast<float>(robot->photon.tag_rel_robot[task->photon_aligner.align_tag_id - 1].Y());
-			calculated_throttle = 2 * evalPid(&robot->drivetrain_controller.tag_aligner_pid, tag_y_dist, CFG_DELTA_TIME);
+			calculated_throttle = 2 * evalPid(&robot->drivetrain_controller.tag_aligner_pid_auto, tag_y_dist, CFG_DELTA_TIME);
 			calculated_throttle = CLAMP(calculated_throttle, -CFG_MAX_TAG_ALIGN_THROTTLE, CFG_MAX_TAG_ALIGN_THROTTLE);
 			task->photon_aligner.angular_throttle = calculated_throttle;
 
-			if(tag_y_dist < 0.1) aim_at_tag = true;
+			if(tag_y_dist < 0.2) aim_at_tag = true;
 		}
 		else task->photon_aligner.angular_throttle = 0;
 
@@ -375,6 +383,8 @@ static bool taskStep(Task* task, RobotData* robot)
 		v2 vect_to_tag = {static_cast<float>(robot->photon.tag_rel_robot[task->photon_aligner.align_tag_id - 1].Y()), static_cast<float>(robot->photon.tag_rel_robot[task->photon_aligner.align_tag_id - 1].X())};
 		float dist_from_tag = length(vect_to_tag);
 
+		frc::SmartDashboard::PutNumber("Dist from tag", dist_from_tag);
+
 		float init_velocity = 0.00195305 * robot->shooter.firing_encoder->GetVelocity() + 1.49364;
 
 		// Uncomment after we see goodish results
@@ -386,8 +396,8 @@ static bool taskStep(Task* task, RobotData* robot)
 
 		float equation_term_1 = (CFG_GRAVITATIONAL_CONSTANT * std::pow(dist_from_tag, 2)) / std::pow(init_velocity, 2);
 
-		float solved_angle_1 = atan( (dist_from_tag - fabs( sqrtf( std::pow(dist_from_tag, 2) - 2 * equation_term_1 * ( 1/2 * equation_term_1 + CFG_SPEAKER_HEIGHT - shooter_height) ) ) ) / equation_term_1 );
-		float solved_angle_2 = atan( (dist_from_tag + fabs( sqrtf( std::pow(dist_from_tag, 2) - 2 * equation_term_1 * ( 1/2 * equation_term_1 + CFG_SPEAKER_HEIGHT - shooter_height) ) ) ) / equation_term_1 );
+		float solved_angle_1 = atan( (dist_from_tag - fabs( sqrtf( std::pow(dist_from_tag, 2) - 2 * equation_term_1 * ( 1/2 * equation_term_1 + CFG_SPEAKER_HEIGHT_AUTO - shooter_height) ) ) ) / equation_term_1 );
+		float solved_angle_2 = atan( (dist_from_tag + fabs( sqrtf( std::pow(dist_from_tag, 2) - 2 * equation_term_1 * ( 1/2 * equation_term_1 + CFG_SPEAKER_HEIGHT_AUTO - shooter_height) ) ) ) / equation_term_1 );
 
 		float solved_shooter_angle = (solved_angle_1 < solved_angle_2) ? solved_angle_1 : solved_angle_2;
 
@@ -413,7 +423,7 @@ static bool taskStep(Task* task, RobotData* robot)
 			task->photon_aligner.timer += CFG_DELTA_TIME;
 		}
 
-		if(task->photon_aligner.timer > 4.0f && task_complete && aim_at_tag)
+		if(task->photon_aligner.timer > task->photon_aligner.delay_length && task_complete && aim_at_tag)
 		{
 			final_task = true;
 		}
@@ -433,6 +443,20 @@ static bool taskStep(Task* task, RobotData* robot)
         printf("NOT COMPLETE delta = %f\n", fabsf(robot->elevator.target_height - curr_angle));
         return height_complete;
     } break;
+
+	case TASK_WAIT_FOR_FIRING_RPM:
+	{
+		bool task_complete = false;
+		if(fabs(robot->shooter.firing_encoder->GetVelocity()) > 5000) task_complete = true;
+		return task_complete;
+	}
+	
+	case TASK_AMP_READY:
+	{
+		robot->ready_fire_amp = true;
+		return true;
+	}
+
 
 
 

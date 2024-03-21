@@ -114,3 +114,15 @@ float angleBetween(v2 from, v2 to)
   }
   return angle;
 }
+
+
+float leastAngularError(float current_value, float target_value )
+{
+    float error_1 = target_value - current_value;
+    float error_2 = target_value - (current_value + 2 * M_PI) ;
+    float error_3 = target_value - (current_value - 2 * M_PI) ;
+    float error = (fabs(error_1) < fabs(error_2)) ? error_1: error_2;
+    error = (fabs(error) < fabs(error_3)) ? error: error_3;
+
+    return error;
+}

@@ -44,6 +44,10 @@ enum TaskType {
 
 	TASK_ANGLE_TO_TAG_AUTO,
 
+	TASK_WAIT_FOR_FIRING_RPM,
+
+	TASK_AMP_READY,
+
 	// TASK_FUNCTIONPTR, // TODO
 };
 
@@ -107,6 +111,7 @@ struct TaskData_PhotonAligner {
 	float shooter_align_epsilon;
 	bool timer_first;
 	float timer;
+	float delay_length;
 };
 
 struct TaskData_Hank {
@@ -137,6 +142,8 @@ struct TaskData_Shooter {
 	float seat_speed_control;
 	float seat_prior_firing_throttle;
 	bool seat_first;
+	float fire_direction;
+	bool maintain_prev_throttle;
 };
 
 struct TaskData_IntakePuller {

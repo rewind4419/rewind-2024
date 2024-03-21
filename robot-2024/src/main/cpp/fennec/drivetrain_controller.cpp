@@ -69,6 +69,8 @@ void updateDrivetrainController(RobotData* r, DrivetrainController* controller, 
 
 			Pose current_pose = r->localiser.pose_estimate;
 			v2 move_to = target_pose.position - current_pose.position;
+			frc::SmartDashboard::PutNumber("Waypoint Difference x", move_to.x);
+			frc::SmartDashboard::PutNumber("Waypoint Difference y", move_to.y);
 
 
 
@@ -76,17 +78,17 @@ void updateDrivetrainController(RobotData* r, DrivetrainController* controller, 
 			v2 current_facing = rotate(v2{ 0, 1 }, current_pose.rotation);
 			v2 target_facing  = rotate(v2{ 0, 1 }, target_pose.rotation);
 
-			float error = acos(dot(current_facing, target_facing));
-			if (dot(target_facing, rightPerpendicular(current_facing)) < 0)
-				error *= -1;
+			// float error = acos(dot(current_facing, target_facing));
+			// if (dot(target_facing, rightPerpendicular(current_facing)) < 0)
+			// 	error *= -1;
 
+			
+			
+			float error = leastAngularError(current_pose.rotation, target_pose.rotation);
 
 
 			move_to.x = evalPid(&controller->linear_x_pid, move_to.x, r->delta_time);
 			move_to.y = evalPid(&controller->linear_y_pid, move_to.y, r->delta_time);
-
-			frc::SmartDashboard::PutNumber("throttle to X", move_to.x);
-			frc::SmartDashboard::PutNumber("throttle to Y", move_to.y);
 
 
 			if (length(move_to) > 1)
@@ -94,12 +96,10 @@ void updateDrivetrainController(RobotData* r, DrivetrainController* controller, 
 
 			move_to = move_to * controller->ctrl.waypoint.speed;
 
-			move_to = rotate(move_to, -current_pose.rotation);
+			move_to = rotate(move_to, current_pose.rotation + r->localiser.starting_rotation + M_PI/2);
 
 
-
-
-			float rot = error / M_PI;
+			float rot = error;
 
 			rot = evalPid(&controller->aligner_pid, rot * controller->ctrl.waypoint.speed_rot, r->delta_time);
 
@@ -128,6 +128,7 @@ void updateDrivetrainController(RobotData* r, DrivetrainController* controller, 
 				frc::SmartDashboard::PutNumber("Translation Y", translation.y);
 
 				drivetrainUpdate(drivetrain, translation, rotation, dt);
+				// drivetrainUpdate(drivetrain, translation, 0, dt);
 		    }
 
 		} break;

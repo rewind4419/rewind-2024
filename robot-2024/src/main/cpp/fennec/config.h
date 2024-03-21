@@ -137,6 +137,8 @@ constexpr float CFG_SHOOTER_RADIUS = 18.75 * INCH_TO_METER; // Change
 constexpr float CFG_SHOOTER_AXIS_HEIGHT = 9 * INCH_TO_METER; //Change
 constexpr float CFG_SHOOTER_DIST_CAM_TO_AXIS = 18 * INCH_TO_METER; //Change
 
+constexpr float CFG_SHOOTER_AMP_SCORE_TARGET_VELOCITY = -2000.0f;
+
 //////////////////////////////// Localiser ////////////////////////////////
 constexpr v2 CFG_APRILTAG_CAMERA_OFFSET = { 0, -13 * INCH_TO_METER };
 
@@ -161,8 +163,9 @@ constexpr int CFG_APRIL_TAG_COUNT = 16;
 constexpr float CFG_MAX_TAG_ALIGN_THROTTLE = 0.4f;
 
 //////// Field Layout //////// 
-constexpr float CFG_SPEAKER_HEIGHT = 87.5413 * INCH_TO_METER;
-// constexpr float CFG_SPEAKER_HEIGHT = 90 * INCH_TO_METER;
+// constexpr float CFG_SPEAKER_HEIGHT = 87.5413 * INCH_TO_METER;
+constexpr float CFG_SPEAKER_HEIGHT = 84 * INCH_TO_METER;
+constexpr float CFG_SPEAKER_HEIGHT_AUTO = 80 * INCH_TO_METER;
 
 //////// Elevator //////// 
 constexpr int CFG_ELEVATOR_LEFT_MOTOR = 40; 

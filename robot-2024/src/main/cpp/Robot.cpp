@@ -32,10 +32,24 @@ void initRobot(RobotData *r, RobotMode mode)
     r->integrated_imu_pos = {};
     r->imu_basis = 0;
     r->sensor_imu->ZeroYaw();
+
+    // r->lastCalledState = STATE_NONE;
 }
 
 void robotModeInit(RobotData *r, RobotMode new_mode)
 {
+
+    if(new_mode == ROBOT_AUTO)
+    {
+        r->auto_first = true;
+    }
+
+    if(new_mode == ROBOT_TELEOP)
+    {
+        resetShooter(&r->shooter);
+        resetElevator(&r->elevator);
+    }
+    // Change to dependent on case later
     r->enable_time = 0;
     r->localiser = {};
 
@@ -62,9 +76,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
     // calibrateShooter(&r->shooter);
     // printCalibrationData(&r->drivetrain);
     // calibrateElevator(&r->elevator);
-    r->temp_amp_height = frc::SmartDashboard::GetNumber("Amp Pose", 0);
-
-    
+    r->side = frc::SmartDashboard::GetNumber("Init Side", 0);
 
 
     if (mode == ROBOT_DISABLE) return;
@@ -318,8 +330,8 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             //During Firing Mode Using Right Trigger
             if (in->mate.trigger_right > 0.01f)
             {
-                r->intake.intake_speed = in->mate.trigger_right / 5;
-                r->shooter.control_motor_speed = in->mate.trigger_right / 5;
+                r->intake.intake_speed = in->mate.trigger_right / 3;
+                r->shooter.control_motor_speed = in->mate.trigger_right / 3;
 
             }
             //During Firing Mode, Nothing
@@ -335,15 +347,15 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             //Not During Firing Mode, Right Trigger
             if (in->mate.trigger_right > 0.01f)
             {
-                r->intake.intake_speed = in->mate.trigger_right / 5;
-                r->shooter.control_motor_speed = in->mate.trigger_right / 5;
+                r->intake.intake_speed = in->mate.trigger_right / 3;
+                r->shooter.control_motor_speed = in->mate.trigger_right / 3;
             }
 
             //Not During Firing Mode, Left Trigger
             else if(in->mate.trigger_left > 0.01f)
             {
-                r->intake.intake_speed = -in->mate.trigger_left / 5;
-                r->shooter.control_motor_speed = -in->mate.trigger_left / 5;
+                r->intake.intake_speed = -in->mate.trigger_left / 3;
+                r->shooter.control_motor_speed = -in->mate.trigger_left / 3;
 
             }
             //Not During Firing Mode, Nothing
@@ -357,6 +369,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         //Return to Rest Position
         if(in->mate.b.down)
         {
+            r->ready_fire_amp = false;
             {
                 Task t;
                 t.type = TASK_ELEVATOR_POSITIONING;
@@ -375,6 +388,15 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
         }
 
+        if(in->mate.trigger_right > 0.01 && r->ready_fire_amp)
+        {
+            r->shooter.amp_mode = true;
+        }
+        else
+        {
+            r->shooter.amp_mode = false;
+        }
+
         if(in->mate.x.down)
         {
             robotCmd(r, SHOOTER_DELIVER_SPEAKER);
@@ -387,6 +409,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
         if(in->mate.a.down)
         {
+            r->ready_fire_amp = false;
             robotCmd(r, INTAKE_TRANSFER);
         }
       
@@ -399,7 +422,11 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         // Press Right Bumper And firing motor task is on, 3rd is just to make sure it only queues once
         else if(in->mate.bumper_right.down && r->shooter.firing_motor_task == true && r->shooter.shooter_first_time == true) 
         {
-            robotCmd(r, SHOOTER_STOP);
+            {
+                Task t;
+                t.type = TASK_SHOOTER_STOP;
+                pushTask(&r->taskmgr, t);
+            }   
             r->shooter.shooter_first_time = false;
         }
         // Hold Right Bumper And firing motor task is off
@@ -421,6 +448,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 t.shooter.seat_speed_control = -0.8f;
                 t.shooter.seat_speed_firing = 1;
                 t.shooter.seat_first = true;
+                t.shooter.maintain_prev_throttle = true;
                 pushTask(&r->taskmgr, t);
             }
         }
@@ -472,19 +500,20 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
             {
                 Task t;
-                t.type = TASK_WAYPOINT;
-                t.waypoint.target_pose = {{0, 3}, 0};
-                t.waypoint.epsilon = 0.4f;
-                t.waypoint.epsilon_rot = 0.4f;
-                t.waypoint.speed = 6.0f;
-                t.waypoint.speed_rot = 1.0f;
-
+                t.type = TASK_SHOOTER_FIRE;
+                t.shooter.fire_direction = 1;
                 pushTask(&r->taskmgr, t);
             }
 
             {
                 Task t;
-                t.type = TASK_SHOOTER_FIRE;
+                t.type = TASK_WAYPOINT;
+                t.waypoint.target_pose = {{2.6, 4.8}, - M_PI / 2};
+                t.waypoint.epsilon = 0.4f;
+                t.waypoint.epsilon_rot = 0.2f;
+                t.waypoint.speed = 6.0f;
+                t.waypoint.speed_rot = 1.0f;
+
                 pushTask(&r->taskmgr, t);
             }
 
@@ -494,13 +523,27 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 t.middle_wheels.enabled = true;
                 pushTask(&r->taskmgr, t);
             }
+            pushTask(&r->taskmgr, genTaskDelay(0.1));
+            {
+                Task t;
+                t.type = TASK_MIDDLE_THE_WHEELS;
+                t.middle_wheels.enabled = false;
+                pushTask(&r->taskmgr, t);
+            }
 
             {
                 Task t;
                 t.type = TASK_ANGLE_TO_TAG_AUTO;
                 t.photon_aligner.align_tag_id = 8;
                 t.photon_aligner.shooter_align_epsilon = 0.2f;
+                t.photon_aligner.delay_length = 0.5;
                 t.photon_aligner.timer_first = true;
+                pushTask(&r->taskmgr, t);
+            }
+
+            {
+                Task t;
+                t.type = TASK_WAIT_FOR_FIRING_RPM;
                 pushTask(&r->taskmgr, t);
             }
         
@@ -511,7 +554,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 t.shooter.delay_length = 0.1f;
                 t.shooter.seat_speed_control = 0.8f;
                 t.shooter.seat_speed_firing = 0;
-                t.shooter.seat_first = true;
+                t.shooter.seat_first = false;
                 pushTask(&r->taskmgr, t);
             }
 
@@ -528,6 +571,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 t.shooter.epsilon = 0.4f;
                 pushTask(&r->taskmgr, t);
             }   
+
         }
         
         if ( r->middle_wheels)
@@ -546,7 +590,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
     updateIntake(&r->intake);
     updateShooter(&r->shooter, r);
     updateDrivetrainController(r, &r->drivetrain_controller, &r->drivetrain, r->latest_odometry_frame, r->delta_time);
-
+    
     updatePhoton(&r->photon);
     stepLocaliser(r);
 

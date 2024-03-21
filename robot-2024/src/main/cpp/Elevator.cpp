@@ -15,6 +15,13 @@ void initElevator(Elevator* elevator)
     printf("curr rot = %f\n", elevator->min_encoder_value);
     printf("init prev = %f\n", elevator->prev_height);
 
+    elevator->target_height = 0;
+
+}
+
+void resetElevator( Elevator* elevator)
+{
+    elevator->target_height = 0;
 }
 
 void updateElevator(Elevator* elevator, RobotData* r)

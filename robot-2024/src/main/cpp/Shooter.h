@@ -28,13 +28,17 @@ struct Shooter
     bool intake_task = false;
     bool firing_mode = false;
     bool brake = false;
+    bool amp_mode = false;
 
 
 
     PID shooter_pid = { .kP = 0.9f, .kI = 0, .kD = 0,  .errorAccum = 0, .lastError = 0 };
 
+    PID amp_wheel_pid = { .kP = 0.00025f, .kI = 0.0001, .kD = 0,  .errorAccum = 0, .lastError = 0 };
+
     std::unique_ptr<rev::SparkMaxRelativeEncoder> shooter_encoder;
     std::unique_ptr<rev::SparkMaxRelativeEncoder> firing_encoder;
+    std::unique_ptr<rev::SparkMaxRelativeEncoder> control_encoder;
     
     rev::CANSparkFlex* axis_motors[CFG_SHOOTER_AXIS_MOTOR_COUNT];
     rev::CANSparkFlex* control_motor;
@@ -46,6 +50,9 @@ void initShooter(Shooter* shooter);
 void updateShooter(Shooter* shooter, RobotData* r);
 void calibrateShooter(Shooter* shooter);
 void calibrateShooterFiringMotor(Shooter* shooter);
+
+void resetShooter( Shooter* shooter);
+
 
 
 

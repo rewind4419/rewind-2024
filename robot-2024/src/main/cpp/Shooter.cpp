@@ -11,13 +11,23 @@ void initShooter(Shooter* shooter)
 
     shooter->shooter_encoder = std::make_unique<rev::SparkMaxRelativeEncoder>(shooter->axis_motors[0]->GetEncoder());
     shooter->firing_encoder = std::make_unique<rev::SparkMaxRelativeEncoder>(shooter->firing_motor->GetEncoder());
+    shooter->control_encoder = std::make_unique<rev::SparkMaxRelativeEncoder>(shooter->control_motor->GetEncoder());
 
 
     shooter->deliver_angle_offset = 0;
 
+    shooter->target_angle = 0;
+
     shooter->prev_angle = shooter->shooter_encoder->GetPosition();
 
     shooter->shooter_firing_calibrate_speed = 1.0f;
+    shooter->amp_mode = false;
+}
+
+void resetShooter( Shooter* shooter)
+{
+    shooter->target_angle = 0;
+    shooter->amp_mode = false;
 }
 
 void updateShooter(Shooter* shooter, RobotData* r)
@@ -39,7 +49,19 @@ void updateShooter(Shooter* shooter, RobotData* r)
     else firing_throttle = shooter->firing_motor_speed;
 
     shooter->firing_motor->Set(firing_throttle);
-    shooter->control_motor->Set(-1 * shooter->control_motor_speed);
+
+    frc::SmartDashboard::PutNumber("Control Velocity", shooter->control_encoder->GetVelocity());
+    frc::SmartDashboard::PutNumber("Firing Motor Throttle", firing_throttle);
+
+    if (shooter->amp_mode)
+    {
+        shooter->control_motor->Set(evalPid(&shooter->amp_wheel_pid, CFG_SHOOTER_AMP_SCORE_TARGET_VELOCITY - shooter->control_encoder->GetVelocity(), CFG_DELTA_TIME));
+    }
+    else
+    {
+        shooter->amp_wheel_pid.errorAccum = 0.0;
+        shooter->control_motor->Set(-1 * shooter->control_motor_speed);
+    }
 
     float shooter_angle = shooter->sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE + CFG_SHOOTER_ANGLE_OFFSET;
 

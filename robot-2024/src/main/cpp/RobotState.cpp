@@ -4,6 +4,8 @@
 
 void robotCmd(RobotData* r, RobotState state)
 {
+    // r->lastCalledState = state;
+
     switch(state)
     {
         case INTAKE_OFF_GROUND:
@@ -50,6 +52,7 @@ void robotCmd(RobotData* r, RobotState state)
                 t.shooter.delay_timer = 0;
                 t.shooter.delay_length = 0.05f;
                 t.shooter.seat_speed_control = -0.8f;
+                t.shooter.seat_speed_firing = 0.0f;
                 pushTask(&r->taskmgr, t);
             }
 
@@ -90,18 +93,25 @@ void robotCmd(RobotData* r, RobotState state)
                 t.shooter.epsilon = 0.4f;
                 pushTask(&r->taskmgr, t);
             }
+            {
+                Task t;
+                t.type = TASK_SHOOTER_FIRE;
+                t.firing_motor.direction = 1;
+                pushTask(&r->taskmgr, t);
+            }
+
 
 
         } break;
 
         case SHOOTER_DELIVER_AMP:
         {
-
+            
             
             {
                 Task t;
                 t.type = TASK_SHOOTER_FIRE;
-                t.firing_motor.direction = -0.8f;
+                t.firing_motor.direction = -0.5f;
                 pushTask(&r->taskmgr, t);
             }
 
@@ -109,7 +119,8 @@ void robotCmd(RobotData* r, RobotState state)
             {
                 Task t;
                 t.type = TASK_SHOOTER_POSITIONING;
-                t.shooter.target_angle = 1.6f;
+                t.shooter.target_angle = 1.5f;
+                // t.shooter.target_angle = 1.4f;
                 t.shooter.epsilon = 0.4f;
                 pushTask(&r->taskmgr, t);
             }   
@@ -122,16 +133,25 @@ void robotCmd(RobotData* r, RobotState state)
                 pushTask(&r->taskmgr, t);
             }
 
+            {
+                Task t;
+                t.type = TASK_AMP_READY;
+                pushTask(&r->taskmgr, t);
+            }
+
+
 
         } break;
 
         case ANGLE_TO_SPEAKER:
         {
+
+            // Use id 7 for blue side and 4 for red side
             r->photon.first_aim = false;
             {
                 Task t;
                 t.type = TASK_ANGLE_TO_TAG;
-                t.photon_aligner.align_tag_id = 8;
+                t.photon_aligner.align_tag_id = 7;
                 pushTask(&r->taskmgr, t);
             }
 

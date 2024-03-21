@@ -4,7 +4,9 @@
 
 enum RobotState
 {
-    INTAKE_OFF_GROUND = 0,
+    STATE_NONE = 0,
+
+    INTAKE_OFF_GROUND,
 
     INTAKE_TRANSFER,
 
@@ -18,5 +20,6 @@ enum RobotState
 
     ANGLE_TO_SPEAKER,
 };
+
 
 void robotCmd(RobotData* r, RobotState state);

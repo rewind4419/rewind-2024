@@ -34,7 +34,7 @@ void RobotProxy::RobotPeriodic() {
 }
 
 void RobotProxy::AutonomousInit() {
-    // initRobot(ROBOT_AUTO);
+    robotModeInit(&r, ROBOT_AUTO);
 }
 void RobotProxy::AutonomousPeriodic() {
     // NOTE: robot timestep is hard-coded to 0.02 for now,

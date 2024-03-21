@@ -121,3 +121,5 @@ bool solveIK(v2 solutions[], float arm1_length, float arm2_length, v2 target_poi
 
 
 float angleBetween(v2 from, v2 to);
+
+float leastAngularError(float current_value, float target_value );

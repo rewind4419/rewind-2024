@@ -63,14 +63,15 @@ struct RobotData
 
   bool auto_first = true;
 
-  float temp_amp_height = 0;
-
+  float side = 0;
   // control
 	float delta_time;
   float enable_time;
   float imu_basis;
 
   float auto_imu_basis;
+
+  // RobotState lastCalledState;
 
   bool middle_wheels = false;
   Aligner aligner = ALGN_NONE;
@@ -104,6 +105,8 @@ struct RobotData
 
   // misc
   frc::Field2d field;
+
+  bool ready_fire_amp = false;
 
 
 }; 
