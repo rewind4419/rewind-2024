@@ -35,7 +35,7 @@ void initRobot(RobotData *r, RobotMode mode)
 
     // r->lastCalledState = STATE_NONE;
 }
-
+ 
 void robotModeInit(RobotData *r, RobotMode new_mode)
 {
 
@@ -52,7 +52,8 @@ void robotModeInit(RobotData *r, RobotMode new_mode)
         }
         else if(r->side == 1)
         {
-            autoCmd(r, AUTO_RED_1_PIECE_AUTO);
+            // autoCmd(r, AUTO_RED_1_PIECE_AUTO);
+            autoCmd(r, AUTO_RED_4_PIECE);
         }
 
     }
