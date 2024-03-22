@@ -121,7 +121,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
     if (mode == ROBOT_TELEOP)
     {
-        frc::SmartDashboard::PutNumber("Yeet shooter vel", r->shooter.firing_encoder->GetVelocity());
+        frc::SmartDashboard::PutNumber("Yeet shooter vel", -r->shooter.firing_encoder->GetVelocity());
 
         
 
