@@ -105,6 +105,7 @@ void updateDrivetrainController(RobotData* r, DrivetrainController* controller, 
 			}
 			else if (r->side == 0) 
 			{
+				frc::SmartDashboard::PutNumber("Move to Offset", current_pose.rotation + r->localiser.starting_rotation + M_PI / 2);
 				move_to = rotate(move_to, current_pose.rotation + r->localiser.starting_rotation + M_PI / 2);
 			}
 

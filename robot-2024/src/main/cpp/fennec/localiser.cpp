@@ -151,11 +151,12 @@ void stepLocaliser(RobotData* robot)
     if(delta_rot < -M_PI) localiser->pose_estimate.rotation -= 2 * M_PI;
 
     // Uncomment if it doesnt work
-    if (localiser->pose_estimate.rotation < 0.0) {localiser->pose_estimate.rotation += M_PI * 2;}
-    localiser->pose_estimate.rotation = fmod(localiser->pose_estimate.rotation, M_PI * 2);
 
     localiser->pose_estimate.rotation +=  -1 * delta_rot;
     localiser->pose_estimate.position = localiser->pose_estimate.position + rotate(odometry_frame.delta_position, -localiser->pose_estimate.rotation);
+
+    if (localiser->pose_estimate.rotation < 0.0) {localiser->pose_estimate.rotation += M_PI * 2;}
+    localiser->pose_estimate.rotation = fmod(localiser->pose_estimate.rotation, M_PI * 2);
   }
 
   //Comment if it doesnt work

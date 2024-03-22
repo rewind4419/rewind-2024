@@ -76,10 +76,10 @@ static bool taskStep(Task* task, RobotData* robot)
 		if (length(robot->localiser.pose_estimate.position - task->waypoint.target_pose.position) < task->waypoint.epsilon
 			&& fabsf(angular_error) < task->waypoint.epsilon_rot)
 		{
-			// robot->drivetrain_controller.mode = DRIVECTRL_THROTTLE;
-			// robot->drivetrain_controller.ctrl.throttle.throttle = {0,0};
-			// robot->drivetrain_controller.ctrl.throttle.angular_throttle = 0;
-			robot->middle_wheels = task->middle_wheels.enabled;
+			robot->drivetrain_controller.mode = DRIVECTRL_THROTTLE;
+			robot->drivetrain_controller.ctrl.throttle.throttle = {0,0};
+			robot->drivetrain_controller.ctrl.throttle.angular_throttle = 0;
+			// robot->middle_wheels = task->middle_wheels.enabled;
 			return true;
 		}
 
@@ -239,6 +239,12 @@ static bool taskStep(Task* task, RobotData* robot)
 		return angle_complete;
 	} break;
 
+	case TASK_SHOOTER_POSITIONING_NO_RETURN: 
+	{
+		robot->shooter.target_angle = task->shooter.target_angle;
+		return true;
+	} break;
+
 	case TASK_SHOOTER_PULLER: 
 	{
 		robot->shooter.control_motor_speed = CFG_SHOOTER_CONTROL_MAX_SPEED;
@@ -333,6 +339,8 @@ static bool taskStep(Task* task, RobotData* robot)
 			calculated_throttle = 2 * evalPid(&robot->drivetrain_controller.tag_aligner_pid, tag_y_dist, CFG_DELTA_TIME);
 			calculated_throttle = CLAMP(calculated_throttle, -CFG_MAX_TAG_ALIGN_THROTTLE, CFG_MAX_TAG_ALIGN_THROTTLE);
 			task->photon_aligner.angular_throttle = calculated_throttle;
+
+
 		}
 
 		else task->photon_aligner.angular_throttle = 0;
@@ -346,9 +354,31 @@ static bool taskStep(Task* task, RobotData* robot)
 		v2 vect_to_tag = {static_cast<float>(robot->photon.tag_rel_robot[task->photon_aligner.align_tag_id - 1].Y()), static_cast<float>(robot->photon.tag_rel_robot[task->photon_aligner.align_tag_id - 1].X())};
 		float dist_from_tag = length(vect_to_tag);
 
-		float init_velocity = 0.00195305 * robot->shooter.firing_encoder->GetVelocity() + 1.49364;
+		frc::SmartDashboard::PutNumber("Dist from tag", dist_from_tag);
+
+
+		// float init_velocity = 0.00195305 * fabs(robot->shooter.firing_encoder->GetVelocity()) + 1.49364;
+		float init_velocity = 12.2177f;
 		float shooter_curr_angle = robot->shooter.sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE + CFG_SHOOTER_ANGLE_OFFSET;
+
+		//Add function that takes current angle and calculate offset according to the calculated angle
+
+		float offset;
+		shooter_curr_angle += offset;
+
+		frc::SmartDashboard::PutNumber("Current Angle", shooter_curr_angle);
+		// float shooter_height = CFG_SHOOTER_RADIUS * sinf( shooter_curr_angle + 0.3542) + CFG_SHOOTER_AXIS_HEIGHT;
+
+
+		float angle_fudge_factor = 0.5117 * shooter_curr_angle + 0.169995;
+		frc::SmartDashboard::PutNumber("Fudge", angle_fudge_factor);
+
+		shooter_curr_angle += angle_fudge_factor;
 		float shooter_height = CFG_SHOOTER_RADIUS * sinf( shooter_curr_angle ) + CFG_SHOOTER_AXIS_HEIGHT;
+		
+		frc::SmartDashboard::PutNumber("Shooter Height", shooter_height * 39.37);
+
+		
 
 		// float shooter_offset = CFG_SHOOTER_DIST_CAM_TO_AXIS - CFG_SHOOTER_RADIUS * cosf(shooter_curr_angle);
 		// dist_from_tag += shooter_offset;
@@ -403,27 +433,33 @@ static bool taskStep(Task* task, RobotData* robot)
 
 		frc::SmartDashboard::PutNumber("Dist from tag", dist_from_tag);
 
-		float shooter_encoder_velocity = robot->shooter.firing_encoder->GetVelocity();
-		float init_velocity;
+		// float shooter_encoder_velocity = robot->shooter.firing_encoder->GetVelocity();
+		// float init_velocity;
 		// if (isnanf(shooter_encoder_velocity) == 0)
 		// {
-		// 	init_velocity = 0.00195305 * shooter_encoder_velocity + 1.49364;
+		// 	init_velocity = 0.00195305 * fabs(shooter_encoder_velocity) + 1.49364;
 		// }
 		// else
-		{
-			init_velocity = 12.43072;
-		}
+		
+			float init_velocity = 12.5f;
+		
 
-		frc::SmartDashboard::PutNumber("Initial Velocity", init_velocity);
+		// frc::SmartDashboard::PutNumber("Initial Velocity", init_velocity);
 
 		// Uncomment after we see goodish results
 		float shooter_total_angle = robot->shooter.sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE + CFG_SHOOTER_ANGLE_OFFSET;
+
+		float angle_fudge_factor = 0.5117 * shooter_total_angle + 0.169995;
+
+		frc::SmartDashboard::PutNumber("Fudge", angle_fudge_factor);
+
+		shooter_total_angle += angle_fudge_factor;
 		float shooter_height = CFG_SHOOTER_RADIUS * sinf( shooter_total_angle ) + CFG_SHOOTER_AXIS_HEIGHT;
 
 		frc::SmartDashboard::PutNumber("Shooter Height", shooter_height);
 
-		// float shooter_offset = CFG_SHOOTER_DIST_CAM_TO_AXIS - CFG_SHOOTER_RADIUS * cosf(shooter_total_angle);
-		// dist_from_tag += shooter_offset;
+		float shooter_offset = CFG_SHOOTER_DIST_CAM_TO_AXIS - CFG_SHOOTER_RADIUS * cosf(shooter_total_angle);
+		dist_from_tag += shooter_offset;
 
 		float equation_term_1 = (CFG_GRAVITATIONAL_CONSTANT * std::pow(dist_from_tag, 2)) / std::pow(init_velocity, 2);
 

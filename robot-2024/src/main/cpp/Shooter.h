@@ -36,6 +36,10 @@ struct Shooter
 
     PID amp_wheel_pid = { .kP = 0.00025f, .kI = 0.0001, .kD = 0,  .errorAccum = 0, .lastError = 0 };
 
+    PID firing_wheel_pid = { .kP = 0.001f, .kI = 0.000235f, .kD = 0.0,  .errorAccum = 0, .lastError = 0 };
+    // PID firing_wheel_pid = { .kP = 0.0f, .kI = 0.000001f, .kD = 0.00000,  .errorAccum = 0, .lastError = 0 };
+
+
     std::unique_ptr<rev::SparkMaxRelativeEncoder> shooter_encoder;
     std::unique_ptr<rev::SparkMaxRelativeEncoder> firing_encoder;
     std::unique_ptr<rev::SparkMaxRelativeEncoder> control_encoder;
@@ -48,7 +52,7 @@ struct Shooter
 
 void initShooter(Shooter* shooter);
 void updateShooter(Shooter* shooter, RobotData* r);
-void calibrateShooter(Shooter* shooter);
+void calibrateShooterAngle(Shooter* shooter);
 void calibrateShooterFiringMotor(Shooter* shooter);
 
 void resetShooter( Shooter* shooter);

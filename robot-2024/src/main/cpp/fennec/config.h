@@ -125,19 +125,21 @@ constexpr int CFG_SHOOTER_AXIS_MOTOR_COUNT = 2;
 
 constexpr int CFG_SHOOTER_BB_DIO = 0;
 
-constexpr float CFG_SHOOTER_ANGLE_OFFSET = 0.3175; //In radians - 16 degrees
+constexpr float CFG_SHOOTER_ANGLE_OFFSET = 0.296706; //In radians - 17 degrees
 constexpr float CFG_SHOOTER_AXIS_THROTTLE = 0.25f;
-constexpr float CFG_SHOOTER_CONTROL_MAX_SPEED = 0.3f;
-constexpr float CFG_SHOOTER_MAX_ANGLE = 10.558441; 
-constexpr float CFG_SHOOTER_ANGLE_RANGE = 1.44862;
+constexpr float CFG_SHOOTER_CONTROL_MAX_SPEED = 0.35f;
+constexpr float CFG_SHOOTER_MAX_ANGLE = 11.774826; 
+constexpr float CFG_SHOOTER_ANGLE_RANGE = 1.6057;
 constexpr float CFG_SHOOTER_START_ANGLE = 0;
 constexpr float CFG_SHOOTER_MAX_FIRING_SPEED = 1.0f;
 constexpr float CFG_SHOOTER_PERPENDICULAR_THROTTLE = 0.07f;
-constexpr float CFG_SHOOTER_RADIUS = 18.75 * INCH_TO_METER; // Change
+constexpr float CFG_SHOOTER_RADIUS = 18.5 * INCH_TO_METER; // Change
 constexpr float CFG_SHOOTER_AXIS_HEIGHT = 9 * INCH_TO_METER; //Change
 constexpr float CFG_SHOOTER_DIST_CAM_TO_AXIS = 18 * INCH_TO_METER; //Change
 
 constexpr float CFG_SHOOTER_AMP_SCORE_TARGET_VELOCITY = -2000.0f;
+
+constexpr float CFG_TARGET_VELOCITY_FIRING_WHEELS = 5600;
 
 //////////////////////////////// Localiser ////////////////////////////////
 constexpr v2 CFG_APRILTAG_CAMERA_OFFSET = { 0, -13 * INCH_TO_METER };
@@ -163,8 +165,8 @@ constexpr int CFG_APRIL_TAG_COUNT = 16;
 constexpr float CFG_MAX_TAG_ALIGN_THROTTLE = 0.4f;
 
 //////// Field Layout //////// 
-// constexpr float CFG_SPEAKER_HEIGHT = 87.5413 * INCH_TO_METER;
-constexpr float CFG_SPEAKER_HEIGHT = 84 * INCH_TO_METER;
+constexpr float CFG_SPEAKER_HEIGHT = 87.5413 * INCH_TO_METER;
+// constexpr float CFG_SPEAKER_HEIGHT = 84 * INCH_TO_METER;
 constexpr float CFG_SPEAKER_HEIGHT_AUTO = 80 * INCH_TO_METER;
 
 //////// Elevator //////// 

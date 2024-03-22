@@ -40,17 +40,47 @@ void updateShooter(Shooter* shooter, RobotData* r)
 
     //////// Firing Motor Brake Code ////////
     if(fabs(firing_motor_velocity) < 400.0f) shooter->brake = false;
+    if(shooter->firing_mode && !r->ready_fire_amp)
+    {
+        float target_velocity = shooter->firing_motor_speed * CFG_TARGET_VELOCITY_FIRING_WHEELS;
+        float current_velocity = shooter->firing_encoder->GetVelocity();
+        firing_throttle = evalPid(&shooter->firing_wheel_pid, target_velocity - current_velocity, CFG_DELTA_TIME);
+        frc::SmartDashboard::PutNumber("Firing Velocity Diff", target_velocity - current_velocity);
+        frc::SmartDashboard::PutNumber("Firing Error Accum", shooter->firing_wheel_pid.errorAccum);
+    }
+    else 
+    {
+        shooter->firing_wheel_pid.errorAccum = 0.0;
+        firing_throttle = shooter->firing_motor_speed;
+    }
+    
     if(shooter->brake)
     {
+
         if(firing_motor_velocity < 0) firing_throttle = 1;
         
         else if(firing_motor_velocity > 0) firing_throttle = -1;
     }
-    else firing_throttle = shooter->firing_motor_speed;
 
-    shooter->firing_motor->Set(firing_throttle);
+    if(!shooter->firing_mode && !r->ready_fire_amp)
+    {
+        // shooter->control_motor->SetSmartCurrentLimit(32);
+        // shooter->control_motor->SetVoltage;
+    }
+    else shooter->control_motor->SetSmartCurrentLimit(80);
+
+
+    // if(shooter->firing_mode)
+    // {
+    //     float target_velocity = shooter->firing_motor_speed * CFG_TARGET_VELOCITY_FIRING_WHEELS;
+    //     float current_velocity = shooter->firing_encoder->GetVelocity();
+    //     firing_throttle = evalPid(&shooter->firing_wheel_pid, target_velocity - current_velocity, CFG_DELTA_TIME);
+    //     frc::SmartDashboard::PutNumber("Firing Velocity Diff", target_velocity - current_velocity);
+    // }
+    // else firing_throttle = r->shooter.firing_motor_speed;
 
     frc::SmartDashboard::PutNumber("Control Velocity", shooter->control_encoder->GetVelocity());
+    frc::SmartDashboard::PutNumber("Firing Velocity", shooter->firing_encoder->GetVelocity());
     frc::SmartDashboard::PutNumber("Firing Motor Throttle", firing_throttle);
 
     if (shooter->amp_mode)
@@ -62,6 +92,9 @@ void updateShooter(Shooter* shooter, RobotData* r)
         shooter->amp_wheel_pid.errorAccum = 0.0;
         shooter->control_motor->Set(-1 * shooter->control_motor_speed);
     }
+
+    shooter->firing_motor->Set(firing_throttle);
+
 
     float shooter_angle = shooter->sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE + CFG_SHOOTER_ANGLE_OFFSET;
 
@@ -79,7 +112,7 @@ void updateShooter(Shooter* shooter, RobotData* r)
     //////// Pivot Throttle Estimation ////////
     float angle_interpol_val = shooter->sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE;
     frc::SmartDashboard::PutNumber("Current Shooter Pivot Angle", angle_interpol_val);
-    shooter->target_angle = CLAMP(shooter->target_angle, 0, 1.6);
+    shooter->target_angle = CLAMP(shooter->target_angle, 0, CFG_SHOOTER_ANGLE_RANGE);
     
     float target_angle_w_adjustment = shooter->target_angle + ( r->input.mate.joystick_right.y * CFG_SHOOTER_ANGLE_RANGE / 10);
     target_angle_w_adjustment = CLAMP(target_angle_w_adjustment, 0, CFG_SHOOTER_ANGLE_RANGE);

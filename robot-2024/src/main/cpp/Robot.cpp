@@ -48,12 +48,13 @@ void robotModeInit(RobotData *r, RobotMode new_mode)
         resetElevator(&r->elevator);
         if(r->side == 0)
         {
-            autoCmd(r, AUTO_BLUE_1_PIECE_AUTO);
+            autoCmd(r, AUTO_BLUE_4_PIECE);
         }
         else if(r->side == 1)
         {
             autoCmd(r, AUTO_RED_1_PIECE_AUTO);
         }
+
     }
 
     
@@ -81,7 +82,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 {
     r->auto_init_delay = frc::SmartDashboard::GetNumber("Auto Initial Delay", 0);
 
-    // calibrateShooter(&r->shooter);
+    // calibrateShooterAngle(&r->shooter);
     // printCalibrationData(&r->drivetrain);
     // calibrateElevator(&r->elevator);
     // r->side = frc::SmartDashboard::GetNumber("Init Side", 0);
@@ -335,7 +336,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
 
         // Case that robot is in firing mode
-        if(r->shooter.firing_mode && !r->shooter.intake_task)
+        if(r->shooter.firing_mode && !r->shooter.intake_task && !r->ready_fire_amp)
         {
             // During Firing Mode Left Trigger
             if(in->mate.trigger_left > 0.01f && r->photon.first_aim)
@@ -362,15 +363,15 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             //Not During Firing Mode, Right Trigger
             if (in->mate.trigger_right > 0.01f)
             {
-                r->intake.intake_speed = in->mate.trigger_right / 3;
-                r->shooter.control_motor_speed = in->mate.trigger_right / 3;
+                r->intake.intake_speed = in->mate.trigger_right / 2;
+                r->shooter.control_motor_speed = in->mate.trigger_right / 2;
             }
 
             //Not During Firing Mode, Left Trigger
             else if(in->mate.trigger_left > 0.01f)
             {
-                r->intake.intake_speed = -in->mate.trigger_left / 3;
-                r->shooter.control_motor_speed = -in->mate.trigger_left / 3;
+                r->intake.intake_speed = -in->mate.trigger_left / 2;
+                r->shooter.control_motor_speed = -in->mate.trigger_left / 2;
 
             }
             //Not During Firing Mode, Nothing
