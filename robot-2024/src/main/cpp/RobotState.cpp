@@ -149,7 +149,7 @@ void robotCmd(RobotData* r, RobotState state)
             {
                 Task t;
                 t.type = TASK_ANGLE_TO_TAG;
-                t.photon_aligner.align_tag_id = 7;
+                t.photon_aligner.align_tag_id = tag_number;
                 pushTask(&r->taskmgr, t);
             }
 
@@ -670,11 +670,11 @@ void autoCmd(RobotData* r, AutoState state)
                 pushTask(&r->taskmgr, t);
             }
 
-            // Blue uses tag 7
+            // Red uses tag 4
             {
                 Task t;
                 t.type = TASK_ANGLE_TO_TAG_AUTO;
-                t.photon_aligner.align_tag_id = 7;
+                t.photon_aligner.align_tag_id = 3;
                 t.photon_aligner.shooter_align_epsilon = 0.2f;
                 t.photon_aligner.delay_length = 0.0f;
                 t.photon_aligner.timer_first = true;
@@ -821,11 +821,11 @@ void autoCmd(RobotData* r, AutoState state)
                     pushTask(&r->taskmgr, t);
                 }
 
-                // Blue uses tag 7
+                // Red uses tag 4
                 {
                     Task t;
                     t.type = TASK_ANGLE_TO_TAG_AUTO;
-                    t.photon_aligner.align_tag_id = 7;
+                    t.photon_aligner.align_tag_id = 3;
                     t.photon_aligner.shooter_align_epsilon = 0.2f;
                     t.photon_aligner.delay_length = 0.5;
                     t.photon_aligner.timer_first = true;

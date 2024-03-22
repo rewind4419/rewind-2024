@@ -165,7 +165,8 @@ constexpr int CFG_APRIL_TAG_COUNT = 16;
 constexpr float CFG_MAX_TAG_ALIGN_THROTTLE = 0.4f;
 
 //////// Field Layout //////// 
-constexpr float CFG_SPEAKER_HEIGHT = 87.5413 * INCH_TO_METER;
+//constexpr float CFG_SPEAKER_HEIGHT = 87.5413 * INCH_TO_METER;
+constexpr float CFG_SPEAKER_HEIGHT = 84 * INCH_TO_METER;
 // constexpr float CFG_SPEAKER_HEIGHT = 84 * INCH_TO_METER;
 constexpr float CFG_SPEAKER_HEIGHT_AUTO = 80 * INCH_TO_METER;
 

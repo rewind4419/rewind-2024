@@ -55,7 +55,6 @@ void robotModeInit(RobotData *r, RobotMode new_mode)
             // autoCmd(r, AUTO_RED_1_PIECE_AUTO);
             autoCmd(r, AUTO_RED_4_PIECE);
         }
-
     }
 
     
@@ -122,6 +121,10 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
     if (mode == ROBOT_TELEOP)
     {
+        frc::SmartDashboard::PutNumber("Yeet shooter vel", r->shooter.firing_encoder->GetVelocity());
+
+        
+
         // Drivetrain
         v2 input_translation = r->input.driver.joystick_left;
 
@@ -519,6 +522,8 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
     // printf("Just before updates \n");
     updateManager(&r->taskmgr, r);
+
+    // // COMP COMP COMP COMP CoMP UNCOMMENT PLEASE
     updateElevator(&r->elevator, r);
     updateIntake(&r->intake);
     updateShooter(&r->shooter, r);
