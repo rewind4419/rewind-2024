@@ -91,6 +91,59 @@ static bool taskStep(Task* task, RobotData* robot)
 
 	} break;
 
+	case TASK_WAYPOINT_PULLER: {
+		printf("Waypoint puller\n");
+		printf("%d Beambreak\n", robot->shooter.beam_break.Get());
+		if (robot->shooter.beam_break.Get() == false)
+		{
+			robot->shooter.control_motor_speed = 0;
+			robot->intake.intake_speed = 0;
+			printf("PULLER STOPPED EARLY PULLER STOPPED EARLY PULLER STOPPED EARLY \n");
+			
+		}
+
+		robot->drivetrain_controller.mode = DRIVECTRL_WAYPOINT;
+		robot->drivetrain_controller.ctrl.waypoint.pose = task->waypoint.target_pose;
+		robot->drivetrain_controller.ctrl.waypoint.speed = task->waypoint.speed;
+		robot->drivetrain_controller.ctrl.waypoint.speed_rot = task->waypoint.speed_rot;
+
+		// if (length(task->waypoint.target_pose.position - robot->localiser.pose_estimate.position) < task->waypoint.epsilon)
+
+		float angular_error = leastAngularError(robot->localiser.pose_estimate.rotation,  task->waypoint.target_pose.rotation);
+		if (length(robot->localiser.pose_estimate.position - task->waypoint.target_pose.position) < task->waypoint.epsilon
+			&& fabsf(angular_error) < task->waypoint.epsilon_rot)
+		{
+			robot->drivetrain_controller.mode = DRIVECTRL_THROTTLE;
+			robot->drivetrain_controller.ctrl.throttle.throttle = {0,0};
+			robot->drivetrain_controller.ctrl.throttle.angular_throttle = 0;
+			// robot->middle_wheels = task->middle_wheels.enabled;
+			return true;
+		}
+
+		v2 translation = robot->localiser.pose_estimate.position - task->waypoint.target_pose.position;
+		frc::SmartDashboard::PutNumber("task translation x", translation.x);
+		frc::SmartDashboard::PutNumber("task translation y", translation.y);
+
+		return false;
+
+	} break;
+
+	case TASK_AUTO_AWAIT_PULLER: {
+		printf("Waypoint puller\n");
+		printf("%d Beambreak\n", robot->shooter.beam_break.Get());
+		if (robot->shooter.beam_break.Get() == false)
+		{
+			robot->shooter.control_motor_speed = 0;
+			robot->intake.intake_speed = 0;
+			printf("PULLER STOPPED EARLY PULLER STOPPED EARLY PULLER STOPPED EARLY \n");
+			
+			return true;
+		}
+
+		return false;
+
+	} break;
+
 	case TASK_DRIVETRAIN_VELOCITY: 
 	{
 		robot->drivetrain_controller.mode = DRIVECTRL_VELOCITY;
