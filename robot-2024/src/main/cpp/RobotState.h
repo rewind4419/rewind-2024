@@ -53,6 +53,9 @@ enum RobotState
 
     ANGLE_TO_SPEAKER,
 
+    CLIMB_POSITIONING, //Comment out if it doesn't work - Nethra
+
+    CLIMBING, //Comment out if it doesn't work - Nethra
 };
 
 

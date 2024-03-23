@@ -587,6 +587,48 @@ static bool taskStep(Task* task, RobotData* robot)
 		return true;
 	}
 
+	//Comment out if it doesn't work - Nethra
+	case TASK_ANGLE_FOR_CLIMB: 
+	{
+		robot->shooter.target_angle = task->shooter.target_angle;
+		float current_angle = robot->shooter.sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE;
+		bool angle_achieved = ( fabsf(robot->shooter.target_angle - current_angle) < task->shooter.epsilon);
+		if (angle_achieved)
+		{
+			printf("Angle Achieved\n");
+		}
+		printf("NOT COMPLETE delta = %f\n", fabsf(robot->shooter.target_angle - current_angle));
+		return angle_achieved;
+	} break;
+
+	//Comment out if it doesn't work - Nethra
+	case TASK_EXTEND_FOR_CLIMB: 
+    {
+        robot->elevator.ideal_height = task->elevator.ideal_height;
+        float current_height = robot->elevator.sum_rotation / CFG_ELEVATOR_MAX_ROTATION * CFG_ELEVATOR_RANGE;
+        bool height_achieved = ( fabsf(robot->elevator.ideal_height - current_height) < task->elevator.epsilon);
+        if (height_achieved)
+        {
+            printf("Height Achieved\n");
+        }
+        printf("NOT COMPLETE delta = %f\n", fabsf(robot->elevator.ideal_height - current_height));
+        return height_achieved;
+    } break;
+
+	//Comment out if it doesn't work - Nethra
+	case TASK_RETRACT_FOR_CLIMB: 
+    {
+        robot->elevator.retract_height = task->elevator.retract_height;
+        float current_height = robot->elevator.sum_rotation / CFG_ELEVATOR_MAX_ROTATION * CFG_ELEVATOR_RANGE;
+        bool height_accomplished = ( fabsf(robot->elevator.retract_height - current_height) < task->elevator.epsilon);
+        if (height_accomplished)
+        {
+            printf("Climb Achieved\n");
+        }
+        printf("NOT COMPLETE delta = %f\n", fabsf(robot->elevator.retract_height - current_height));
+        return height_accomplished;
+    } break;
+
 
 	default: break;
 	}

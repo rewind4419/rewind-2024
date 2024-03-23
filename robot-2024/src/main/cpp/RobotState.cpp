@@ -708,7 +708,7 @@ void autoCmd(RobotData* r, AutoState state)
             {
                 Task t;
                 t.type = TASK_ANGLE_TO_TAG_AUTO;
-                t.photon_aligner.align_tag_id = 3;
+                t.photon_aligner.align_tag_id = 4;
                 t.photon_aligner.shooter_align_epsilon = 0.2f;
                 t.photon_aligner.delay_length = 0.0f;
                 t.photon_aligner.timer_first = true;
@@ -866,7 +866,7 @@ void autoCmd(RobotData* r, AutoState state)
                 {
                     Task t;
                     t.type = TASK_ANGLE_TO_TAG_AUTO;
-                    t.photon_aligner.align_tag_id = 3;
+                    t.photon_aligner.align_tag_id = 4;
                     t.photon_aligner.shooter_align_epsilon = 0.2f;
                     t.photon_aligner.delay_length = 0.5;
                     t.photon_aligner.timer_first = true;
@@ -930,7 +930,39 @@ void autoCmd(RobotData* r, AutoState state)
                 pushTask(&r->taskmgr, t);
             }
         }
-        
+
+        //Comment out if it doesn't work - Nethra
+        case CLIMB_POSITIONING:
+        {
+            
+            {
+                Task t;
+                t.type = TASK_ANGLE_FOR_CLIMB;
+                t.shooter.target_angle = 1.571f;
+                t.shooter.epsilon = 0.05f;
+                pushTask(&r->taskmgr, t);
+            }      
+
+            {
+                Task t;
+                t.type = TASK_EXTEND_FOR_CLIMB;
+                t.elevator.ideal_height = 0.275f; //Change
+                t.elevator.epsilon = 0.1f;
+                pushTask(&r->taskmgr, t);
+            }
+        }
+
+        //Comment out if it doesn't work - Nethra
+        case CLIMBING:
+        {
+            {
+                Task t;
+                t.type = TASK_RETRACT_FOR_CLIMB;
+                t.elevator.retract_height = 0.0f;
+                t.elevator.epsilon = 0.05f;
+                pushTask(&r->taskmgr, t);
+            }
+        }
     }
 
     return;
