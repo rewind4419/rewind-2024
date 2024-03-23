@@ -433,13 +433,15 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             robotCmd(r, INTAKE_TRANSFER);
         }
 
-        // if(in->mate.x.down) //Need to Change Button - Nethra
+        // if(in->mate.share_button.down) //Need to Change Button - Nethra
         // {
+        //     printf("CLIMB POSITIONING\n");
         //     robotCmd(r, CLIMB_POSITIONING);
         // }
 
-        // if(in->mate.y.down) //Need to Change Button - Nethra
+        // if(in->mate.option_button.down) //Need to Change Button - Nethra
         // {
+        //     printf("CLIMB\n");
         //     robotCmd(r, CLIMBING);
         // }
       

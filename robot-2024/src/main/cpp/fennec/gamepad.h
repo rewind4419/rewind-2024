@@ -23,6 +23,9 @@ struct GamepadInput {
   GamepadButton bumper_right;
 
   GamepadButton big_button;
+
+  GamepadButton share_button;
+  GamepadButton option_button;
 };
 
 struct Input

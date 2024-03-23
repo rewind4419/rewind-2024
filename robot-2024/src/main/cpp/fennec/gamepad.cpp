@@ -61,6 +61,8 @@ static void doGamepadInput(GamepadInput* ctrl, frc::Joystick* joystick)
     ctrl->y = getGamepadButton(4, joystick);
 
     ctrl->big_button = getGamepadButton(14, joystick);
+    ctrl->share_button = getGamepadButton(9, joystick);
+    ctrl->option_button = getGamepadButton(10, joystick);
 
     #endif
 }
