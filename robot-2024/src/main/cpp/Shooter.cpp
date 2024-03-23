@@ -22,12 +22,15 @@ void initShooter(Shooter* shooter)
 
     shooter->shooter_firing_calibrate_speed = 1.0f;
     shooter->amp_mode = false;
+
+    shooter->beam_break_enabled = true;
 }
 
 void resetShooter( Shooter* shooter)
 {
     shooter->target_angle = 0;
     shooter->amp_mode = false;
+    shooter->beam_break_enabled = true;
 }
 
 void updateShooter(Shooter* shooter, RobotData* r)

@@ -50,6 +50,7 @@ struct Shooter
     rev::CANSparkFlex* control_motor;
     rev::CANSparkFlex* firing_motor;
     frc::DigitalInput beam_break{CFG_SHOOTER_BB_DIO};
+    bool beam_break_enabled = true;
 };
 
 void initShooter(Shooter* shooter);

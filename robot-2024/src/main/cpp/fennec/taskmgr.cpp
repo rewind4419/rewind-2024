@@ -128,6 +128,15 @@ static bool taskStep(Task* task, RobotData* robot)
 
 	} break;
 
+	case TASK_CHECK_INTAKE_FREE: {
+		if (robot->shooter.beam_break.Get() == false)
+		{
+			// Intake is already blocked when it shouldn't be, assume the sensor is broken and disable it
+			robot->shooter.beam_break_enabled = false;
+		}
+		return true;
+	};
+
 	case TASK_AUTO_AWAIT_PULLER: {
 		printf("Waypoint puller\n");
 		printf("%d Beambreak\n", robot->shooter.beam_break.Get());
@@ -303,8 +312,9 @@ static bool taskStep(Task* task, RobotData* robot)
 		robot->shooter.control_motor_speed = CFG_SHOOTER_CONTROL_MAX_SPEED;
 		robot->intake.intake_speed = CFG_INTAKE_MAX_SPEED;
 
-		if(!robot->input.mate.a.held || (robot->shooter.beam_break.Get() == false))
+		if(!robot->input.mate.a.held || (robot->shooter.beam_break.Get() == false && robot->shooter.beam_break_enabled))
 		{
+			robot->shooter.beam_break_enabled = true;
 			robot->shooter.control_motor_speed = 0;
 			robot->intake.intake_speed = 0;
 

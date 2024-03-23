@@ -2,6 +2,28 @@
 #include <iostream>
 #include "fennec/config.h"
 
+/*
+SDR Auto issues
+
+1. Auto missing side shots
+- Fix tuning? risky
+- Move points to middle? possible, needs testing
+
+2. What if break beam fails? How to fix it in a match?
+- Add FRC Dashsboard option to disable breakbeam
+    - Need to test FRC Dashboard for that
+    - Can use it for auto too if its tested
+- Add a thing that automatically disables beam break if its already false
+^ DOING THIS
+(it didn't work, just leaving it for now)
+
+3. IMU recalibration to fix field centric
+- Make sure robot is stable on init
+- Run factory calibration again once
+
+
+*/
+
 void robotCmd(RobotData* r, RobotState state)
 {
     // r->lastCalledState = state;
@@ -37,6 +59,12 @@ void robotCmd(RobotData* r, RobotState state)
                 t.shooter.epsilon = 0.4f;
                 pushTask(&r->taskmgr, t);
             }     
+
+            {
+                Task t;
+                t.type = TASK_CHECK_INTAKE_FREE;
+                pushTask(&r->taskmgr, t);
+            }
 
             {
                 Task t;
