@@ -466,12 +466,18 @@ void autoCmd(RobotData* r, AutoState state)
 
                 {
                     Task t;
-                    t.type = TASK_WAYPOINT;
+                    t.type = TASK_WAYPOINT_PULLER;
                     t.waypoint.target_pose = pickup;
                     t.waypoint.epsilon = 0.3f;
                     t.waypoint.epsilon_rot = 0.2f;
                     t.waypoint.speed = 8.0f;
                     t.waypoint.speed_rot = 1.2f;
+
+                    pushTask(&r->taskmgr, t);
+                }
+                {
+                    Task t;
+                    t.type = TASK_AUTO_AWAIT_PULLER;
 
                     pushTask(&r->taskmgr, t);
                 }
@@ -707,7 +713,7 @@ void autoCmd(RobotData* r, AutoState state)
 
             Pose prepickup;
             Pose pickup;
-            for (int i = 1; i < 2; i++)
+            for (int i = 0; i < 3; i++)
             {
 
                 if (i == 0)
