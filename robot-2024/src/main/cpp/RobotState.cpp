@@ -380,7 +380,7 @@ void autoCmd(RobotData* r, AutoState state)
             {
                 Task t;
                 t.type = TASK_WAIT_FOR_FIRING_RPM;
-                t.wait_rpm.rpm = 4000;
+                t.wait_rpm.rpm = 5300;
                 pushTask(&r->taskmgr, t);
             }
         
@@ -531,7 +531,7 @@ void autoCmd(RobotData* r, AutoState state)
                 {
                     Task t;
                     t.type = TASK_WAIT_FOR_FIRING_RPM;
-                    t.wait_rpm.rpm = 5000;
+                    t.wait_rpm.rpm = 5300;
                     pushTask(&r->taskmgr, t);
                 }
             
@@ -684,7 +684,7 @@ void autoCmd(RobotData* r, AutoState state)
             {
                 Task t;
                 t.type = TASK_WAIT_FOR_FIRING_RPM;
-                t.wait_rpm.rpm = 4000;
+                t.wait_rpm.rpm = 5300;
                 pushTask(&r->taskmgr, t);
             }
         
@@ -704,6 +704,8 @@ void autoCmd(RobotData* r, AutoState state)
                 t.type = TASK_SHOOTER_STOP;
                 pushTask(&r->taskmgr, t);
             }
+
+            pushTask(&r->taskmgr, genTaskDelay(4));
 
             Pose prepickup;
             Pose pickup;
@@ -835,7 +837,7 @@ void autoCmd(RobotData* r, AutoState state)
                 {
                     Task t;
                     t.type = TASK_WAIT_FOR_FIRING_RPM;
-                    t.wait_rpm.rpm = 5000;
+                    t.wait_rpm.rpm = 5300;
                     pushTask(&r->taskmgr, t);
                 }
             

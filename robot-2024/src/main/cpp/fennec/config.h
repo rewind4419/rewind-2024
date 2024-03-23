@@ -169,7 +169,7 @@ constexpr float CFG_SPEAKER_HEIGHT = 87.5413 * INCH_TO_METER;
 //constexpr float CFG_SPEAKER_HEIGHT = 84 * INCH_TO_METER;
 
 // constexpr float CFG_SPEAKER_HEIGHT_AUTO = 80 * INCH_TO_METER;
-constexpr float CFG_SPEAKER_HEIGHT_AUTO = 83 * INCH_TO_METER;
+constexpr float CFG_SPEAKER_HEIGHT_AUTO = 83.5 * INCH_TO_METER;
 
 //////// Elevator //////// 
 constexpr int CFG_ELEVATOR_LEFT_MOTOR = 40; 

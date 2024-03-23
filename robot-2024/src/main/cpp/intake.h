@@ -9,7 +9,7 @@ struct Intake
     float beam_break_val;
     float intake_speed = 0.0f;
     rev::CANSparkMax* intake_motor;
-    frc::DigitalInput beam_break{CFG_INTAKE_BB_DIO};
+    //frc::DigitalInput beam_break{CFG_INTAKE_BB_DIO};
 };
 
 void initIntake(Intake* intake);

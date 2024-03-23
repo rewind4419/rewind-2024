@@ -39,6 +39,8 @@ struct Shooter
     PID firing_wheel_pid = { .kP = 0.001f, .kI = 0.000235f, .kD = 0.0,  .errorAccum = 0, .lastError = 0 };
     // PID firing_wheel_pid = { .kP = 0.0f, .kI = 0.000001f, .kD = 0.00000,  .errorAccum = 0, .lastError = 0 };
 
+    
+
 
     std::unique_ptr<rev::SparkMaxRelativeEncoder> shooter_encoder;
     std::unique_ptr<rev::SparkMaxRelativeEncoder> firing_encoder;

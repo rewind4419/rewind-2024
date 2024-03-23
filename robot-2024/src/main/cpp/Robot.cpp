@@ -121,7 +121,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
     if (mode == ROBOT_TELEOP)
     {
-        frc::SmartDashboard::PutNumber("Yeet shooter vel", -r->shooter.firing_encoder->GetVelocity());
+        frc::SmartDashboard::PutNumber("Yeet shooter vel", r->shooter.firing_encoder->GetVelocity());
 
         
 
@@ -519,6 +519,8 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             drivetrainUpdateRawVectors(&r->drivetrain, targets, r->delta_time, true);
         }
     }
+
+    frc::SmartDashboard::PutBoolean("Beam braeakea", r->shooter.beam_break.Get());
 
     // printf("Just before updates \n");
     updateManager(&r->taskmgr, r);

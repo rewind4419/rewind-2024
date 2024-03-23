@@ -250,7 +250,7 @@ static bool taskStep(Task* task, RobotData* robot)
 		robot->shooter.control_motor_speed = CFG_SHOOTER_CONTROL_MAX_SPEED;
 		robot->intake.intake_speed = CFG_INTAKE_MAX_SPEED;
 
-		if(!robot->input.mate.a.held)
+		if(!robot->input.mate.a.held || (robot->shooter.beam_break.Get() == false))
 		{
 			robot->shooter.control_motor_speed = 0;
 			robot->intake.intake_speed = 0;
