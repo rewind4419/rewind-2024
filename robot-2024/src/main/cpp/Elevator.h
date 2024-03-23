@@ -18,6 +18,8 @@ struct Elevator
     float sum_rotation = 0;
     float prev_height;
     float target_height = 0;
+    float ideal_height = 0; //Comment out if it doesn't work - Nethra
+    float retract_height = 0; //Comment out if it doesn't work - Nethra
     float curr_throttle;
 
     bool intake_assignment = false;

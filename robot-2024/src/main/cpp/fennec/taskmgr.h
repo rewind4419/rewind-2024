@@ -53,6 +53,12 @@ enum TaskType {
 	TASK_SHOOTER_PULLER_STOP,
 
 	TASK_SHOOTER_POSITIONING_NO_RETURN,
+	
+	TASK_ANGLE_FOR_CLIMB, //Comment out if it doesn't work - Nethra
+
+	TASK_EXTEND_FOR_CLIMB, //Comment out if it doesn't work - Nethra
+
+	TASK_RETRACT_FOR_CLIMB, //Comment out if it doesn't work - Nethra
 
 	// TASK_FUNCTIONPTR, // TODO
 };
@@ -75,6 +81,8 @@ struct TaskData_Delay {
 struct TaskData_Elevator
 {
     float target_height;
+	float ideal_height; //Comment out if it doesn't work - Nethra
+	float retract_height; //Comment out if it doesn't work - Nethra
     float epsilon;
 };
 

@@ -44,7 +44,9 @@ enum RobotState
 
     ANGLE_TO_SPEAKER,
 
-    AUTO_RED_4_PIECE,
+    CLIMB_POSITIONING, //Comment out if it doesn't work - Nethra
+
+    CLIMBING, //Comment out if it doesn't work - Nethra
 };
 
 
@@ -59,6 +61,8 @@ enum AutoState
     AUTO_TEST,
 
     AUTO_BLUE_4_PIECE,
+
+    AUTO_RED_4_PIECE,
 };
 
 

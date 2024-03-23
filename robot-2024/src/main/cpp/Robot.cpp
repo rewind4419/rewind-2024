@@ -429,6 +429,16 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             r->ready_fire_amp = false;
             robotCmd(r, INTAKE_TRANSFER);
         }
+
+        // if(in->mate.x.down) //Need to Change Button - Nethra
+        // {
+        //     robotCmd(r, CLIMB_POSITIONING);
+        // }
+
+        // if(in->mate.y.down) //Need to Change Button - Nethra
+        // {
+        //     robotCmd(r, CLIMBING);
+        // }
       
         // Press Right Trigger And firing motor task is on, 3rd is just to make sure it only queues once
         if (in->mate.trigger_right > 0.01 && r->shooter.firing_motor_task == true && r->shooter.shooter_first_time == true) 

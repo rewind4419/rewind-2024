@@ -889,7 +889,39 @@ void autoCmd(RobotData* r, AutoState state)
                 pushTask(&r->taskmgr, t);
             }
         }
-        
+
+        //Comment out if it doesn't work - Nethra
+        case CLIMB_POSITIONING:
+        {
+            
+            {
+                Task t;
+                t.type = TASK_ANGLE_FOR_CLIMB;
+                t.shooter.target_angle = 1.571f;
+                t.shooter.epsilon = 0.05f;
+                pushTask(&r->taskmgr, t);
+            }      
+
+            {
+                Task t;
+                t.type = TASK_EXTEND_FOR_CLIMB;
+                t.elevator.ideal_height = 0.275f; //Change
+                t.elevator.epsilon = 0.1f;
+                pushTask(&r->taskmgr, t);
+            }
+        }
+
+        //Comment out if it doesn't work - Nethra
+        case CLIMBING:
+        {
+            {
+                Task t;
+                t.type = TASK_RETRACT_FOR_CLIMB;
+                t.elevator.retract_height = 0.0f;
+                t.elevator.epsilon = 0.05f;
+                pushTask(&r->taskmgr, t);
+            }
+        }
     }
 
     return;
