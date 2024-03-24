@@ -53,6 +53,8 @@ void updateManager(TaskMgr* mgr, RobotData* robot) {
 
 static bool taskStep(Task* task, RobotData* robot)
 {
+	printf("%d <- Updating task\n", task->type);
+
 	switch (task->type) {
 	case TASK_LIST: {
 		updateManager(task->list, robot);
@@ -138,6 +140,10 @@ static bool taskStep(Task* task, RobotData* robot)
 	};
 
 	case TASK_AUTO_AWAIT_PULLER: {
+		robot->shooter.auto_await_timeout += CFG_DELTA_TIME;
+
+		if (robot->shooter.auto_await_timeout > 1.0) {return true;}
+
 		printf("Waypoint puller\n");
 		printf("%d Beambreak\n", robot->shooter.beam_break.Get());
 		if (robot->shooter.beam_break.Get() == false)
@@ -326,7 +332,8 @@ static bool taskStep(Task* task, RobotData* robot)
 
 	case TASK_SHOOTER_PULLER_START: 
 	{
-		robot->shooter.control_motor_speed = CFG_CONTROL_PULLER_MAX_SPEED;
+		//robot->shooter.control_motor_speed = CFG_CONTROL_PULLER_MAX_SPEED;
+		robot->shooter.control_motor_speed = 0.25;
 		robot->intake.intake_speed = CFG_INTAKE_PULLER_MAX_SPEED;
 		return true;
     } break;
@@ -382,6 +389,32 @@ static bool taskStep(Task* task, RobotData* robot)
 		bool task_complete = false;
 		robot->shooter.intake_task = false;
 		if ( task->shooter.delay_timer > task->shooter.delay_length)
+		{
+			task_complete = true;
+			robot->shooter.control_motor_speed = 0;
+			if(task->shooter.maintain_prev_throttle) robot->shooter.firing_motor_speed = task->shooter.seat_prior_firing_throttle;
+
+		}
+
+		return task_complete;
+	} break;
+
+	case TASK_SEAT_RING_WITH_BEAMBREAK: 
+	{
+		if(task->shooter.seat_first)
+		{
+			task->shooter.seat_prior_firing_throttle = robot->shooter.firing_motor_speed;
+			task->shooter.seat_first = false;
+		}
+
+		if(task->shooter.seat_speed_firing != 0) robot->shooter.firing_motor_speed = task->shooter.seat_speed_firing;
+		if(task->shooter.seat_speed_control != 0) robot->shooter.control_motor_speed = task->shooter.seat_speed_control;
+		// if(task->shooter.seat_speed_intake != 0) robot->intake.intake_speed = task->shooter.seat_speed_intake;
+
+		task->shooter.delay_timer += robot->delta_time;
+		bool task_complete = false;
+		robot->shooter.intake_task = false;
+		if ( task->shooter.delay_timer > task->shooter.delay_length || robot->shooter.beam_break.Get() == false)
 		{
 			task_complete = true;
 			robot->shooter.control_motor_speed = 0;
@@ -562,15 +595,16 @@ static bool taskStep(Task* task, RobotData* robot)
 
 	case TASK_ELEVATOR_POSITIONING: 
     {
-        // printf("Setting Angle\n");
+        printf("Setting Angle\n");
         robot->elevator.target_height = task->elevator.target_height;
         float curr_angle = robot->elevator.sum_rotation / CFG_ELEVATOR_MAX_ROTATION * CFG_ELEVATOR_RANGE;
-        bool height_complete = ( fabsf(robot->elevator.target_height - curr_angle) < task->elevator.epsilon );
+        bool height_complete = ( fabsf(robot->elevator.target_height - curr_angle) < 0.2f );
         if (height_complete)
         {
             printf("Position Achieved\n");
         }
         printf("NOT COMPLETE delta = %f\n", fabsf(robot->elevator.target_height - curr_angle));
+		printf("Epsilon %f but its just using 0.2 hardcoded\n", task->elevator.epsilon);
         return height_complete;
     } break;
 

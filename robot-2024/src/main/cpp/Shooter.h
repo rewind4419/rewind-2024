@@ -20,6 +20,7 @@ struct Shooter
     float axis_throttle;
     float prev_angle;
     float shooter_delay_timer = 0;
+    float auto_await_timeout = 0.0;
 
     float shooter_firing_calibrate_speed;
 

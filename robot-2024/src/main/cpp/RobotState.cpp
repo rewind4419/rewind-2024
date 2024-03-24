@@ -427,6 +427,20 @@ void autoCmd(RobotData* r, AutoState state)
                 pushTask(&r->taskmgr, t);
             }
 
+            {
+                Task t;
+                t.type = TASK_WAYPOINT;
+                t.waypoint.target_pose = BLUE_NOTE_PREPICKUP_LEFT;
+                t.waypoint.epsilon = 0.4f;
+                t.waypoint.epsilon_rot = 0.4f;
+                t.waypoint.speed = 8.0f;
+                t.waypoint.speed_rot = 3.5f;
+
+                pushTask(&r->taskmgr, t);
+            }
+
+            pushTask(&r->taskmgr, genTaskDelay(0.5));
+
             // Blue uses tag 7
             {
                 Task t;
@@ -539,6 +553,7 @@ void autoCmd(RobotData* r, AutoState state)
                 {
                     Task t;
                     t.type = TASK_AUTO_AWAIT_PULLER;
+                    r->shooter.auto_await_timeout = 0.0;
 
                     pushTask(&r->taskmgr, t);
                 }
@@ -553,9 +568,9 @@ void autoCmd(RobotData* r, AutoState state)
 
                 {
                     Task t;
-                    t.type = TASK_SEAT_RING;
+                    t.type = TASK_SEAT_RING_WITH_BEAMBREAK;
                     t.shooter.delay_timer = 0;
-                    t.shooter.delay_length = 0.05f;
+                    t.shooter.delay_length = 0.15f;
                     t.shooter.seat_speed_control = -0.8f;
                     t.shooter.seat_speed_firing = 0.0f;
                     pushTask(&r->taskmgr, t);
@@ -737,6 +752,20 @@ void autoCmd(RobotData* r, AutoState state)
                 pushTask(&r->taskmgr, t);
             }
 
+             {
+                Task t;
+                t.type = TASK_WAYPOINT;
+                t.waypoint.target_pose = RED_NOTE_PREPICKUP_RIGHT;
+                t.waypoint.epsilon = 0.4f;
+                t.waypoint.epsilon_rot = 0.4f;
+                t.waypoint.speed = 8.0f;
+                t.waypoint.speed_rot = 3.5f;
+
+                pushTask(&r->taskmgr, t);
+            }
+
+            pushTask(&r->taskmgr, genTaskDelay(0.5));
+
             // Red uses tag 4
             {
                 Task t;
@@ -779,8 +808,8 @@ void autoCmd(RobotData* r, AutoState state)
 
                 if (i == 0)
                 {
-                    prepickup = RED_NOTE_PREPICKUP_LEFT;
-                    pickup = RED_NOTE_PICKUP_LEFT;
+                    prepickup = RED_NOTE_PREPICKUP_RIGHT;
+                    pickup = RED_NOTE_PICKUP_RIGHT;
                 }
                 else if (i == 1)
                 {
@@ -789,8 +818,8 @@ void autoCmd(RobotData* r, AutoState state)
                 }
                 else if (i == 2)
                 {
-                    prepickup = RED_NOTE_PREPICKUP_RIGHT;
-                    pickup = RED_NOTE_PICKUP_RIGHT;
+                    prepickup = RED_NOTE_PREPICKUP_LEFT;
+                    pickup = RED_NOTE_PICKUP_LEFT;
                 }
 
                 { // Sets pivot angle but doesn't wait for the move to finish
@@ -850,7 +879,7 @@ void autoCmd(RobotData* r, AutoState state)
                 {
                     Task t;
                     t.type = TASK_AUTO_AWAIT_PULLER;
-
+                    r->shooter.auto_await_timeout = 0.0;
                     pushTask(&r->taskmgr, t);
                 }
 
@@ -864,7 +893,7 @@ void autoCmd(RobotData* r, AutoState state)
 
                 {
                     Task t;
-                    t.type = TASK_SEAT_RING;
+                    t.type = TASK_SEAT_RING_WITH_BEAMBREAK;
                     t.shooter.delay_timer = 0;
                     t.shooter.delay_length = 0.05f;
                     t.shooter.seat_speed_control = -0.8f;
