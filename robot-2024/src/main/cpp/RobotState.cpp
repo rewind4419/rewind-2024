@@ -895,7 +895,7 @@ void autoCmd(RobotData* r, AutoState state)
                     Task t;
                     t.type = TASK_SEAT_RING_WITH_BEAMBREAK;
                     t.shooter.delay_timer = 0;
-                    t.shooter.delay_length = 0.05f;
+                    t.shooter.delay_length = 0.15f;
                     t.shooter.seat_speed_control = -0.8f;
                     t.shooter.seat_speed_firing = 0.0f;
                     pushTask(&r->taskmgr, t);
