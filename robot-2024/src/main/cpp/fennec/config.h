@@ -118,6 +118,7 @@ constexpr float CFG_INTAKE_MAX_SPEED = 0.8;
 
 constexpr int CFG_SHOOTER_CONTROL_MOTOR = 30;
 constexpr int CFG_SHOOTER_FIRING_MOTOR = 31;
+constexpr int CFG_SHOOTER_FIRING_MOTOR_2 = 32;
 
 constexpr int CFG_SHOOTER_AXIS_LEFT = 21;
 constexpr int CFG_SHOOTER_AXIS_RIGHT = 22;

@@ -5,6 +5,7 @@ void initShooter(Shooter* shooter)
 {
     shooter->control_motor = new rev::CANSparkFlex(CFG_SHOOTER_CONTROL_MOTOR, rev::CANSparkFlex::MotorType::kBrushless);
     shooter->firing_motor = new rev::CANSparkFlex(CFG_SHOOTER_FIRING_MOTOR, rev::CANSparkFlex::MotorType::kBrushless);
+    shooter->firing_motor_2 = new rev::CANSparkFlex(CFG_SHOOTER_FIRING_MOTOR_2, rev::CANSparkFlex::MotorType::kBrushless);
 
     shooter->axis_motors[0] = new rev::CANSparkFlex(CFG_SHOOTER_AXIS_LEFT, rev::CANSparkFlex::MotorType::kBrushless);
     shooter->axis_motors[1] = new rev::CANSparkFlex(CFG_SHOOTER_AXIS_RIGHT, rev::CANSparkFlex::MotorType::kBrushless);
@@ -97,7 +98,7 @@ void updateShooter(Shooter* shooter, RobotData* r)
     }
 
     shooter->firing_motor->Set(firing_throttle);
-
+    shooter->firing_motor_2->Set(-firing_throttle);
 
     float shooter_angle = shooter->sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE + CFG_SHOOTER_ANGLE_OFFSET;
 

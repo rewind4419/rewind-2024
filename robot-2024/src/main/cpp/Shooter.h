@@ -50,6 +50,7 @@ struct Shooter
     rev::CANSparkFlex* axis_motors[CFG_SHOOTER_AXIS_MOTOR_COUNT];
     rev::CANSparkFlex* control_motor;
     rev::CANSparkFlex* firing_motor;
+    rev::CANSparkFlex* firing_motor_2;
     frc::DigitalInput beam_break{CFG_SHOOTER_BB_DIO};
     bool beam_break_enabled = true;
 };
