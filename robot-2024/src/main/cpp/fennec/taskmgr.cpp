@@ -159,6 +159,23 @@ static bool taskStep(Task* task, RobotData* robot)
 
 	} break;
 
+	case TASK_AUTO_AWAIT_PULLER_INVERT: {
+		robot->shooter.auto_await_timeout += CFG_DELTA_TIME;
+
+		if (robot->shooter.auto_await_timeout > 4.0) {return true;}
+
+		printf("Auto await puller inverse\n");
+		printf("%d Beambreak\n", robot->shooter.beam_break.Get());
+		if (robot->shooter.beam_break.Get() == true)
+		{
+			printf("SHOOT COMPLETE SHOOT COMPLETE \n");		
+			return true;
+		}
+
+		return false;
+
+	} break;
+
 	case TASK_DRIVETRAIN_VELOCITY: 
 	{
 		robot->drivetrain_controller.mode = DRIVECTRL_VELOCITY;

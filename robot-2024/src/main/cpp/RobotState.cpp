@@ -795,6 +795,8 @@ void autoCmd(RobotData* r, AutoState state)
                 pushTask(&r->taskmgr, t);
             }
 
+
+
             {
                 Task t;
                 t.type = TASK_SHOOTER_STOP;

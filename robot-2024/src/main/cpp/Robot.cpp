@@ -335,7 +335,8 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
         if (in->mate.big_button.down)
         {
-            r->taskmgr = TaskMgr {};
+            r->taskmgr = TaskMgr();
+            printf("Attempted to clear queue\n");
         }
 
 

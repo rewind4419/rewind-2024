@@ -118,7 +118,7 @@ constexpr float CFG_INTAKE_MAX_SPEED = 0.8;
 
 constexpr int CFG_SHOOTER_CONTROL_MOTOR = 30;
 constexpr int CFG_SHOOTER_FIRING_MOTOR = 31;
-constexpr int CFG_SHOOTER_FIRING_MOTOR_2 = 32;
+constexpr int CFG_SHOOTER_FIRING_MOTOR_2 = 35;
 
 constexpr int CFG_SHOOTER_AXIS_LEFT = 21;
 constexpr int CFG_SHOOTER_AXIS_RIGHT = 22;
@@ -166,11 +166,12 @@ constexpr int CFG_APRIL_TAG_COUNT = 16;
 constexpr float CFG_MAX_TAG_ALIGN_THROTTLE = 0.4f;
 
 //////// Field Layout //////// 
+constexpr float CFG_SPEAKER_HEIGHT = 92 * INCH_TO_METER;
 //constexpr float CFG_SPEAKER_HEIGHT = 87.5413 * INCH_TO_METER;
-constexpr float CFG_SPEAKER_HEIGHT = 84 * INCH_TO_METER;
+//constexpr float CFG_SPEAKER_HEIGHT = 84 * INCH_TO_METER;
 
-///constexpr float CFG_SPEAKER_HEIGHT_AUTO = 83.5 * INCH_TO_METER;
-constexpr float CFG_SPEAKER_HEIGHT_AUTO = 80 * INCH_TO_METER;
+constexpr float CFG_SPEAKER_HEIGHT_AUTO = 83.5 * INCH_TO_METER;
+//constexpr float CFG_SPEAKER_HEIGHT_AUTO = 80 * INCH_TO_METER;
 
 //////// Elevator //////// 
 constexpr int CFG_ELEVATOR_LEFT_MOTOR = 40; 
