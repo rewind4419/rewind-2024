@@ -352,7 +352,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             if (in->mate.trigger_right > 0.01f)
             {
                 r->intake.intake_speed = in->mate.trigger_right / 3;
-                r->shooter.control_motor_speed = in->mate.trigger_right / 3;
+                r->shooter.control_motor_speed = in->mate.trigger_right;
 
             }
             //During Firing Mode, Nothing
@@ -363,13 +363,13 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             }
         }
         // Case that robot is in intake mode
-        else if(!r->shooter.intake_task)
+        else if(!r->shooter.intake_task && r->shooter.beam_break.Get() == true)
         {
             //Not During Firing Mode, Right Trigger
             if (in->mate.trigger_right > 0.01f)
             {
                 r->intake.intake_speed = in->mate.trigger_right / 2;
-                r->shooter.control_motor_speed = in->mate.trigger_right / 2;
+                r->shooter.control_motor_speed = in->mate.trigger_right;
             }
 
             //Not During Firing Mode, Left Trigger
@@ -434,17 +434,17 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             robotCmd(r, INTAKE_TRANSFER);
         }
 
-        // if(in->mate.share_button.down) //Need to Change Button - Nethra
-        // {
-        //     printf("CLIMB POSITIONING\n");
-        //     robotCmd(r, CLIMB_POSITIONING);
-        // }
+        if(in->mate.share_button.down) //Need to Change Button - Nethra
+        {
+            printf("CLIMB POSITIONING\n");
+            robotCmd(r, CLIMB_POSITIONING);
+        }
 
-        // if(in->mate.option_button.down) //Need to Change Button - Nethra
-        // {
-        //     printf("CLIMB\n");
-        //     robotCmd(r, CLIMBING);
-        // }
+        if(in->mate.option_button.down) //Need to Change Button - Nethra
+        {
+            printf("CLIMB\n");
+            robotCmd(r, CLIMBING);
+        }
       
         // Press Right Trigger And firing motor task is on, 3rd is just to make sure it only queues once
         if (in->mate.trigger_right > 0.01 && r->shooter.firing_motor_task == true && r->shooter.shooter_first_time == true) 

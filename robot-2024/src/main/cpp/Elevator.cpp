@@ -78,6 +78,7 @@ void updateElevator(Elevator* elevator, RobotData* r)
     elevator->curr_throttle = CLAMP(elevator->curr_throttle, -CFG_ELEVATOR_THROTTLE, CFG_ELEVATOR_THROTTLE);
     elevator->right_motor->Set(-elevator->curr_throttle);
     elevator->left_motor->Set(-elevator->curr_throttle);
+    frc::SmartDashboard::PutNumber("Elevator set power", elevator->curr_throttle);
 }
 
 void calibrateElevator(Elevator* elevator)
