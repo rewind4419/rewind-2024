@@ -33,6 +33,7 @@
 #include "RobotState.h"
 #include "photonvis.h"
 #include "Elevator.h"
+#include "projectilecalc.h"
 
 
 
@@ -88,6 +89,8 @@ struct RobotData
   Elevator elevator;
 
   PhotonParameters photon;
+
+  ProjectileCalculations proj_calcs;
 
   Input input;
   Localiser_FirstOrderLag localiser;
