@@ -1,6 +1,7 @@
 #include "RobotState.h"
 #include <iostream>
 #include "fennec/config.h"
+#include "Robot.h"
 
 /*
 SDR Auto issues
@@ -24,7 +25,7 @@ SDR Auto issues
 
 */
 
-void robotCmd(RobotData* r, RobotState state)
+void robotCmd(RobotData* r, RobotCommand state)
 {
     // r->lastCalledState = state;
 

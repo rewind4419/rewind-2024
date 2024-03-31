@@ -310,7 +310,7 @@ static bool taskStep(Task* task, RobotData* robot)
     
     } break;
 
-	case TASK_SHOOTER_POSITIONING: 
+	case TASK_SHOOTER_POSITIONING:
 	{
 		// printf("Setting Angle\n");
 		robot->shooter.target_angle = task->shooter.target_angle;

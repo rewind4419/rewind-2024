@@ -63,6 +63,7 @@ struct RobotData
 {
   // high level
   TaskMgr taskmgr;
+  RobotStateContainer robotState;
 
   bool auto_first = true;
   float auto_init_delay = 0;
@@ -114,18 +115,10 @@ struct RobotData
   frc::Field2d field;
 
   bool ready_fire_amp = false;
-
-
 }; 
 
 void robotModeInit(RobotData *robot, RobotMode new_mode);
-// void updateRobot(RobotData* robot, float time_step, RobotMode mode);
-
-
-// void robotPeriodic(RobotData* robot, float time_step);
-
 // void fieldDashboard(RobotData* r, v2 object, std::string object_name);
-
 
 void initRobot(RobotData *r, RobotMode mode);
 void updateRobot(RobotData *r, float time_step, RobotMode mode);

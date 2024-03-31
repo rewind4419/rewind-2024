@@ -128,7 +128,7 @@ constexpr int CFG_SHOOTER_BB_DIO = 0;
 
 constexpr float CFG_SHOOTER_ANGLE_OFFSET = 0.296706; //In radians - 17 degrees
 constexpr float CFG_SHOOTER_AXIS_THROTTLE = 0.25f;
-constexpr float CFG_SHOOTER_CONTROL_MAX_SPEED = 0.5f;
+constexpr float CFG_SHOOTER_CONTROL_MAX_SPEED = 0.3f;
 constexpr float CFG_SHOOTER_MAX_ANGLE = 11.774826; 
 constexpr float CFG_SHOOTER_ANGLE_RANGE = 1.6057;
 constexpr float CFG_SHOOTER_START_ANGLE = 0;

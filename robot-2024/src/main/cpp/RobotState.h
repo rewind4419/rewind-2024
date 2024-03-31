@@ -1,6 +1,5 @@
 #pragma once
 #include "fennec/taskmgr.h"
-#include "Robot.h"
 
 
 // Left, Middle, and Right is from the perspective of looking at the speaker from
@@ -37,7 +36,26 @@ constexpr Pose RED_NOTE_PICKUP_MIDDLE = {{14.094409, 5.660251}, 1.549997};
 constexpr Pose RED_NOTE_PICKUP_RIGHT = {{14.262881, 4.607547}, 2.197760};
 
 
-enum RobotState
+
+enum RobotStateMode
+{
+    MODE_DEFAULT = 0,
+
+    MODE_AMP,
+
+    MODE_INTAKING,
+
+    MODE_SHOOTING,
+
+    MODE_CLIMBING,
+};
+
+struct RobotStateContainer
+{
+    RobotStateMode robotMode;
+};
+
+enum RobotCommand
 {
     STATE_NONE = 0,
 
@@ -76,8 +94,9 @@ enum AutoState
     AUTO_RED_4_PIECE,
 };
 
+struct RobotData;
 
-void robotCmd(RobotData* r, RobotState state);
+void robotCmd(RobotData* r, RobotCommand state);
 
 void autoCmd(RobotData* r, AutoState state);
 

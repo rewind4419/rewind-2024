@@ -7,8 +7,10 @@
 
 #include <fmt/core.h>
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <frc/shuffleboard/Shuffleboard.h>
 
-
+nt::GenericEntry* kP;
+nt::GenericEntry* kI;
 
 void initRobot(RobotData *r, RobotMode mode)
 {
@@ -34,11 +36,16 @@ void initRobot(RobotData *r, RobotMode mode)
     r->sensor_imu->ZeroYaw();
 
     // r->lastCalledState = STATE_NONE;
+    r->robotState.robotMode = MODE_DEFAULT;
+
+    // Shuffleboard
+    kP = frc::Shuffleboard::GetTab("Shooter").Add("kP", 0.001).GetEntry();
+    kI = frc::Shuffleboard::GetTab("Shooter").Add("kI", 0.000235).GetEntry();
 }
  
 void robotModeInit(RobotData *r, RobotMode new_mode)
 {
-
+    r->robotState.robotMode = MODE_DEFAULT;
     
     r->taskmgr = TaskMgr{};
 
@@ -121,215 +128,214 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
     if (mode == ROBOT_TELEOP)
     {
-        frc::SmartDashboard::PutNumber("Yeet shooter vel", r->shooter.firing_encoder->GetVelocity());
+        {
+            // Drivetrain
+            v2 input_translation = r->input.driver.joystick_left;
 
+            if (length(input_translation) > 1)
+                input_translation = normalize(input_translation);
+
+            // Speed of the bot based on gamepad bumpers
+            float driver_speed_target = CFG_DRIVER_SPEED_NORMAL;
+            float driver_speed_target_rotation = CFG_DRIVER_SPEED_NORMAL_ROT;
+
+            // Make input curve Square
+            // input_translation = input_translation * v2{length(input_translation), length(input_translation)};
+
+            if ( r->input.driver.bumper_right.held)
+            {
+                driver_speed_target = CFG_DRIVER_SPEED_SURGERY;
+                driver_speed_target_rotation = CFG_DRIVER_SPEED_SURGERY_ROT;
+            }
+
+            else if ( r->input.driver.bumper_left.held)
+            {
+                driver_speed_target = CFG_DRIVER_SPEED_SPRINT;
+                driver_speed_target_rotation = CFG_DRIVER_SPEED_SPRINT_ROT;
+            }
+
+            //Slowly amp up speed
+            const float SPEED_CHANGE_RATE = 1;
+            
+            {
+                float speed_diff = driver_speed_target - r->driver_speed;
+
+                speed_diff = CLAMP(speed_diff, -SPEED_CHANGE_RATE * r->delta_time, SPEED_CHANGE_RATE * r->delta_time);
+
+                r->driver_speed += speed_diff;
+            }
+
+            float curr_speed = r->driver_speed;
+            float curr_speed_rot = driver_speed_target_rotation;
+
+
+            // Resets the rotation of the drivetrain
+            if ( r->input.driver.y.held)
+            {
+                r->imu_basis = degToRad( r->sensor_imu->GetYaw());
+            }
+
+            if ( r->input.driver.x.held)
+            {
+                r->imu_basis = degToRad( r->sensor_imu->GetYaw()) + M_PI / 2.0f;
+            }
+
+            if ( r->input.driver.b.held)
+            {
+                r->imu_basis = degToRad( r->sensor_imu->GetYaw()) - M_PI / 2.0f;
+            }
+
+            if ( r->input.driver.a.held)
+            {
+                r->imu_basis = degToRad( r->sensor_imu->GetYaw()) + M_PI;
+            }
+
+            float imu_yaw = degToRad( r->sensor_imu->GetYaw()) - r->imu_basis;
+            input_translation = rotate(input_translation, -imu_yaw);
+
+            if ( r->input.driver.x.held || r->input.driver.y.held || r->input.driver.b.held || r->input.driver.a.held) r->held_rotation = imu_yaw;
         
+            input_translation = input_translation * curr_speed;
 
-        // Drivetrain
-        v2 input_translation = r->input.driver.joystick_left;
+            r->global_input_translation = input_translation;
+            
+            if ( r->input.driver.big_button.held)
+            {
+                r->middle_wheels = true;
+            }
 
-        if (length(input_translation) > 1)
-            input_translation = normalize(input_translation);
+            //Allign Straight Code
+            // if ( r->input.driver.trigger_left > 0.25)
+            // {
+            //     r->aligner = ALGN_FORWARD;
+            // }
+            // if ( r->input.driver.trigger_right > 0.25)
+            // {
+            //     r->aligner = ALGN_BACKWARD;
+            // }
 
-        // Speed of the bot based on gamepad bumpers
-        float driver_speed_target = CFG_DRIVER_SPEED_NORMAL;
-        float driver_speed_target_rotation = CFG_DRIVER_SPEED_NORMAL_ROT;
+            float imu_rotation_radians = imu_yaw;
 
-        // Make input curve Square
-        // input_translation = input_translation * v2{length(input_translation), length(input_translation)};
-
-        if ( r->input.driver.bumper_right.held)
-        {
-            driver_speed_target = CFG_DRIVER_SPEED_SURGERY;
-            driver_speed_target_rotation = CFG_DRIVER_SPEED_SURGERY_ROT;
-        }
-
-        else if ( r->input.driver.bumper_left.held)
-        {
-            driver_speed_target = CFG_DRIVER_SPEED_SPRINT;
-            driver_speed_target_rotation = CFG_DRIVER_SPEED_SPRINT_ROT;
-        }
-
-        //Slowly amp up speed
-        const float SPEED_CHANGE_RATE = 1;
-        
-        {
-            float speed_diff = driver_speed_target - r->driver_speed;
-
-            speed_diff = CLAMP(speed_diff, -SPEED_CHANGE_RATE * r->delta_time, SPEED_CHANGE_RATE * r->delta_time);
-
-            r->driver_speed += speed_diff;
-        }
-
-        float curr_speed = r->driver_speed;
-        float curr_speed_rot = driver_speed_target_rotation;
-
-
-        // Resets the rotation of the drivetrain
-        if ( r->input.driver.y.held)
-        {
-            r->imu_basis = degToRad( r->sensor_imu->GetYaw());
-        }
-
-        if ( r->input.driver.x.held)
-        {
-            r->imu_basis = degToRad( r->sensor_imu->GetYaw()) + M_PI / 2.0f;
-        }
-
-        if ( r->input.driver.b.held)
-        {
-            r->imu_basis = degToRad( r->sensor_imu->GetYaw()) - M_PI / 2.0f;
-        }
-
-        if ( r->input.driver.a.held)
-        {
-            r->imu_basis = degToRad( r->sensor_imu->GetYaw()) + M_PI;
-        }
-
-        float imu_yaw = degToRad( r->sensor_imu->GetYaw()) - r->imu_basis;
-        input_translation = rotate(input_translation, -imu_yaw);
-
-        if ( r->input.driver.x.held || r->input.driver.y.held || r->input.driver.b.held || r->input.driver.a.held) r->held_rotation = imu_yaw;
-    
-        input_translation = input_translation * curr_speed;
-
-        r->global_input_translation = input_translation;
-        
-        if ( r->input.driver.big_button.held)
-        {
-            r->middle_wheels = true;
-        }
-
-        //Allign Straight Code
-        // if ( r->input.driver.trigger_left > 0.25)
-        // {
-        //     r->aligner = ALGN_FORWARD;
-        // }
-        // if ( r->input.driver.trigger_right > 0.25)
-        // {
-        //     r->aligner = ALGN_BACKWARD;
-        // }
-
-        float imu_rotation_radians = imu_yaw;
-
-        v2 robot_dir = v2{sinf(imu_rotation_radians), cosf(imu_rotation_radians)};
+            v2 robot_dir = v2{sinf(imu_rotation_radians), cosf(imu_rotation_radians)};
 
 
 
-        //Fixing wrong sided rotaton -Matteo
-        v2 driver_joystick_right = r->input.driver.joystick_right;
-        driver_joystick_right.x *= -1;
-        driver_joystick_right.y *= -1;
+            //Fixing wrong sided rotaton -Matteo
+            v2 driver_joystick_right = r->input.driver.joystick_right;
+            driver_joystick_right.x *= -1;
+            driver_joystick_right.y *= -1;
 
 
-        //USE THIS FOR APRIL TAG ALIGNER CODE IF THE OTHER ISNT EFFICIENT
+            //USE THIS FOR APRIL TAG ALIGNER CODE IF THE OTHER ISNT EFFICIENT
 
-        float angle_diff = acosf(dot(robot_dir, normalize( driver_joystick_right)));
-        v2 robot_right = rotate(robot_dir, M_PI / 2);
-        if (dot(robot_right, normalize( driver_joystick_right)) < 0)
-        {
-            angle_diff = -angle_diff;
-        }
+            float angle_diff = acosf(dot(robot_dir, normalize( driver_joystick_right)));
+            v2 robot_right = rotate(robot_dir, M_PI / 2);
+            if (dot(robot_right, normalize( driver_joystick_right)) < 0)
+            {
+                angle_diff = -angle_diff;
+            }
 
-        // deadzone
-        // if(length( driver_joystick_right) < 0.5f)
-        {
-            angle_diff = 0;
-        }
+            // deadzone
+            // if(length( driver_joystick_right) < 0.5f)
+            {
+                angle_diff = 0;
+            }
 
-        float angle01 = angle_diff / M_PI;
-        // const float reactiveness = 0.5; // higher reactivity = closer to 0, straight reactiveness curve = 1
-        float power_curve = pow(fabsf(angle01), CFG_DRIVER_ABSOLUTE_ROTATION_REACTIVENESS);
+            float angle01 = angle_diff / M_PI;
+            // const float reactiveness = 0.5; // higher reactivity = closer to 0, straight reactiveness curve = 1
+            float power_curve = pow(fabsf(angle01), CFG_DRIVER_ABSOLUTE_ROTATION_REACTIVENESS);
 
-        power_curve = power_curve * sign(angle01);
+            power_curve = power_curve * sign(angle01);
 
-        float adjustment_rotation = driver_joystick_right.x * CFG_DRIVER_ADJUSTMENT_ROTATION_SENSITIVITY * (curr_speed_rot / CFG_DRIVER_SPEED_NORMAL);
+            float adjustment_rotation = driver_joystick_right.x * CFG_DRIVER_ADJUSTMENT_ROTATION_SENSITIVITY * (curr_speed_rot / CFG_DRIVER_SPEED_NORMAL);
 
-        //( r->input.driver.trigger_right - r->input.driver.trigger_left) * CFG_DRIVER_ADJUSTMENT_ROTATION_SENSITIVITY * (curr_speed / CFG_DRIVER_SPEED_NORMAL);
+            //( r->input.driver.trigger_right - r->input.driver.trigger_left) * CFG_DRIVER_ADJUSTMENT_ROTATION_SENSITIVITY * (curr_speed / CFG_DRIVER_SPEED_NORMAL);
 
-        if (length(input_translation) > 0.15 || fabsf(power_curve + adjustment_rotation) > 0.15)
-        {
-            r->middle_wheels = false;
-        }
+            if (length(input_translation) > 0.15 || fabsf(power_curve + adjustment_rotation) > 0.15)
+            {
+                r->middle_wheels = false;
+            }
 
-        if (fabsf(power_curve + adjustment_rotation) > 0.15)
-        {
-            r->aligner = ALGN_NONE;
-        }
+            if (fabsf(power_curve + adjustment_rotation) > 0.15)
+            {
+                r->aligner = ALGN_NONE;
+            }
 
-        if ( r->middle_wheels)
-        {
-            v2 targets[DrivetrainSwerve_Count];
-            targets[DrivetrainSwerve_BL] = v2{1, 1};
-            targets[DrivetrainSwerve_BR] = v2{-1, 1};
-            targets[DrivetrainSwerve_FL] = v2{1, -1};
-            targets[DrivetrainSwerve_FR] = v2{-1, -1};
-            drivetrainUpdateRawVectors(&r->drivetrain, targets, r->delta_time, true);
-        }
-        else
-        {
-          if ( r->aligner != ALGN_NONE)
-          {
-              float auto_rotater = 0;
-
-              v2 robot_dir = v2{sinf(imu_rotation_radians), cosf(imu_rotation_radians)};
-
-              v2 align_dir = v2{0, 1};
-
-              switch ( r->aligner)
-              {
-              case ALGN_FORWARD:
-                  align_dir = v2{0, 1};
-                  break;
-              case ALGN_BACKWARD:
-                  align_dir = v2{0, -1};
-                  break;
-              default:
-                  break;
-              }
-
-              float my_angle_diff = angleBetween(robot_dir, align_dir);
-
-              float my_angle01 = my_angle_diff / M_PI;
-
-              auto_rotater = evalPid(&r->aligner_pid, my_angle01, r->delta_time);
-
-              // printf("Rotater: %f\n", my_power_curve);
-
-              // drivetrainUpdate(&r.drivetrain, input_translation, auto_rotater, r->delta_time);
-              r->drivetrain_controller.mode = DRIVECTRL_THROTTLE;
-              r->drivetrain_controller.ctrl.throttle.throttle = input_translation;
-              r->drivetrain_controller.ctrl.throttle.angular_throttle = auto_rotater;
+            if ( r->middle_wheels)
+            {
+                v2 targets[DrivetrainSwerve_Count];
+                targets[DrivetrainSwerve_BL] = v2{1, 1};
+                targets[DrivetrainSwerve_BR] = v2{-1, 1};
+                targets[DrivetrainSwerve_FL] = v2{1, -1};
+                targets[DrivetrainSwerve_FR] = v2{-1, -1};
+                drivetrainUpdateRawVectors(&r->drivetrain, targets, r->delta_time, true);
             }
             else
             {
-                // the idea is that it holds rotation
-                if (fabsf(power_curve + adjustment_rotation) > 0.015)
+            if ( r->aligner != ALGN_NONE)
+            {
+                float auto_rotater = 0;
+
+                v2 robot_dir = v2{sinf(imu_rotation_radians), cosf(imu_rotation_radians)};
+
+                v2 align_dir = v2{0, 1};
+
+                switch ( r->aligner)
                 {
-                    r->held_rotation = imu_yaw;
+                case ALGN_FORWARD:
+                    align_dir = v2{0, 1};
+                    break;
+                case ALGN_BACKWARD:
+                    align_dir = v2{0, -1};
+                    break;
+                default:
+                    break;
                 }
 
-                v2 robot_facing = rotate(v2{0, 1}, imu_yaw);
-                v2 hold_facing = rotate(v2{0, 1}, r->held_rotation);
+                float my_angle_diff = angleBetween(robot_dir, align_dir);
 
-                // this is zero if you're actively turning the robot, bc held_rotation is getting updated
-                float hold_angle_diff = angleBetween(robot_facing, hold_facing);
+                float my_angle01 = my_angle_diff / M_PI;
 
-                float hold_angle01 = hold_angle_diff / M_PI;
-                
+                auto_rotater = evalPid(&r->aligner_pid, my_angle01, r->delta_time);
+
+                // printf("Rotater: %f\n", my_power_curve);
+
+                // drivetrainUpdate(&r.drivetrain, input_translation, auto_rotater, r->delta_time);
                 r->drivetrain_controller.mode = DRIVECTRL_THROTTLE;
                 r->drivetrain_controller.ctrl.throttle.throttle = input_translation;
-                r->drivetrain_controller.ctrl.throttle.angular_throttle = power_curve + adjustment_rotation + evalPid(&r->holder_pid, -1 * hold_angle01, r->delta_time);
+                r->drivetrain_controller.ctrl.throttle.angular_throttle = auto_rotater;
+                }
+                else
+                {
+                    // the idea is that it holds rotation
+                    if (fabsf(power_curve + adjustment_rotation) > 0.015)
+                    {
+                        r->held_rotation = imu_yaw;
+                    }
 
-                // printf("real angle throttle = %f\n", power_curve + adjustment_rotation + evalPid(&r->holder_pid, -1 * hold_angle01, r->delta_time));
+                    v2 robot_facing = rotate(v2{0, 1}, imu_yaw);
+                    v2 hold_facing = rotate(v2{0, 1}, r->held_rotation);
 
-                // drivetrainUpdate(&r->drivetrain, input_translation, power_curve + adjustment_rotation + evalPid(&r->holder_pid, hold_angle01, r->delta_time), r->delta_time);
+                    // this is zero if you're actively turning the robot, bc held_rotation is getting updated
+                    float hold_angle_diff = angleBetween(robot_facing, hold_facing);
+
+                    float hold_angle01 = hold_angle_diff / M_PI;
+                    
+                    r->drivetrain_controller.mode = DRIVECTRL_THROTTLE;
+                    r->drivetrain_controller.ctrl.throttle.throttle = input_translation;
+                    r->drivetrain_controller.ctrl.throttle.angular_throttle = power_curve + adjustment_rotation + evalPid(&r->holder_pid, -1 * hold_angle01, r->delta_time);
+
+                    // printf("real angle throttle = %f\n", power_curve + adjustment_rotation + evalPid(&r->holder_pid, -1 * hold_angle01, r->delta_time));
+
+                    // drivetrainUpdate(&r->drivetrain, input_translation, power_curve + adjustment_rotation + evalPid(&r->holder_pid, hold_angle01, r->delta_time), r->delta_time);
+                }
             }
         }
 
 
-
         auto *in = &r->input;
+
+        // MATE CODE MATE CODE MATE CODE MATE CODE MATE CODE MATE CODE
 
         // in->mate = in->driver;
 
@@ -339,152 +345,260 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             printf("Attempted to clear queue\n");
         }
 
-
-        // Case that robot is in firing mode
-        if(r->shooter.firing_mode && !r->shooter.intake_task && !r->ready_fire_amp)
+        if (in->mate.b.held)
         {
-            // During Firing Mode Left Trigger
-            if(in->mate.trigger_left > 0.01f && r->photon.first_aim)
-            {
-                robotCmd(r, ANGLE_TO_SPEAKER);
-            }
-            //During Firing Mode Using Right Trigger
-            if (in->mate.trigger_right > 0.01f)
-            {
-                r->intake.intake_speed = in->mate.trigger_right / 3;
-                r->shooter.control_motor_speed = in->mate.trigger_right;
-
-            }
-            //During Firing Mode, Nothing
-            else
-            {
-                r->intake.intake_speed = 0;
-                r->shooter.control_motor_speed = 0;
-            }
+            r->robotState.robotMode = MODE_DEFAULT;
         }
-        // Case that robot is in intake mode
-        else if(!r->shooter.intake_task && r->shooter.beam_break.Get() == true)
-        {
-            //Not During Firing Mode, Right Trigger
-            if (in->mate.trigger_right > 0.01f)
-            {
-                r->intake.intake_speed = in->mate.trigger_right / 2;
-                r->shooter.control_motor_speed = in->mate.trigger_right;
-            }
 
-            //Not During Firing Mode, Left Trigger
-            else if(in->mate.trigger_left > 0.01f)
-            {
-                r->intake.intake_speed = -in->mate.trigger_left / 2;
-                r->shooter.control_motor_speed = -in->mate.trigger_left / 2;
+        frc::SmartDashboard::PutBoolean("Beam Break", r->shooter.beam_break.Get());
 
-            }
-            //Not During Firing Mode, Nothing
-            else
-            {
-                r->intake.intake_speed = 0;
-                r->shooter.control_motor_speed = 0;
-            } 
-        }
+
+        r->shooter.firing_wheel_pid.kP = kP->GetDouble(0.001);
+        r->shooter.firing_wheel_pid.kI = kI->GetDouble(0.000235);
+
         
-        //Return to Rest Position
-        if(in->mate.b.down)
+
+        switch (r->robotState.robotMode)
         {
+        case MODE_DEFAULT:
+            // Always down in default mode
+            r->elevator.target_height = 0;
+            r->shooter.target_angle = 0;
+
+            r->shooter.firing_mode = true;
             r->ready_fire_amp = false;
+            r->shooter.firing_motor_speed = -0.4;
+
+            //r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5);
+            r->shooter.control_motor_speed = 0;
+            r->intake.intake_speed = 0;
+
+            if (in->mate.a.down)
             {
-                Task t;
-                t.type = TASK_ELEVATOR_POSITIONING;
-                t.elevator.target_height = 0;
-                t.shooter.epsilon = 0.2f;
-                pushTask(&r->taskmgr, t);
-            }   
-
-            {
-                Task t;
-                t.type = TASK_SHOOTER_POSITIONING;
-                t.shooter.target_angle = 0;
-                t.shooter.epsilon = 0.4f;
-                pushTask(&r->taskmgr, t);
-            }     
-
-        }
-
-        if(in->mate.trigger_right > 0.01 && r->ready_fire_amp)
-        {
-            r->shooter.amp_mode = true;
-        }
-        else
-        {
-            r->shooter.amp_mode = false;
-        }
-
-        if(in->mate.x.down)
-        {
-            robotCmd(r, SHOOTER_DELIVER_SPEAKER);
-        }
-
-        if(in->mate.y.down)
-        {
-            robotCmd(r, SHOOTER_DELIVER_AMP);
-        }
-
-        if(in->mate.a.down)
-        {
-            r->ready_fire_amp = false;
-            robotCmd(r, INTAKE_TRANSFER);
-        }
-
-        if(in->mate.share_button.down) //Need to Change Button - Nethra
-        {
-            printf("CLIMB POSITIONING\n");
-            robotCmd(r, CLIMB_POSITIONING);
-        }
-
-        if(in->mate.option_button.down) //Need to Change Button - Nethra
-        {
-            printf("CLIMB\n");
-            robotCmd(r, CLIMBING);
-        }
-      
-        // Press Right Trigger And firing motor task is on, 3rd is just to make sure it only queues once
-        if (in->mate.trigger_right > 0.01 && r->shooter.firing_motor_task == true && r->shooter.shooter_first_time == true) 
-        {
-            robotCmd(r, SHOOTER_STOP);
-            r->shooter.shooter_first_time = false;
-        }
-        // Press Right Bumper And firing motor task is on, 3rd is just to make sure it only queues once
-        else if(in->mate.bumper_right.down && r->shooter.firing_motor_task == true && r->shooter.shooter_first_time == true) 
-        {
-            {
-                Task t;
-                t.type = TASK_SHOOTER_STOP;
-                pushTask(&r->taskmgr, t);
-            }   
-            r->shooter.shooter_first_time = false;
-        }
-        // Hold Right Bumper And firing motor task is off
-        else if (in->mate.bumper_right.held && r->shooter.firing_motor_task == false)  r->shooter.firing_motor_speed = -CFG_SHOOTER_MAX_FIRING_SPEED;
-        // Do Nothing And firing motor task is off
-        else if (r->shooter.firing_motor_task == false && r->shooter.brake == false) 
-        {
-            r->shooter.firing_motor_speed = 0;
-            r->shooter.brake = true;
-        }
-
-        if(in->mate.bumper_left.down)
-        {
-            {
-                Task t;
-                t.type = TASK_SEAT_RING;
-                t.shooter.delay_timer = 0;
-                t.shooter.delay_length = 0.05f;
-                t.shooter.seat_speed_control = -0.8f;
-                t.shooter.seat_speed_firing = 1;
-                t.shooter.seat_first = true;
-                t.shooter.maintain_prev_throttle = true;
-                pushTask(&r->taskmgr, t);
+                r->robotState.robotMode = MODE_INTAKING;
             }
+
+            if (in->mate.y.down)
+            {
+                r->robotState.robotMode = MODE_AMP;
+            }
+
+            if (in->mate.x.down)
+            {
+                r->robotState.robotMode = MODE_SHOOTING;
+            }
+            break;
+        case MODE_INTAKING:
+            if (r->shooter.beam_break.Get() == false)
+            {
+                // note detected, finish the intake
+                r->robotState.robotMode = MODE_DEFAULT;
+                printf("STOPPING INTAKE DUE TO BEAM BREAK\n");
+                r->shooter.control_motor_speed = 0;
+                r->intake.intake_speed = 0;
+            }
+
+            r->shooter.target_angle = 1.2f;
+            r->elevator.target_height = 0.0;
+
+            r->shooter.firing_mode = true;
+            r->ready_fire_amp = false;
+            r->shooter.firing_motor_speed = -0.4;
+
+            r->intake.intake_speed = (in->mate.trigger_right * 0.5 + 0.5) / 3;
+            r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5) / 3;
+
+            frc::SmartDashboard::PutNumber("Intake gamepad input", (in->mate.trigger_right * 0.5 + 0.5));
+
+            if (in->mate.a.up)
+            {
+                r->robotState.robotMode = MODE_DEFAULT;
+            }
+            break;
+        case MODE_AMP:
+            r->shooter.target_angle = 1.45;
+            r->elevator.target_height = 0.275;
+
+            r->shooter.firing_mode = true;
+            r->ready_fire_amp = false;
+            r->shooter.firing_motor_speed = 0.5;
+
+             r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5);
+            r->intake.intake_speed = 0;
+            
+            break;
+        case MODE_SHOOTING:
+             r->elevator.target_height = 0;
+            r->shooter.target_angle = 0;
+
+            r->shooter.firing_mode = true;
+            r->ready_fire_amp = false;
+            r->shooter.firing_motor_speed = -1.0;
+
+            r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5) - (in->mate.trigger_left * 0.5 + 0.5);
+            r->intake.intake_speed = 0;
+
+            if (in->mate.a.down)
+            {
+                r->robotState.robotMode = MODE_INTAKING;
+            }
+            if (in->mate.y.down)
+            {
+                r->robotState.robotMode = MODE_AMP;
+            }
+            break;
+            // TODO Add climbing
         }
+
+
+
+        // // Case that robot is in firing mode
+        // if(r->shooter.firing_mode && !r->shooter.intake_task && !r->ready_fire_amp)
+        // {
+        //     // During Firing Mode Left Trigger
+        //     if(in->mate.trigger_left > 0.01f && r->photon.first_aim)
+        //     {
+        //         robotCmd(r, ANGLE_TO_SPEAKER);
+        //     }
+        //     //During Firing Mode Using Right Trigger
+        //     if (in->mate.trigger_right > 0.01f)
+        //     {
+        //         r->intake.intake_speed = in->mate.trigger_right / 3;
+        //         r->shooter.control_motor_speed = in->mate.trigger_right;
+
+        //     }
+        //     //During Firing Mode, Nothing
+        //     else
+        //     {
+        //         r->intake.intake_speed = 0;
+        //         r->shooter.control_motor_speed = 0;
+        //     }
+        // }
+        // // Case that robot is in intake mode
+        // else if(!r->shooter.intake_task && r->shooter.beam_break.Get() == true)
+        // {
+        //     //Not During Firing Mode, Right Trigger
+        //     if (in->mate.trigger_right > 0.01f)
+        //     {
+        //         r->intake.intake_speed = in->mate.trigger_right / 2;
+        //         r->shooter.control_motor_speed = in->mate.trigger_right;
+        //     }
+
+        //     //Not During Firing Mode, Left Trigger
+        //     else if(in->mate.trigger_left > 0.01f)
+        //     {
+        //         r->intake.intake_speed = -in->mate.trigger_left / 2;
+        //         r->shooter.control_motor_speed = -in->mate.trigger_left / 2;
+
+        //     }
+        //     //Not During Firing Mode, Nothing
+        //     else
+        //     {
+        //         r->intake.intake_speed = 0;
+        //         r->shooter.control_motor_speed = 0;
+        //     } 
+        // }
+        
+        // //Return to Rest Position
+        // if(in->mate.b.down)
+        // {
+        //     r->ready_fire_amp = false;
+        //     {
+        //         Task t;
+        //         t.type = TASK_ELEVATOR_POSITIONING;
+        //         t.elevator.target_height = 0;
+        //         t.shooter.epsilon = 0.2f;
+        //         pushTask(&r->taskmgr, t);
+        //     }   
+            
+
+        //     {
+        //         Task t;
+        //         t.type = TASK_SHOOTER_POSITIONING;
+        //         t.shooter.target_angle = 0;
+        //         t.shooter.epsilon = 0.4f;
+        //         pushTask(&r->taskmgr, t);
+        //     }     
+        // }
+
+        // if(in->mate.trigger_right > 0.01 && r->ready_fire_amp)
+        // {
+        //     r->shooter.amp_mode = true;
+        // }
+        // else
+        // {
+        //     r->shooter.amp_mode = false;
+        // }
+
+        // if(in->mate.x.down)
+        // {
+        //     robotCmd(r, SHOOTER_DELIVER_SPEAKER);
+        // }
+
+        // if(in->mate.y.down)
+        // {
+        //     robotCmd(r, SHOOTER_DELIVER_AMP);
+        // }
+
+        // if(in->mate.a.down)
+        // {
+        //     r->ready_fire_amp = false;
+        //     robotCmd(r, INTAKE_TRANSFER);
+        // }
+
+        // if(in->mate.share_button.down) //Need to Change Button - Nethra
+        // {
+        //     printf("CLIMB POSITIONING\n");
+        //     robotCmd(r, CLIMB_POSITIONING);
+        // }
+
+        // if(in->mate.option_button.down) //Need to Change Button - Nethra
+        // {
+        //     printf("CLIMB\n");
+        //     robotCmd(r, CLIMBING);
+        // }
+      
+        // // Press Right Trigger And firing motor task is on, 3rd is just to make sure it only queues once
+        // if (in->mate.trigger_right > 0.01 && r->shooter.firing_motor_task == true && r->shooter.shooter_first_time == true) 
+        // {
+        //     robotCmd(r, SHOOTER_STOP);
+        //     r->shooter.shooter_first_time = false;
+        // }
+        // // Press Right Bumper And firing motor task is on, 3rd is just to make sure it only queues once
+        // else if(in->mate.bumper_right.down && r->shooter.firing_motor_task == true && r->shooter.shooter_first_time == true) 
+        // {
+        //     {
+        //         Task t;
+        //         t.type = TASK_SHOOTER_STOP;
+        //         pushTask(&r->taskmgr, t);
+        //     }   
+        //     r->shooter.shooter_first_time = false;
+        // }
+        // // Hold Right Bumper And firing motor task is off
+        // else if (in->mate.bumper_right.held && r->shooter.firing_motor_task == false)  r->shooter.firing_motor_speed = -CFG_SHOOTER_MAX_FIRING_SPEED;
+        // // Do Nothing And firing motor task is off
+        // else if (r->shooter.firing_motor_task == false && r->shooter.brake == false) 
+        // {
+        //     r->shooter.firing_motor_speed = 0;
+        //     r->shooter.brake = true;
+        // }
+
+        // if(in->mate.bumper_left.down)
+        // {
+        //     {
+        //         Task t;
+        //         t.type = TASK_SEAT_RING;
+        //         t.shooter.delay_timer = 0;
+        //         t.shooter.delay_length = 0.05f;
+        //         t.shooter.seat_speed_control = -0.8f;
+        //         t.shooter.seat_speed_firing = 1;
+        //         t.shooter.seat_first = true;
+        //         t.shooter.maintain_prev_throttle = true;
+        //         pushTask(&r->taskmgr, t);
+        //     }
+        // }
+
+        // -----------------
 
         //////// REMOVE AFTER CALIBRATION TEST ////////
         // if(in->mate.big_button.down)
@@ -510,9 +624,6 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         // } 
 
         // calibrateShooterFiringMotor(&r->shooter);
-
-
-
     }
     else if(mode == ROBOT_AUTO)
     {

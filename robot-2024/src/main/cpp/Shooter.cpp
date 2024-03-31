@@ -32,6 +32,7 @@ void resetShooter( Shooter* shooter)
     shooter->target_angle = 0;
     shooter->amp_mode = false;
     shooter->beam_break_enabled = true;
+    shooter->firing_wheel_pid.errorAccum = 0.0;
 }
 
 void updateShooter(Shooter* shooter, RobotData* r)
@@ -43,7 +44,6 @@ void updateShooter(Shooter* shooter, RobotData* r)
     frc::SmartDashboard::PutNumber("Current Firing Motor Velocity", firing_motor_velocity);
 
     //////// Firing Motor Brake Code ////////
-    if(fabs(firing_motor_velocity) < 400.0f) shooter->brake = false;
     if(shooter->firing_mode && !r->ready_fire_amp)
     {
         float target_velocity = shooter->firing_motor_speed * CFG_TARGET_VELOCITY_FIRING_WHEELS;
@@ -58,6 +58,7 @@ void updateShooter(Shooter* shooter, RobotData* r)
         firing_throttle = shooter->firing_motor_speed;
     }
     
+    if(fabs(firing_motor_velocity) < 400.0f) shooter->brake = false;
     if(shooter->brake)
     {
 
