@@ -9,6 +9,7 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/shuffleboard/Shuffleboard.h>
 
+nt::GenericEntry* firingVelocity;
 nt::GenericEntry* kP;
 nt::GenericEntry* kI;
 
@@ -38,9 +39,10 @@ void initRobot(RobotData *r, RobotMode mode)
     // r->lastCalledState = STATE_NONE;
     r->robotState.robotMode = MODE_DEFAULT;
 
-    // Shuffleboard
-    kP = frc::Shuffleboard::GetTab("Shooter").Add("kP", 0.001).GetEntry();
-    kI = frc::Shuffleboard::GetTab("Shooter").Add("kI", 0.000235).GetEntry();
+    // // Shuffleboard
+    firingVelocity = frc::Shuffleboard::GetTab("Shooter").Add("Firing Velocity", 0.0).GetEntry();
+    // kP = frc::Shuffleboard::GetTab("Shooter").Add("kP", 0.001).GetEntry();
+    // kI = frc::Shuffleboard::GetTab("Shooter").Add("kI", 0.000235).GetEntry();
 }
  
 void robotModeInit(RobotData *r, RobotMode new_mode)
@@ -353,8 +355,8 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         frc::SmartDashboard::PutBoolean("Beam Break", r->shooter.beam_break.Get());
 
 
-        r->shooter.firing_wheel_pid.kP = kP->GetDouble(0.001);
-        r->shooter.firing_wheel_pid.kI = kI->GetDouble(0.000235);
+        // r->shooter.firing_wheel_pid.kP = kP->GetDouble(0.001);
+        // r->shooter.firing_wheel_pid.kI = kI->GetDouble(0.000235);
 
         
 
@@ -370,8 +372,16 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             r->shooter.firing_motor_speed = -0.4;
 
             //r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5);
-            r->shooter.control_motor_speed = 0;
-            r->intake.intake_speed = 0;
+            if (r->shooter.beam_break.Get())
+            {
+                r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5) * CFG_CONTROL_PULLER_MAX_SPEED;
+                r->intake.intake_speed = (in->mate.trigger_right * 0.5 + 0.5) * CFG_INTAKE_PULLER_MAX_SPEED;
+            }
+            else
+            {
+                r->shooter.control_motor_speed = 0;
+                r->intake.intake_speed = 0;
+            }
 
             if (in->mate.a.down)
             {
@@ -386,6 +396,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             if (in->mate.x.down)
             {
                 r->robotState.robotMode = MODE_SHOOTING;
+                r->shooter.target_angle = 0.9f - CFG_SHOOTER_ANGLE_OFFSET;
             }
             break;
         case MODE_INTAKING:
@@ -405,8 +416,8 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             r->ready_fire_amp = false;
             r->shooter.firing_motor_speed = -0.4;
 
-            r->intake.intake_speed = (in->mate.trigger_right * 0.5 + 0.5) / 3;
-            r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5) / 3;
+            r->intake.intake_speed = CFG_INTAKE_MAX_SPEED;
+            r->shooter.control_motor_speed = CFG_CONTROL_PULLER_MAX_SPEED;
 
             frc::SmartDashboard::PutNumber("Intake gamepad input", (in->mate.trigger_right * 0.5 + 0.5));
 
@@ -423,20 +434,25 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             r->ready_fire_amp = false;
             r->shooter.firing_motor_speed = 0.5;
 
-             r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5);
+             r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5) - (in->mate.trigger_left * 0.5 + 0.5);
             r->intake.intake_speed = 0;
             
             break;
         case MODE_SHOOTING:
-             r->elevator.target_height = 0;
-            r->shooter.target_angle = 0;
 
             r->shooter.firing_mode = true;
             r->ready_fire_amp = false;
             r->shooter.firing_motor_speed = -1.0;
 
-            r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5) - (in->mate.trigger_left * 0.5 + 0.5);
+            r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5);
             r->intake.intake_speed = 0;
+
+            if (in->mate.trigger_left > 0.5)
+            {
+                if(r->side == 0) calculateVision(7, r);
+                if(r->side == 1) calculateVision(4, r);
+                
+            }
 
             if (in->mate.a.down)
             {
@@ -450,7 +466,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             // TODO Add climbing
         }
 
-
+        firingVelocity->SetDouble(r->shooter.firing_encoder->GetVelocity());
 
         // // Case that robot is in firing mode
         // if(r->shooter.firing_mode && !r->shooter.intake_task && !r->ready_fire_amp)

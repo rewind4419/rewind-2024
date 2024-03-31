@@ -38,7 +38,7 @@ struct Shooter
     PID amp_wheel_pid = { .kP = 0.00025f, .kI = 0.0001, .kD = 0,  .errorAccum = 0, .lastError = 0 };
 
     //PID firing_wheel_pid = { .kP = 0.001f, .kI = 0.000235f, .kD = 0.0,  .errorAccum = 0, .lastError = 0 };
-    PID firing_wheel_pid = { .kP = 0.0004f, .kI = 0.0003f, .kD = 0.0,  .errorAccum = 0, .lastError = 0 };
+    PID firing_wheel_pid = { .kP = 0.0f, .kI = 0.0004f, .kD = 0.0,  .errorAccum = 0, .lastError = 0 };
     // PID firing_wheel_pid = { .kP = 0.0f, .kI = 0.000001f, .kD = 0.00000,  .errorAccum = 0, .lastError = 0 };
 
     

@@ -8,6 +8,9 @@
 #include <vector>
 #include "fennec/config.h"
 
+struct RobotData;
+
+void calculateVision(int tagId, RobotData* data);
 
 struct TagPosition
 {

@@ -187,7 +187,6 @@ void robotCmd(RobotData* r, RobotCommand state)
         //Comment out if it doesn't work - Nethra
         case CLIMB_POSITIONING:
         {
-            
             {
                 printf("Quein  forst on|\n");
                 Task t;
