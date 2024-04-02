@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 
+extern nt::GenericEntry* beamBreakTimerEntry;
 
 static bool taskStep(Task* task, RobotData* robot);
 
@@ -105,6 +106,25 @@ static bool taskStep(Task* task, RobotData* robot)
 	case TASK_WAYPOINT_PULLER: {
 		printf("Waypoint puller\n");
 		printf("%d Beambreak\n", robot->shooter.beam_break.Get());
+
+
+
+		static double beamBreakTimer = 0.0;
+
+		beamBreakTimerEntry->SetDouble(beamBreakTimer);
+
+		printf("Beam Break Timer = %f\n", beamBreakTimer );
+
+
+		if (robot->shooter.beam_break.Get() == false)
+		{
+			beamBreakTimer += CFG_DELTA_TIME;
+		}
+		else
+		{
+			beamBreakTimer = 0.0;
+		}
+
 		if (robot->shooter.beam_break.Get() == false)
 		{
 			robot->shooter.control_motor_speed = 0;
@@ -151,14 +171,29 @@ static bool taskStep(Task* task, RobotData* robot)
 	case TASK_AUTO_AWAIT_PULLER: {
 		robot->shooter.auto_await_timeout += CFG_DELTA_TIME;
 
-		if (robot->shooter.auto_await_timeout > 1.0) {return true;}
+		if (robot->shooter.auto_await_timeout > 1.5) 
+		{
+			robot->shooter.auto_await_timeout = 0;
+			return true;
+		}
 
 		printf("Waypoint puller\n");
 		printf("%d Beambreak\n", robot->shooter.beam_break.Get());
+		beamBreakTimerEntry->SetDouble(robot->shooter.auto_beam_break_timer);
+		printf("Beam Break Timer = %f\n", robot->shooter.auto_beam_break_timer );
+
+
 		if (robot->shooter.beam_break.Get() == false)
+		{
+			robot->shooter.auto_beam_break_timer += CFG_DELTA_TIME;
+		}
+
+		// if (robot->shooter.beam_break.Get() == false)
+		if (robot->shooter.auto_beam_break_timer > 0.1)
 		{
 			robot->shooter.control_motor_speed = 0;
 			robot->intake.intake_speed = 0;
+			robot->shooter.auto_beam_break_timer = 0.0;
 			printf("PULLER STOPPED EARLY PULLER STOPPED EARLY PULLER STOPPED EARLY \n");
 			
 			return true;
@@ -359,7 +394,7 @@ static bool taskStep(Task* task, RobotData* robot)
 	case TASK_SHOOTER_PULLER_START: 
 	{
 		//robot->shooter.control_motor_speed = CFG_CONTROL_PULLER_MAX_SPEED;
-		robot->shooter.control_motor_speed = CFG_CONTROL_PULLER_MAX_SPEED * 0.7;
+		robot->shooter.control_motor_speed = CFG_CONTROL_PULLER_MAX_SPEED;
 		robot->intake.intake_speed = CFG_INTAKE_PULLER_MAX_SPEED;
 		return true;
     } break;
@@ -635,6 +670,11 @@ static bool taskStep(Task* task, RobotData* robot)
         printf("NOT COMPLETE delta = %f\n", fabsf(robot->elevator.retract_height - current_height));
         return height_accomplished;
     } break;
+
+	case TASK_DRIVETRAIN_OVERRIDE:
+	{
+		robot->drivetrain.drivetrain_override = true;
+	} break;
 
 
 	default: break;

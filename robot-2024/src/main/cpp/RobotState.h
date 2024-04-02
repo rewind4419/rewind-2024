@@ -87,7 +87,9 @@ enum AutoState
 
     AUTO_4_PIECE,
 
-    AUTO_TEST
+    AUTO_TEST,
+
+    AUTO_SINGLE_TEST,
 };
 
 enum AutoAlliance

@@ -67,6 +67,8 @@ enum TaskType {
 
 	TASK_RETRACT_FOR_CLIMB, //Comment out if it doesn't work - Nethra
 
+	TASK_DRIVETRAIN_OVERRIDE,
+
 	// TASK_FUNCTIONPTR, // TODO
 };
 

@@ -3,6 +3,8 @@
 #include "fennec/config.h"
 #include "Robot.h"
 
+#include <frc/shuffleboard/Shuffleboard.h>
+
 /*
 SDR Auto issues
 
@@ -24,6 +26,9 @@ SDR Auto issues
 
 
 */
+
+extern nt::GenericEntry* singleWaypointSpeed;
+extern nt::GenericEntry* singleWaypointSpeedRot;
 
 void robotCmd(RobotData* r, RobotCommand state)
 {
@@ -242,10 +247,22 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                 Task t;
                 t.type = TASK_WAYPOINT;
                 t.waypoint.target_pose = BLUE_NOTE_PREPICKUP_LEFT;
-                t.waypoint.epsilon = 0.2f;
+                t.waypoint.epsilon = 1.0f;
                 t.waypoint.epsilon_rot = 0.4f;
-                t.waypoint.speed = 8.0f;
-                t.waypoint.speed_rot = 2.5f;
+                t.waypoint.speed = 15.0f;
+                t.waypoint.speed_rot = 2.0f;
+
+                pushTask(&r->taskmgr, t);
+            }
+
+            {
+                Task t;
+                t.type = TASK_WAYPOINT;
+                t.waypoint.target_pose = BLUE_NOTE_PREPICKUP_LEFT;
+                t.waypoint.epsilon = 0.4f;
+                t.waypoint.epsilon_rot = 0.1f;
+                t.waypoint.speed = 5.0f;
+                t.waypoint.speed_rot = 2.0f;
 
                 pushTask(&r->taskmgr, t);
             }
@@ -329,10 +346,10 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                     Task t;
                     t.type = TASK_WAYPOINT;
                     t.waypoint.target_pose = prepickup;
-                    t.waypoint.epsilon = 1.0f;
-                    t.waypoint.epsilon_rot = 0.7f;
-                    t.waypoint.speed = 20.0f;
-                    t.waypoint.speed_rot = 4.5f;
+                    t.waypoint.epsilon = 0.5f;
+                    t.waypoint.epsilon_rot = 0.3f;
+                    t.waypoint.speed = 7.0f;
+                    t.waypoint.speed_rot = 2.0f;
 
                     pushTask(&r->taskmgr, t);
                 }
@@ -341,10 +358,10 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                     Task t;
                     t.type = TASK_WAYPOINT;
                     t.waypoint.target_pose = prepickup;
-                    t.waypoint.epsilon = 0.4f;
-                    t.waypoint.epsilon_rot = 0.3f;
-                    t.waypoint.speed = 8.0f;
-                    t.waypoint.speed_rot = 3.0f;
+                    t.waypoint.epsilon = 0.2f;
+                    t.waypoint.epsilon_rot = 0.15f;
+                    t.waypoint.speed = 5.0f;
+                    t.waypoint.speed_rot = 1.0f;
 
                     pushTask(&r->taskmgr, t);
                 }
@@ -355,23 +372,30 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                     pushTask(&r->taskmgr, t);
                 }
 
-                pushTask(&r->taskmgr, genTaskDelay(0.5));
+                {
+                    Task t;
+                    t.type = TASK_MIDDLE_THE_WHEELS;
+                    t.middle_wheels.enabled = true;
+                    pushTask(&r->taskmgr, t);
+                }
+
+                pushTask(&r->taskmgr, genTaskDelay(0.4));
+
+                {
+                    Task t;
+                    t.type = TASK_MIDDLE_THE_WHEELS;
+                    t.middle_wheels.enabled = false;
+                    pushTask(&r->taskmgr, t);
+                }
 
                 {
                     Task t;
                     t.type = TASK_WAYPOINT_PULLER;
                     t.waypoint.target_pose = pickup;
-                    t.waypoint.epsilon = 0.12f;
-                    t.waypoint.epsilon_rot = 0.2f;
-                    t.waypoint.speed = 10.0f;
-                    t.waypoint.speed_rot = 1.5f;
-
-                    pushTask(&r->taskmgr, t);
-                }
-                {
-                    Task t;
-                    t.type = TASK_AUTO_AWAIT_PULLER;
-                    r->shooter.auto_await_timeout = 0.0;
+                    t.waypoint.epsilon = 0.2f;
+                    t.waypoint.epsilon_rot = 0.25f;
+                    t.waypoint.speed = 8.0f;
+                    t.waypoint.speed_rot = 1.0f;
 
                     pushTask(&r->taskmgr, t);
                 }
@@ -382,7 +406,13 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                     pushTask(&r->taskmgr, t);
                 }
 
-                pushTask(&r->taskmgr, genTaskDelay(0.25));
+                {
+                    Task t;
+                    t.type = TASK_AUTO_AWAIT_PULLER;
+                    // r->shooter.auto_await_timeout = 0.0;
+
+                    pushTask(&r->taskmgr, t);
+                }
 
                 {
                     Task t;
@@ -403,14 +433,26 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                     {
                         Task t;
                         t.type = TASK_WAYPOINT;
-                        t.waypoint.target_pose = BLUE_NOTE_PREPICKUP_MIDDLE;
-                        t.waypoint.epsilon = 0.4f;
-                        t.waypoint.epsilon_rot = 0.4f;
-                        t.waypoint.speed = 8.0f;
-                        t.waypoint.speed_rot = 2.5f;
+                        t.waypoint.target_pose = BLUE_NOTE_PREPICKUP_RIGHT;
+                        t.waypoint.epsilon = 0.5f;
+                        t.waypoint.epsilon_rot = 0.25f;
+                        t.waypoint.speed = 6.0f;
+                        t.waypoint.speed_rot = 1.3f;
 
                         pushTask(&r->taskmgr, t);
                     }
+
+                    // {
+                    //     Task t;
+                    //     t.type = TASK_WAYPOINT;
+                    //     t.waypoint.target_pose = BLUE_NOTE_PICKUP_MIDDLE;
+                    //     t.waypoint.epsilon = 0.2f;
+                    //     t.waypoint.epsilon_rot = 0.1f;
+                    //     t.waypoint.speed = 6.0f;
+                    //     t.waypoint.speed_rot = 1.3f;
+
+                    //     pushTask(&r->taskmgr, t);
+                    // }
 
                     {
                         Task t;
@@ -419,7 +461,7 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                         pushTask(&r->taskmgr, t);
                     }
 
-                    pushTask(&r->taskmgr, genTaskDelay(0.4));
+                    pushTask(&r->taskmgr, genTaskDelay(0.2));
 
                     {
                         Task t;
@@ -436,7 +478,7 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                     t.photon_aligner.angular_throttle = 0.0;
                     t.photon_aligner.align_tag_id = 7;
                     t.photon_aligner.shooter_align_epsilon = 0.2f;
-                    t.photon_aligner.delay_length = 0.5;
+                    t.photon_aligner.delay_length = 0.5f;
                     t.photon_aligner.timer_first = true;
                     pushTask(&r->taskmgr, t);
                 }
@@ -468,9 +510,9 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                         Task t;
                         t.type = TASK_WAYPOINT;
                         t.waypoint.target_pose = prepickup;
-                        t.waypoint.epsilon = 0.6f;
+                        t.waypoint.epsilon = 0.5f;
                         t.waypoint.epsilon_rot = 0.3f;
-                        t.waypoint.speed = 15.0f;
+                        t.waypoint.speed = 10.0f;
                         t.waypoint.speed_rot = 2.5f;
 
                         pushTask(&r->taskmgr, t);
@@ -506,7 +548,11 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                 pushTask(&r->taskmgr, t);
             }
 
-
+            {
+                Task t;
+                t.type = TASK_DRIVETRAIN_OVERRIDE;
+                pushTask(&r->taskmgr, t);
+            }
         }
 
         case AUTO_TEST:
@@ -515,8 +561,8 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                 Task t;
                 t.type = TASK_WAYPOINT;
                 t.waypoint.target_pose = BLUE_NOTE_PREPICKUP_LEFT;
-                t.waypoint.epsilon = 0.2f;
-                t.waypoint.epsilon_rot = 0.4f;
+                t.waypoint.epsilon = 0.1f;
+                t.waypoint.epsilon_rot = 0.1f;
                 t.waypoint.speed = 15.0f;
                 t.waypoint.speed_rot = 3.5f;
 
@@ -567,8 +613,8 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                     Task t;
                     t.type = TASK_WAYPOINT;
                     t.waypoint.target_pose = prepickup;
-                    t.waypoint.epsilon = 0.15f;
-                    t.waypoint.epsilon_rot = 0.4f;
+                    t.waypoint.epsilon = 0.1f;
+                    t.waypoint.epsilon_rot = 0.1f;
                     t.waypoint.speed = 10.0f;
                     t.waypoint.speed_rot = 1.5f;
 
@@ -597,9 +643,9 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                     Task t;
                     t.type = TASK_WAYPOINT;
                     t.waypoint.target_pose = pickup;
-                    t.waypoint.epsilon = 0.12f;
-                    t.waypoint.epsilon_rot = 0.3f;
-                    t.waypoint.speed = 10.0f;
+                    t.waypoint.epsilon = 0.1f;
+                    t.waypoint.epsilon_rot = 0.1f;
+                    t.waypoint.speed = 4.0f;
                     t.waypoint.speed_rot = 1.5f;
 
                     pushTask(&r->taskmgr, t);
@@ -622,15 +668,24 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                 }
 
                 pushTask(&r->taskmgr, genTaskDelay(1));
-                
-
             }
-
-            
-
         }
 
-        
+        case AUTO_SINGLE_TEST:
+        {
+            {
+                Task t;
+                t.type = TASK_WAYPOINT;
+                t.waypoint.target_pose = BLUE_NOTE_PREPICKUP_LEFT;
+                t.waypoint.epsilon = 0.0f;
+                t.waypoint.epsilon_rot = 0.0f;
+                t.waypoint.speed = singleWaypointSpeed->GetDouble(1.0);
+                t.waypoint.speed_rot = singleWaypointSpeedRot->GetDouble(1.0);
+
+                pushTask(&r->taskmgr, t);
+            }
+
+        }
     }
 
     return;

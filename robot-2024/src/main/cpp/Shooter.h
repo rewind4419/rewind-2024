@@ -22,6 +22,11 @@ struct Shooter
     float shooter_delay_timer = 0;
     float auto_await_timeout = 0.0;
 
+    float auto_beam_break_timer = 0.0;
+
+    double last_firing_motor_target = 0.0;
+    // ^ Used to detect when the target speed has changed to reset integral
+
     float shooter_firing_calibrate_speed;
 
     bool firing_motor_task = false;
@@ -38,7 +43,7 @@ struct Shooter
     PID amp_wheel_pid = { .kP = 0.00025f, .kI = 0.0001, .kD = 0,  .errorAccum = 0, .lastError = 0 };
 
     //PID firing_wheel_pid = { .kP = 0.001f, .kI = 0.000235f, .kD = 0.0,  .errorAccum = 0, .lastError = 0 };
-    PID firing_wheel_pid = { .kP = 0.0f, .kI = 0.0004f, .kD = 0.0,  .errorAccum = 0, .lastError = 0 };
+    PID firing_wheel_pid = { .kP = 0.0f, .kI = 0.0002f, .kD = 0.0,  .errorAccum = 0, .lastError = 0 };
     // PID firing_wheel_pid = { .kP = 0.0f, .kI = 0.000001f, .kD = 0.00000,  .errorAccum = 0, .lastError = 0 };
 
     

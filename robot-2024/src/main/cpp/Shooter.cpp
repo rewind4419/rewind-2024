@@ -35,6 +35,8 @@ void initShooter(Shooter* shooter)
     shooter->amp_mode = false;
 
     shooter->beam_break_enabled = true;
+
+    shooter->last_firing_motor_target = 0.0;
 }
 
 void resetShooter( Shooter* shooter)
@@ -43,6 +45,7 @@ void resetShooter( Shooter* shooter)
     shooter->amp_mode = false;
     shooter->beam_break_enabled = true;
     shooter->firing_wheel_pid.errorAccum = 0.0;
+    shooter->last_firing_motor_target = 0.0;
 }
 
 void updateShooter(Shooter* shooter, RobotData* r)
@@ -52,6 +55,14 @@ void updateShooter(Shooter* shooter, RobotData* r)
     float firing_throttle;
     float firing_motor_velocity = shooter->firing_encoder->GetVelocity();
     frc::SmartDashboard::PutNumber("Current Firing Motor Velocity", firing_motor_velocity);
+
+    if (shooter->firing_motor_speed * CFG_TARGET_VELOCITY_FIRING_WHEELS != shooter->last_firing_motor_target)
+    {
+        shooter->firing_wheel_pid.errorAccum = 0.0;
+        printf("Resetting error accum on firing motor\n");
+        shooter->last_firing_motor_target = shooter->firing_motor_speed * CFG_TARGET_VELOCITY_FIRING_WHEELS;
+    }
+    
 
     //////// Firing Motor Brake Code ////////
     if(shooter->firing_mode && !r->ready_fire_amp)

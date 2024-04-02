@@ -76,8 +76,6 @@ void updateDrivetrainController(RobotData* r, DrivetrainController* controller, 
 			frc::SmartDashboard::PutNumber("Side", r->side);
 
 
-
-
 			v2 current_facing = rotate(v2{ 0, 1 }, current_pose.rotation);
 			v2 target_facing  = rotate(v2{ 0, 1 }, target_pose.rotation);
 
@@ -93,6 +91,8 @@ void updateDrivetrainController(RobotData* r, DrivetrainController* controller, 
 			move_to.x = evalPid(&controller->linear_x_pid, move_to.x, r->delta_time);
 			move_to.y = evalPid(&controller->linear_y_pid, move_to.y, r->delta_time);
 
+			printf("%f movetoX\n", move_to.x);
+			printf("%f movetoY\n", move_to.y);
 
 			if (length(move_to) > 1)
 				move_to = normalize(move_to);

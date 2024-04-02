@@ -39,6 +39,7 @@ enum DrivetrainSwerveModule
 struct Drivetrain
 {
     SwerveDriveModule swerve_drives[DrivetrainSwerve_Count];
+    bool drivetrain_override = false;
 };
 
 struct OdometryFrame
