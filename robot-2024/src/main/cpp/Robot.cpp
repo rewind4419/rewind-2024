@@ -456,6 +456,12 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 r->shooter.target_angle = 0.9f - CFG_SHOOTER_ANGLE_OFFSET;
                 r->shooter.shooter_pid.errorAccum = 0;
             }
+            if (in->mate.share_button.down)
+            {
+                r->robotState.robotMode = MODE_CLIMBING;
+                r->shooter.target_angle = 1.2f;
+                r->elevator.target_height = 0.225; //Might need to change?
+            }
             break;
         case MODE_INTAKING:
             if (r->shooter.beam_break.Get() == false)
@@ -530,7 +536,28 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 r->robotState.robotMode = MODE_AMP;
             }
             break;
-            // TODO Add climbing
+        case MODE_CLIMBING:
+
+            r->elevator.target_height = CLAMP(r-elevator.target_height + in->mate.joystick_left.y * 0.05, 0, CFG_ELEVATOR_RANGE);
+
+            r->shooter.firing_mode = false;
+            r->ready_fire_amp = false;
+            
+            r->shooter.control_motor_speed = 0;
+            r->intake.intake_speed = 0;
+
+            if (in->mate.option_button.down)
+            {
+                r->shooter.target_angle = 1.2f;
+                r->elevator.target_height = 0.0;
+            }
+            if (in->mate.share_button.down)
+            {
+                r->shooter.target_angle = 1.2f;
+                r->elevator.target_height = 0.225;
+            }
+
+            break;
         }
 
         if (r->robotState.robotMode == MODE_SHOOTING)
