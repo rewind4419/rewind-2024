@@ -169,6 +169,7 @@ void drivetrainUpdateRawVectors(Drivetrain* drivetrain, v2* target_vectors, floa
         float steer_throttle = -turn_angle / M_PI; 
         // if (steer_throttle >  .5) steer_throttle =  .5;
         // if (steer_throttle < -.5) steer_throttle = -.5;
+        if(drivetrain->drivetrain_override) steer_throttle = 0;
         module->steer_motor->Set( steer_throttle);
 
         frc::SmartDashboard::PutNumber("Final Steer", steer_throttle);
@@ -194,7 +195,7 @@ void drivetrainUpdateRawVectors(Drivetrain* drivetrain, v2* target_vectors, floa
 
         float drive_throttle = v / driveSpeed;
 
-    
+        if(drivetrain->drivetrain_override) drive_throttle = 0;
         module->drive_motor->Set(drive_throttle);
         frc::SmartDashboard::PutNumber("Final Drive", drive_throttle);
 

@@ -10,7 +10,9 @@
 #include <frc/shuffleboard/Shuffleboard.h>
 #include <frc/DataLogManager.h>
 
+nt::GenericEntry* debug_firingTargetVelocity;
 nt::GenericEntry* firingVelocity;
+nt::GenericEntry* firingVelocityRaw;
 nt::GenericEntry* firingReadyIndicator;
 nt::GenericEntry* currentAutoTask;
 nt::GenericEntry* currentDriverState;
@@ -18,7 +20,12 @@ nt::GenericEntry* kP;
 nt::GenericEntry* kI;
 nt::GenericEntry* kD;
 
-
+nt::GenericEntry* waypointkP;
+nt::GenericEntry* waypointkI;
+nt::GenericEntry* waypointkD;
+nt::GenericEntry* waypointRotkP;
+nt::GenericEntry* waypointRotkI;
+nt::GenericEntry* waypointRotkD;
 
 nt::GenericEntry* autoMode;
 
@@ -29,13 +36,17 @@ nt::GenericEntry* localizerR;
 nt::GenericEntry* waypointTaskEpsilon;
 nt::GenericEntry* waypointTaskRotEpsilon;
 
+nt::GenericEntry* singleWaypointSpeed;
+nt::GenericEntry* singleWaypointSpeedRot;
+
 nt::GenericEntry* aprilTagDist;
 nt::GenericEntry* aprilTagAngle;
 
 nt::GenericEntry* ampScoreHeight;
 nt::GenericEntry* ampScoreAngle;
 
-
+nt::GenericEntry* beamBreakTimerEntry;
+nt::GenericEntry* beamBreak;
 
 void initRobot(RobotData *r, RobotMode mode)
 {
@@ -52,6 +63,8 @@ void initRobot(RobotData *r, RobotMode mode)
     initShooter(&r->shooter);
     initElevator(&r->elevator);
 
+
+
     r->taskmgr = TaskMgr();
     r->sensor_imu = new AHRS(frc::SPI::Port::kMXP);
     r->integrated_imu_pos = {};
@@ -62,15 +75,23 @@ void initRobot(RobotData *r, RobotMode mode)
     r->robotState.robotMode = MODE_DEFAULT;
 
     // // Shuffleboard
-    firingVelocity = frc::Shuffleboard::GetTab("Main").Add("Firing Velocity", 0.0).GetEntry();
+    debug_firingTargetVelocity = frc::Shuffleboard::GetTab("Shooter").Add("Shooter Target", 0.0).GetEntry();
+    firingVelocity = frc::Shuffleboard::GetTab("Shooter").Add("Firing Velocity", 0.0).GetEntry();
+    firingVelocityRaw = frc::Shuffleboard::GetTab("Shooter").Add("Firing Velocity Raw", 0.0).GetEntry();
     firingReadyIndicator = frc::Shuffleboard::GetTab("Main").Add("Firing Ready", false).GetEntry();
     currentAutoTask = frc::Shuffleboard::GetTab("State").Add("Currnt Auto Task ID", 0).GetEntry();
     currentDriverState = frc::Shuffleboard::GetTab("State").Add("Current Driver State ID", 0).GetEntry();
     kP = frc::Shuffleboard::GetTab("Shooter").Add("kP", 0.4).GetEntry();
     kI = frc::Shuffleboard::GetTab("Shooter").Add("kI", 0.0).GetEntry();
-    kD = frc::Shuffleboard::GetTab("Shooter").Add("kI", 0.0).GetEntry();
+    kD = frc::Shuffleboard::GetTab("Shooter").Add("kD", 0.0).GetEntry();
 
-    
+    waypointkP = frc::Shuffleboard::GetTab("Localizer").Add("kP", 0.0).GetEntry();
+    waypointkI = frc::Shuffleboard::GetTab("Localizer").Add("kI", 0.0).GetEntry();
+    waypointkD = frc::Shuffleboard::GetTab("Localizer").Add("kD", 0.0).GetEntry();
+
+    waypointRotkP = frc::Shuffleboard::GetTab("Localizer").Add("kP Rot", 0.0).GetEntry();
+    waypointRotkI = frc::Shuffleboard::GetTab("Localizer").Add("kI Rot", 0.0).GetEntry();
+    waypointRotkD = frc::Shuffleboard::GetTab("Localizer").Add("kD Rot", 0.0).GetEntry();
 
     autoMode = frc::Shuffleboard::GetTab("Main").Add("AUTO MODE", 0).GetEntry();
 
@@ -81,15 +102,22 @@ void initRobot(RobotData *r, RobotMode mode)
     waypointTaskEpsilon = frc::Shuffleboard::GetTab("Localizer").Add("waypoint epsilon", -1.0).GetEntry();
     waypointTaskRotEpsilon = frc::Shuffleboard::GetTab("Localizer").Add("waypoint rot epsilon", -1.0).GetEntry();
 
+    singleWaypointSpeed = frc::Shuffleboard::GetTab("Localizer").Add("Single Waypoint Speed", 1.0).GetEntry();
+    singleWaypointSpeedRot = frc::Shuffleboard::GetTab("Localizer").Add("Single Waypoint Speed Rot", 1.0).GetEntry();
+
     ampScoreHeight = frc::Shuffleboard::GetTab("Main").Add("Amp Score Height", 0.275).GetEntry();
     ampScoreAngle = frc::Shuffleboard::GetTab("Main").Add("Amp Socre Angle", 1.45).GetEntry();
 
+    beamBreakTimerEntry = frc::Shuffleboard::GetTab("Main").Add("Beam BReak Timer", -1.0).GetEntry();
+    beamBreak = frc::Shuffleboard::GetTab("Main").Add("Beam BReak", false).GetEntry();
 }
 
 void robotModeInit(RobotData *r, RobotMode new_mode)
 {
     r->shooter.axis_motors[0]->SetIdleMode(rev::CANSparkBase::IdleMode::kCoast);
     r->shooter.axis_motors[1]->SetIdleMode(rev::CANSparkBase::IdleMode::kCoast);
+
+    r->drivetrain.drivetrain_override = false;
 
     frc::DataLogManager::Stop();
 
@@ -120,10 +148,24 @@ void robotModeInit(RobotData *r, RobotMode new_mode)
         }
         else
         {
+            autoCmd(r, AUTO_4_PIECE, autoAlliance);
             // if (autoMode->GetInteger(0) == 0)
             //     printf("WARNING: AUTO MODE = 0, RUNNING NO AUTO\n");
-
-            autoCmd(r, AUTO_4_PIECE, autoAlliance);
+            // switch (autoMode->GetInteger(0))
+            // {
+            // case 0:
+            //     autoCmd(r, AUTO_NONE, autoAlliance);
+            //     break;
+            // case 1:
+            //     autoCmd(r, AUTO_4_PIECE, autoAlliance);
+            //     break;
+            // case 2:
+            //     autoCmd(r, AUTO_TEST, autoAlliance);
+            //     break;
+            // case 3:
+            //     autoCmd(r, AUTO_SINGLE_TEST, autoAlliance);
+            //     break;
+            // }
         }
     }
 
@@ -154,9 +196,23 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
     // calibrateElevator(&r->elevator);
     // r->side = frc::SmartDashboard::GetNumber("Init Side", 0);
 
+    beamBreak->SetBoolean(r->shooter.beam_break.Get());
+
     localizerX->SetDouble(r->localiser.pose_estimate.position.x);
     localizerY->SetDouble(r->localiser.pose_estimate.position.y);
     localizerR->SetDouble(r->localiser.pose_estimate.rotation);
+
+    // r->drivetrain_controller.linear_x_pid.kP = waypointkP->GetDouble(0.0);
+    // r->drivetrain_controller.linear_x_pid.kI = waypointkI->GetDouble(0.0);
+    // r->drivetrain_controller.linear_x_pid.kD = waypointkD->GetDouble(0.0);
+
+    // r->drivetrain_controller.linear_y_pid.kP = waypointkP->GetDouble(0.0);
+    // r->drivetrain_controller.linear_y_pid.kI = waypointkI->GetDouble(0.0);
+    // r->drivetrain_controller.linear_y_pid.kD = waypointkD->GetDouble(0.0);
+
+    // r->drivetrain_controller.aligner_pid.kP = waypointRotkP->GetDouble(0.0);
+    // r->drivetrain_controller.aligner_pid.kI = waypointRotkI->GetDouble(0.0);
+    // r->drivetrain_controller.aligner_pid.kD = waypointRotkD->GetDouble(0.0);
 
     r->driverstation_side = frc::DriverStation::GetAlliance();
 
@@ -410,11 +466,6 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         }
 
         frc::SmartDashboard::PutBoolean("Beam Break", r->shooter.beam_break.Get());
-
-
-        r->shooter.shooter_pid.kP = kP->GetDouble(0.4);
-        r->shooter.shooter_pid.kI = kI->GetDouble(0.0);
-        r->shooter.shooter_pid.kD = kD->GetDouble(0.0);
         
         currentDriverState->SetInteger(r->robotState.robotMode);
         switch (r->robotState.robotMode)
@@ -476,8 +527,6 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
             r->intake.intake_speed = CFG_INTAKE_MAX_SPEED;
             r->shooter.control_motor_speed = CFG_CONTROL_PULLER_MAX_SPEED;
-
-            frc::SmartDashboard::PutNumber("Intake gamepad input", (in->mate.trigger_right * 0.5 + 0.5));
 
             if (in->mate.a.up)
             {
@@ -544,7 +593,12 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
         float shooterVelocity = r->shooter.firing_encoder->GetVelocity();
         firingVelocity->SetDouble(shooterVelocity);
-        if (fabsf(shooterVelocity) > 5400.0f)
+
+        static double debug_LastPos = 0.0;
+        firingVelocityRaw->SetDouble(r->shooter.firing_encoder->GetPosition() - debug_LastPos);
+        debug_LastPos = r->shooter.firing_encoder->GetPosition();
+
+        if (fabsf(shooterVelocity) > 5530.0f && fabsf(shooterVelocity) < 5660)
         {
             firingReadyIndicator->SetBoolean(true);
         }
