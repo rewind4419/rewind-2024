@@ -1,8 +1,18 @@
 #include "Shooter.h"
 #include "Robot.h"
 
+#include <frc/shuffleboard/Shuffleboard.h>
+
+nt::GenericEntry* pivotAngle;
+nt::GenericEntry* pivotTarget;
+nt::GenericEntry* pivotError;
+
 void initShooter(Shooter* shooter)
 {
+    pivotAngle = frc::Shuffleboard::GetTab("Shooter").Add("Angle", 0.0).GetEntry();
+    pivotError = frc::Shuffleboard::GetTab("Shooter").Add("Error", 0.0).GetEntry();
+    pivotTarget = frc::Shuffleboard::GetTab("Shooter").Add("Target", 0.0).GetEntry();
+
     shooter->control_motor = new rev::CANSparkFlex(CFG_SHOOTER_CONTROL_MOTOR, rev::CANSparkFlex::MotorType::kBrushless);
     shooter->firing_motor = new rev::CANSparkFlex(CFG_SHOOTER_FIRING_MOTOR, rev::CANSparkFlex::MotorType::kBrushless);
     shooter->firing_motor_2 = new rev::CANSparkFlex(CFG_SHOOTER_FIRING_MOTOR_2, rev::CANSparkFlex::MotorType::kBrushless);
@@ -117,6 +127,7 @@ void updateShooter(Shooter* shooter, RobotData* r)
     //////// Pivot Throttle Estimation ////////
     float angle_interpol_val = shooter->sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE;
     frc::SmartDashboard::PutNumber("Current Shooter Pivot Angle", angle_interpol_val);
+    pivotAngle->SetDouble(angle_interpol_val);
     shooter->target_angle = CLAMP(shooter->target_angle, 0, CFG_SHOOTER_ANGLE_RANGE);
     
     float target_angle_w_adjustment = shooter->target_angle + ( r->input.mate.joystick_right.y * CFG_SHOOTER_ANGLE_RANGE / 10);
@@ -126,7 +137,10 @@ void updateShooter(Shooter* shooter, RobotData* r)
     if(shooter->intake_task) inputted_angle =  shooter->target_angle;
     else inputted_angle = target_angle_w_adjustment;
 
+    pivotTarget->SetDouble(inputted_angle);
+
     float interpol_diff = inputted_angle - angle_interpol_val;
+    pivotError->SetDouble(interpol_diff);
     float pid = evalPid(&shooter->shooter_pid, interpol_diff, CFG_DELTA_TIME);
     float target_throttle = CLAMP(pid, -CFG_SHOOTER_AXIS_THROTTLE, CFG_SHOOTER_AXIS_THROTTLE);
 

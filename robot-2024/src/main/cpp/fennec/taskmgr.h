@@ -96,6 +96,7 @@ struct TaskData_Elevator
 struct TaskData_Wait_For_RPM
 {
 	float rpm;
+	float timer;
 };
 
 
@@ -138,6 +139,7 @@ struct TaskData_PhotonAligner {
 	bool timer_first;
 	float timer;
 	float delay_length;
+	float angular_throttle_timer;
 };
 
 struct TaskData_Hank {

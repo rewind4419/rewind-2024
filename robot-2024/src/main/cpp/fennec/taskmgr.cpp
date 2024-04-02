@@ -51,9 +51,16 @@ void updateManager(TaskMgr* mgr, RobotData* robot) {
 	}
 }
 
+#include <frc/shuffleboard/Shuffleboard.h>
+
+extern nt::GenericEntry* currentAutoTask;
+extern nt::GenericEntry* waypointTaskEpsilon;
+extern nt::GenericEntry* waypointTaskRotEpsilon;
+
 static bool taskStep(Task* task, RobotData* robot)
 {
 	printf("%d <- Updating task\n", task->type);
+	currentAutoTask->SetInteger(task->type);
 
 	switch (task->type) {
 	case TASK_LIST: {
@@ -89,6 +96,8 @@ static bool taskStep(Task* task, RobotData* robot)
 		frc::SmartDashboard::PutNumber("task translation x", translation.x);
 		frc::SmartDashboard::PutNumber("task translation y", translation.y);
 
+		waypointTaskEpsilon->SetDouble(length(robot->localiser.pose_estimate.position - task->waypoint.target_pose.position));
+		waypointTaskEpsilon->SetDouble(fabsf(angular_error));
 		return false;
 
 	} break;
@@ -350,7 +359,7 @@ static bool taskStep(Task* task, RobotData* robot)
 	case TASK_SHOOTER_PULLER_START: 
 	{
 		//robot->shooter.control_motor_speed = CFG_CONTROL_PULLER_MAX_SPEED;
-		robot->shooter.control_motor_speed = 0.25;
+		robot->shooter.control_motor_speed = CFG_CONTROL_PULLER_MAX_SPEED * 0.7;
 		robot->intake.intake_speed = CFG_INTAKE_PULLER_MAX_SPEED;
 		return true;
     } break;
@@ -398,18 +407,17 @@ static bool taskStep(Task* task, RobotData* robot)
 			task->shooter.seat_first = false;
 		}
 
-		if(task->shooter.seat_speed_firing != 0) robot->shooter.firing_motor_speed = task->shooter.seat_speed_firing;
 		if(task->shooter.seat_speed_control != 0) robot->shooter.control_motor_speed = task->shooter.seat_speed_control;
 		// if(task->shooter.seat_speed_intake != 0) robot->intake.intake_speed = task->shooter.seat_speed_intake;
 
 		task->shooter.delay_timer += robot->delta_time;
 		bool task_complete = false;
 		robot->shooter.intake_task = false;
-		if ( task->shooter.delay_timer > task->shooter.delay_length)
+		//if ( task->shooter.delay_timer > task->shooter.delay_length)
+		if (robot->shooter.beam_break.Get() == true)
 		{
 			task_complete = true;
 			robot->shooter.control_motor_speed = 0;
-			if(task->shooter.maintain_prev_throttle) robot->shooter.firing_motor_speed = task->shooter.seat_prior_firing_throttle;
 
 		}
 
@@ -420,11 +428,9 @@ static bool taskStep(Task* task, RobotData* robot)
 	{
 		if(task->shooter.seat_first)
 		{
-			task->shooter.seat_prior_firing_throttle = robot->shooter.firing_motor_speed;
 			task->shooter.seat_first = false;
 		}
 
-		if(task->shooter.seat_speed_firing != 0) robot->shooter.firing_motor_speed = task->shooter.seat_speed_firing;
 		if(task->shooter.seat_speed_control != 0) robot->shooter.control_motor_speed = task->shooter.seat_speed_control;
 		// if(task->shooter.seat_speed_intake != 0) robot->intake.intake_speed = task->shooter.seat_speed_intake;
 
@@ -435,7 +441,6 @@ static bool taskStep(Task* task, RobotData* robot)
 		{
 			task_complete = true;
 			robot->shooter.control_motor_speed = 0;
-			if(task->shooter.maintain_prev_throttle) robot->shooter.firing_motor_speed = task->shooter.seat_prior_firing_throttle;
 
 		}
 
@@ -484,6 +489,8 @@ static bool taskStep(Task* task, RobotData* robot)
 
 		frc::SmartDashboard::PutNumber("Dist from tag", dist_from_tag);
 
+		frc::SmartDashboard::PutNumber("Angular Throttle", task->photon_aligner.angular_throttle);
+
 		// float shooter_encoder_velocity = robot->shooter.firing_encoder->GetVelocity();
 		// float init_velocity;
 		// if (isnanf(shooter_encoder_velocity) == 0)
@@ -529,7 +536,12 @@ static bool taskStep(Task* task, RobotData* robot)
 		float shooter_curr_angle = robot->shooter.sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE;
 		bool final_task = false;
 
-		bool task_complete = (robot->shooter.target_angle - shooter_curr_angle) < task->photon_aligner.shooter_align_epsilon;
+		if (task->photon_aligner.angular_throttle < 0.25)
+		{
+			task->photon_aligner.angular_throttle_timer += CFG_DELTA_TIME;
+		} else {task->photon_aligner.angular_throttle_timer = 0.0;}
+
+		bool task_complete = (robot->shooter.target_angle - shooter_curr_angle) < task->photon_aligner.shooter_align_epsilon && task->photon_aligner.angular_throttle_timer > 0.2;
 
 		if(task_complete && task->photon_aligner.timer_first && aim_at_tag)
 		{
@@ -566,7 +578,9 @@ static bool taskStep(Task* task, RobotData* robot)
 	case TASK_WAIT_FOR_FIRING_RPM:
 	{
 		bool task_complete = false;
-		if(fabs(robot->shooter.firing_encoder->GetVelocity()) > task->wait_rpm.rpm) task_complete = true;
+		task->wait_rpm.timer += CFG_DELTA_TIME;
+		if(fabs(robot->shooter.firing_encoder->GetVelocity()) > task->wait_rpm.rpm) {task_complete = true;}
+		if (task->wait_rpm.timer > 1.0) {task_complete = true;}
 		return task_complete;
 	}
 	

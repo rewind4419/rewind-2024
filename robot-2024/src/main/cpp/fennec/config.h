@@ -127,7 +127,7 @@ constexpr int CFG_SHOOTER_AXIS_MOTOR_COUNT = 2;
 constexpr int CFG_SHOOTER_BB_DIO = 0;
 
 constexpr float CFG_SHOOTER_ANGLE_OFFSET = 0.296706; //In radians - 17 degrees
-constexpr float CFG_SHOOTER_AXIS_THROTTLE = 0.25f;
+constexpr float CFG_SHOOTER_AXIS_THROTTLE = 0.45f;
 constexpr float CFG_SHOOTER_CONTROL_MAX_SPEED = 0.3f;
 constexpr float CFG_SHOOTER_MAX_ANGLE = 11.774826; 
 constexpr float CFG_SHOOTER_ANGLE_RANGE = 1.6057;
@@ -166,11 +166,13 @@ constexpr int CFG_APRIL_TAG_COUNT = 16;
 constexpr float CFG_MAX_TAG_ALIGN_THROTTLE = 0.4f;
 
 //////// Field Layout //////// 
-constexpr float CFG_SPEAKER_HEIGHT = 92 * INCH_TO_METER;
+constexpr float CFG_SPEAKER_HEIGHT = 90 * INCH_TO_METER;
+//constexpr float CFG_SPEAKER_HEIGHT = 92 * INCH_TO_METER;
 //constexpr float CFG_SPEAKER_HEIGHT = 87.5413 * INCH_TO_METER;
 //constexpr float CFG_SPEAKER_HEIGHT = 84 * INCH_TO_METER;
 
-constexpr float CFG_SPEAKER_HEIGHT_AUTO = 83.5 * INCH_TO_METER;
+constexpr float CFG_SPEAKER_HEIGHT_AUTO = 90 * INCH_TO_METER;
+//constexpr float CFG_SPEAKER_HEIGHT_AUTO = 83.5 * INCH_TO_METER;
 //constexpr float CFG_SPEAKER_HEIGHT_AUTO = 80 * INCH_TO_METER;
 
 //////// Elevator //////// 

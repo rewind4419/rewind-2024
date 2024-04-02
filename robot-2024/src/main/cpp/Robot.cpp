@@ -8,10 +8,34 @@
 #include <fmt/core.h>
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/shuffleboard/Shuffleboard.h>
+#include <frc/DataLogManager.h>
 
 nt::GenericEntry* firingVelocity;
+nt::GenericEntry* firingReadyIndicator;
+nt::GenericEntry* currentAutoTask;
+nt::GenericEntry* currentDriverState;
 nt::GenericEntry* kP;
 nt::GenericEntry* kI;
+nt::GenericEntry* kD;
+
+
+
+nt::GenericEntry* autoMode;
+
+nt::GenericEntry* localizerX;
+nt::GenericEntry* localizerY;
+nt::GenericEntry* localizerR;
+
+nt::GenericEntry* waypointTaskEpsilon;
+nt::GenericEntry* waypointTaskRotEpsilon;
+
+nt::GenericEntry* aprilTagDist;
+nt::GenericEntry* aprilTagAngle;
+
+nt::GenericEntry* ampScoreHeight;
+nt::GenericEntry* ampScoreAngle;
+
+
 
 void initRobot(RobotData *r, RobotMode mode)
 {
@@ -26,9 +50,7 @@ void initRobot(RobotData *r, RobotMode mode)
     initDrivetrainController(&r->drivetrain_controller);
     initIntake(&r->intake);
     initShooter(&r->shooter);
-    initElevator (&r->elevator);
-
-
+    initElevator(&r->elevator);
 
     r->taskmgr = TaskMgr();
     r->sensor_imu = new AHRS(frc::SPI::Port::kMXP);
@@ -40,37 +62,73 @@ void initRobot(RobotData *r, RobotMode mode)
     r->robotState.robotMode = MODE_DEFAULT;
 
     // // Shuffleboard
-    firingVelocity = frc::Shuffleboard::GetTab("Shooter").Add("Firing Velocity", 0.0).GetEntry();
-    // kP = frc::Shuffleboard::GetTab("Shooter").Add("kP", 0.001).GetEntry();
-    // kI = frc::Shuffleboard::GetTab("Shooter").Add("kI", 0.000235).GetEntry();
+    firingVelocity = frc::Shuffleboard::GetTab("Main").Add("Firing Velocity", 0.0).GetEntry();
+    firingReadyIndicator = frc::Shuffleboard::GetTab("Main").Add("Firing Ready", false).GetEntry();
+    currentAutoTask = frc::Shuffleboard::GetTab("State").Add("Currnt Auto Task ID", 0).GetEntry();
+    currentDriverState = frc::Shuffleboard::GetTab("State").Add("Current Driver State ID", 0).GetEntry();
+    kP = frc::Shuffleboard::GetTab("Shooter").Add("kP", 0.4).GetEntry();
+    kI = frc::Shuffleboard::GetTab("Shooter").Add("kI", 0.0).GetEntry();
+    kD = frc::Shuffleboard::GetTab("Shooter").Add("kI", 0.0).GetEntry();
+
+    
+
+    autoMode = frc::Shuffleboard::GetTab("Main").Add("AUTO MODE", 0).GetEntry();
+
+    localizerX = frc::Shuffleboard::GetTab("Localizer").Add("localizerX", 0.0).GetEntry();
+    localizerY = frc::Shuffleboard::GetTab("Localizer").Add("localizerY", 0.0).GetEntry();
+    localizerR = frc::Shuffleboard::GetTab("Localizer").Add("localizerR", 0.0).GetEntry();
+
+    waypointTaskEpsilon = frc::Shuffleboard::GetTab("Localizer").Add("waypoint epsilon", -1.0).GetEntry();
+    waypointTaskRotEpsilon = frc::Shuffleboard::GetTab("Localizer").Add("waypoint rot epsilon", -1.0).GetEntry();
+
+    ampScoreHeight = frc::Shuffleboard::GetTab("Main").Add("Amp Score Height", 0.275).GetEntry();
+    ampScoreAngle = frc::Shuffleboard::GetTab("Main").Add("Amp Socre Angle", 1.45).GetEntry();
+
 }
- 
+
 void robotModeInit(RobotData *r, RobotMode new_mode)
 {
+    r->shooter.axis_motors[0]->SetIdleMode(rev::CANSparkBase::IdleMode::kCoast);
+    r->shooter.axis_motors[1]->SetIdleMode(rev::CANSparkBase::IdleMode::kCoast);
+
+    frc::DataLogManager::Stop();
+
+    frc::DataLogManager::Start();
+
     r->robotState.robotMode = MODE_DEFAULT;
     
     r->taskmgr = TaskMgr{};
 
+    resetShooter(&r->shooter);
+    resetElevator(&r->elevator);
+
     if(new_mode == ROBOT_AUTO)
     {
-        resetShooter(&r->shooter);
-        resetElevator(&r->elevator);
+        AutoAlliance autoAlliance = A_ALLIANCE_NONE;
         if(r->side == 0)
         {
-            autoCmd(r, AUTO_BLUE_4_PIECE);
+            autoAlliance = A_ALLIANCE_BLUE;
         }
         else if(r->side == 1)
         {
-            // autoCmd(r, AUTO_RED_1_PIECE_AUTO);
-            autoCmd(r, AUTO_RED_4_PIECE);
+            autoAlliance = A_ALLIANCE_RED;
+        }
+
+        if (autoAlliance == A_ALLIANCE_NONE)
+        {
+            printf("WARNING: AUTO ALLIANCE WAS NONE, ABORTING AUTO!!\n");
+        }
+        else
+        {
+            // if (autoMode->GetInteger(0) == 0)
+            //     printf("WARNING: AUTO MODE = 0, RUNNING NO AUTO\n");
+
+            autoCmd(r, AUTO_4_PIECE, autoAlliance);
         }
     }
 
-    
     if(new_mode == ROBOT_TELEOP)
     {
-        resetShooter(&r->shooter);
-        resetElevator(&r->elevator);
     }
 
     // Change to dependent on case later
@@ -95,6 +153,10 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
     // printCalibrationData(&r->drivetrain);
     // calibrateElevator(&r->elevator);
     // r->side = frc::SmartDashboard::GetNumber("Init Side", 0);
+
+    localizerX->SetDouble(r->localiser.pose_estimate.position.x);
+    localizerY->SetDouble(r->localiser.pose_estimate.position.y);
+    localizerR->SetDouble(r->localiser.pose_estimate.rotation);
 
     r->driverstation_side = frc::DriverStation::GetAlliance();
 
@@ -206,15 +268,6 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 r->middle_wheels = true;
             }
 
-            //Allign Straight Code
-            // if ( r->input.driver.trigger_left > 0.25)
-            // {
-            //     r->aligner = ALGN_FORWARD;
-            // }
-            // if ( r->input.driver.trigger_right > 0.25)
-            // {
-            //     r->aligner = ALGN_BACKWARD;
-            // }
 
             float imu_rotation_radians = imu_yaw;
 
@@ -250,8 +303,6 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             power_curve = power_curve * sign(angle01);
 
             float adjustment_rotation = driver_joystick_right.x * CFG_DRIVER_ADJUSTMENT_ROTATION_SENSITIVITY * (curr_speed_rot / CFG_DRIVER_SPEED_NORMAL);
-
-            //( r->input.driver.trigger_right - r->input.driver.trigger_left) * CFG_DRIVER_ADJUSTMENT_ROTATION_SENSITIVITY * (curr_speed / CFG_DRIVER_SPEED_NORMAL);
 
             if (length(input_translation) > 0.15 || fabsf(power_curve + adjustment_rotation) > 0.15)
             {
@@ -310,7 +361,11 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 else
                 {
                     // the idea is that it holds rotation
-                    if (fabsf(power_curve + adjustment_rotation) > 0.015)
+
+                    // Sherwin: This is kind of a hack to get rid of hold rotation, uncomment the below line to add it back
+                    // (Hold rotation = whenever the driver isn't touching the controller, the PID is maintaining a certain rotation)
+                    // (Im pretty sure reason our robot randomly rotates is because it was trying to maintain its rotation while the IMU was disconnected)
+                    //if (fabsf(power_curve + adjustment_rotation) > 0.015)
                     {
                         r->held_rotation = imu_yaw;
                     }
@@ -338,6 +393,8 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         auto *in = &r->input;
 
         // MATE CODE MATE CODE MATE CODE MATE CODE MATE CODE MATE CODE
+        // (technically its SUBSYTEM CODE)
+        // (there are some driver controls here too)
 
         // in->mate = in->driver;
 
@@ -355,11 +412,11 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         frc::SmartDashboard::PutBoolean("Beam Break", r->shooter.beam_break.Get());
 
 
-        // r->shooter.firing_wheel_pid.kP = kP->GetDouble(0.001);
-        // r->shooter.firing_wheel_pid.kI = kI->GetDouble(0.000235);
-
+        r->shooter.shooter_pid.kP = kP->GetDouble(0.4);
+        r->shooter.shooter_pid.kI = kI->GetDouble(0.0);
+        r->shooter.shooter_pid.kD = kD->GetDouble(0.0);
         
-
+        currentDriverState->SetInteger(r->robotState.robotMode);
         switch (r->robotState.robotMode)
         {
         case MODE_DEFAULT:
@@ -369,18 +426,18 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
             r->shooter.firing_mode = true;
             r->ready_fire_amp = false;
-            r->shooter.firing_motor_speed = -0.4;
+            r->shooter.firing_motor_speed = -0.75;
 
             //r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5);
             if (r->shooter.beam_break.Get())
             {
-                r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5) * CFG_CONTROL_PULLER_MAX_SPEED;
-                r->intake.intake_speed = (in->mate.trigger_right * 0.5 + 0.5) * CFG_INTAKE_PULLER_MAX_SPEED;
+                r->shooter.control_motor_speed = ((in->mate.trigger_right * 0.5 + 0.5)- (in->mate.trigger_left * 0.5 + 0.5)) * CFG_CONTROL_PULLER_MAX_SPEED;
+                r->intake.intake_speed = ((in->mate.trigger_right * 0.5 + 0.5)- (in->mate.trigger_left * 0.5 + 0.5)) * CFG_INTAKE_PULLER_MAX_SPEED;
             }
             else
             {
-                r->shooter.control_motor_speed = 0;
-                r->intake.intake_speed = 0;
+                r->shooter.control_motor_speed = - (in->mate.trigger_left * 0.5 + 0.5);
+                r->intake.intake_speed = -(in->mate.trigger_left * 0.5 + 0.5);
             }
 
             if (in->mate.a.down)
@@ -397,6 +454,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             {
                 r->robotState.robotMode = MODE_SHOOTING;
                 r->shooter.target_angle = 0.9f - CFG_SHOOTER_ANGLE_OFFSET;
+                r->shooter.shooter_pid.errorAccum = 0;
             }
             break;
         case MODE_INTAKING:
@@ -414,7 +472,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
             r->shooter.firing_mode = true;
             r->ready_fire_amp = false;
-            r->shooter.firing_motor_speed = -0.4;
+            r->shooter.firing_motor_speed = -0.5;
 
             r->intake.intake_speed = CFG_INTAKE_MAX_SPEED;
             r->shooter.control_motor_speed = CFG_CONTROL_PULLER_MAX_SPEED;
@@ -427,8 +485,11 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             }
             break;
         case MODE_AMP:
-            r->shooter.target_angle = 1.45;
-            r->elevator.target_height = 0.275;
+            // r->shooter.target_angle = ampScoreAngle->GetDouble(1.45);
+            // r->elevator.target_height = ampScoreHeight->GetDouble(0.275);
+
+            r->shooter.target_angle = (1.45);
+            r->elevator.target_height = (0.31);
 
             r->shooter.firing_mode = true;
             r->ready_fire_amp = false;
@@ -444,14 +505,20 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             r->ready_fire_amp = false;
             r->shooter.firing_motor_speed = -1.0;
 
-            r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5);
+            if ((in->driver.trigger_right * 0.5 + 0.5) > 0.5)
+            {
+                r->shooter.control_motor_speed = 1.0f;
+            }
+            else
+            {
+                r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5);
+            }
             r->intake.intake_speed = 0;
 
-            if (in->mate.trigger_left > 0.5)
+            if (in->mate.bumper_left.held || in->driver.trigger_left > 0.5)
             {
                 if(r->side == 0) calculateVision(7, r);
                 if(r->side == 1) calculateVision(4, r);
-                
             }
 
             if (in->mate.a.down)
@@ -466,7 +533,25 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             // TODO Add climbing
         }
 
-        firingVelocity->SetDouble(r->shooter.firing_encoder->GetVelocity());
+        if (r->robotState.robotMode == MODE_SHOOTING)
+        {
+            r->shooter.shooter_pid.kP = 2.0;
+        }
+        else
+        {
+            r->shooter.shooter_pid.kP = 0.4;
+        }
+
+        float shooterVelocity = r->shooter.firing_encoder->GetVelocity();
+        firingVelocity->SetDouble(shooterVelocity);
+        if (fabsf(shooterVelocity) > 5400.0f)
+        {
+            firingReadyIndicator->SetBoolean(true);
+        }
+        else
+        {
+            firingReadyIndicator->SetBoolean(false);
+        }
 
         // // Case that robot is in firing mode
         // if(r->shooter.firing_mode && !r->shooter.intake_task && !r->ready_fire_amp)

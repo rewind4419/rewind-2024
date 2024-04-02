@@ -33,7 +33,7 @@ struct Shooter
 
 
 
-    PID shooter_pid = { .kP = 0.9f, .kI = 0, .kD = 0,  .errorAccum = 0, .lastError = 0 };
+    PID shooter_pid = { .kP = 0.4f, .kI = 0, .kD = 0,  .errorAccum = 0, .lastError = 0 };
 
     PID amp_wheel_pid = { .kP = 0.00025f, .kI = 0.0001, .kD = 0,  .errorAccum = 0, .lastError = 0 };
 
