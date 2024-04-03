@@ -112,6 +112,7 @@ void initRobot(RobotData *r, RobotMode mode)
 
     beamBreakTimerEntry = frc::Shuffleboard::GetTab("Main").Add("Beam BReak Timer", -1.0).GetEntry();
     beamBreak = frc::Shuffleboard::GetTab("Main").Add("Beam BReak", false).GetEntry();
+
 }
 
 void robotModeInit(RobotData *r, RobotMode new_mode)
@@ -484,153 +485,207 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         currentDriverState->SetInteger(r->robotState.robotMode);
         switch (r->robotState.robotMode)
         {
-        case MODE_DEFAULT:
-            // Always down in default mode
-            r->elevator.target_height = 0;
-            r->shooter.target_angle = 0;
-
-            r->shooter.firing_mode = true;
-            r->ready_fire_amp = false;
-            r->shooter.firing_motor_speed = -0.75;
-
-            //r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5);
-            if (r->shooter.beam_break.Get())
+            case MODE_DEFAULT:
             {
-                r->shooter.control_motor_speed = ((in->mate.trigger_right * 0.5 + 0.5)- (in->mate.trigger_left * 0.5 + 0.5)) * CFG_CONTROL_PULLER_MAX_SPEED;
-                r->intake.intake_speed = ((in->mate.trigger_right * 0.5 + 0.5)- (in->mate.trigger_left * 0.5 + 0.5)) * CFG_INTAKE_PULLER_MAX_SPEED;
-            }
-            else
+                // Always down in default mode
+                r->elevator.target_height = 0;
+                r->shooter.target_angle = 0;
+
+                r->shooter.firing_mode = true;
+                r->ready_fire_amp = false;
+                r->shooter.firing_motor_speed = -1.0;
+
+                //r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5);
+                if (r->shooter.beam_break.Get())
+                {
+                    r->shooter.control_motor_speed = ((in->mate.trigger_right * 0.5 + 0.5)- (in->mate.trigger_left * 0.5 + 0.5)) * CFG_CONTROL_PULLER_MAX_SPEED;
+                    r->intake.intake_speed = ((in->mate.trigger_right * 0.5 + 0.5)- (in->mate.trigger_left * 0.5 + 0.5)) * CFG_INTAKE_PULLER_MAX_SPEED;
+                }
+                else
+                {
+                    r->shooter.control_motor_speed = - (in->mate.trigger_left * 0.5 + 0.5) * CFG_CONTROL_PULLER_MAX_SPEED;
+                    r->intake.intake_speed = - (in->mate.trigger_left * 0.5 + 0.5) * CFG_INTAKE_PULLER_MAX_SPEED;
+                }
+
+                if (in->mate.a.down)
+                {
+                    r->robotState.robotMode = MODE_INTAKING;
+                }
+
+                if (in->mate.y.down)
+                {
+                    r->robotState.robotMode = MODE_AMP;
+                }
+
+                if (in->mate.x.down)
+                {
+                    r->robotState.robotMode = MODE_SHOOTING;
+                    r->shooter.target_angle = 0.0;
+                    r->shooter.shooter_pid.errorAccum = 0;
+                }
+                if (in->mate.option_button.down)
+                {
+                    r->robotState.robotMode = MODE_CLIMBING;
+                    r->shooter.target_angle = 1.2f;
+                    r->elevator.target_height = 0.225; //Might need to change?
+                }
+            } break;
+            case MODE_INTAKING:
             {
-                r->shooter.control_motor_speed = - (in->mate.trigger_left * 0.5 + 0.5);
-                r->intake.intake_speed = -(in->mate.trigger_left * 0.5 + 0.5);
-            }
+                if (r->shooter.beam_break.Get() == false)
+                {
+                    // note detected, finish the intake
+                    r->robotState.robotMode = MODE_SHOOTING;
+                    printf("STOPPING INTAKE DUE TO BEAM BREAK\n");
+                    r->shooter.control_motor_speed = 0;
+                    r->intake.intake_speed = 0;
+                }
 
-            if (in->mate.a.down)
-            {
-                r->robotState.robotMode = MODE_INTAKING;
-            }
-
-            if (in->mate.y.down)
-            {
-                r->robotState.robotMode = MODE_AMP;
-            }
-
-            if (in->mate.x.down)
-            {
-                r->robotState.robotMode = MODE_SHOOTING;
-                r->shooter.target_angle = 0.9f - CFG_SHOOTER_ANGLE_OFFSET;
-                r->shooter.shooter_pid.errorAccum = 0;
-            }
-            if (in->mate.share_button.down)
-            {
-                r->robotState.robotMode = MODE_CLIMBING;
-                r->shooter.target_angle = 1.2f;
-                r->elevator.target_height = 0.225; //Might need to change?
-            }
-            break;
-        case MODE_INTAKING:
-            if (r->shooter.beam_break.Get() == false)
-            {
-                // note detected, finish the intake
-                r->robotState.robotMode = MODE_DEFAULT;
-                printf("STOPPING INTAKE DUE TO BEAM BREAK\n");
-                r->shooter.control_motor_speed = 0;
-                r->intake.intake_speed = 0;
-            }
-
-            r->shooter.target_angle = 1.2f;
-            r->elevator.target_height = 0.0;
-
-            r->shooter.firing_mode = true;
-            r->ready_fire_amp = false;
-            r->shooter.firing_motor_speed = -0.5;
-
-            r->intake.intake_speed = CFG_INTAKE_MAX_SPEED;
-            r->shooter.control_motor_speed = CFG_CONTROL_PULLER_MAX_SPEED;
-
-            if (in->mate.a.up)
-            {
-                r->robotState.robotMode = MODE_DEFAULT;
-            }
-            break;
-        case MODE_AMP:
-            // r->shooter.target_angle = ampScoreAngle->GetDouble(1.45);
-            // r->elevator.target_height = ampScoreHeight->GetDouble(0.275);
-
-            r->shooter.target_angle = (1.45);
-            r->elevator.target_height = (0.31);
-
-            r->shooter.firing_mode = true;
-            r->ready_fire_amp = false;
-            r->shooter.firing_motor_speed = 0.5;
-
-             r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5) - (in->mate.trigger_left * 0.5 + 0.5);
-            r->intake.intake_speed = 0;
-            
-            break;
-        case MODE_SHOOTING:
-
-            r->shooter.firing_mode = true;
-            r->ready_fire_amp = false;
-            r->shooter.firing_motor_speed = -1.0;
-
-            if ((in->driver.trigger_right * 0.5 + 0.5) > 0.5)
-            {
-                r->shooter.control_motor_speed = 1.0f;
-            }
-            else
-            {
-                r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5);
-            }
-            r->intake.intake_speed = 0;
-
-            if (in->mate.bumper_left.held || in->driver.trigger_left > 0.5)
-            {
-                if(r->side == 0) calculateVision(7, r);
-                if(r->side == 1) calculateVision(4, r);
-            }
-
-            if (in->mate.a.down)
-            {
-                r->robotState.robotMode = MODE_INTAKING;
-            }
-            if (in->mate.y.down)
-            {
-                r->robotState.robotMode = MODE_AMP;
-            }
-            break;
-        case MODE_CLIMBING:
-
-            r->elevator.target_height = CLAMP(r-elevator.target_height + in->mate.joystick_left.y * 0.05, 0, CFG_ELEVATOR_RANGE);
-
-            r->shooter.firing_mode = false;
-            r->ready_fire_amp = false;
-            
-            r->shooter.control_motor_speed = 0;
-            r->intake.intake_speed = 0;
-
-            if (in->mate.option_button.down)
-            {
                 r->shooter.target_angle = 1.2f;
                 r->elevator.target_height = 0.0;
-            }
-            if (in->mate.share_button.down)
-            {
-                r->shooter.target_angle = 1.2f;
-                r->elevator.target_height = 0.225;
-            }
 
-            break;
+                r->shooter.firing_mode = true;
+                r->ready_fire_amp = false;
+                r->shooter.firing_motor_speed = -1.0;
+
+                r->intake.intake_speed = CFG_INTAKE_MAX_SPEED;
+                r->shooter.control_motor_speed = CFG_CONTROL_PULLER_MAX_SPEED;
+
+                if (in->mate.a.up)
+                {
+                    r->robotState.robotMode = MODE_DEFAULT;
+                }
+            } break;
+            case MODE_AMP:
+            {
+                // r->shooter.target_angle = ampScoreAngle->GetDouble(1.45);
+                // r->elevator.target_height = ampScoreHeight->GetDouble(0.275);
+
+                r->shooter.target_angle = (1.45);
+                r->elevator.target_height = (0.31);
+
+                r->shooter.firing_mode = true;
+                r->ready_fire_amp = false;
+                r->shooter.firing_motor_speed = 0.5;
+
+                r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5) - (in->mate.trigger_left * 0.5 + 0.5);
+                r->intake.intake_speed = 0;
+                
+            } break;
+            case MODE_SHOOTING:
+            {
+                r->shooter.firing_mode = true;
+                r->ready_fire_amp = false;
+                r->shooter.firing_motor_speed = -1.0;
+
+                if ((in->driver.trigger_right * 0.5 + 0.5) > 0.5)
+                {
+                    r->shooter.control_motor_speed = 1.0f;
+                }
+                else
+                {
+                    r->shooter.control_motor_speed = - (in->mate.trigger_left * 0.5 + 0.5) + (in->mate.trigger_right * 0.5 + 0.5);
+                    r->intake.intake_speed = - (in->mate.trigger_left * 0.5 + 0.5) + (in->mate.trigger_right * 0.5 + 0.5);
+                }
+                r->intake.intake_speed = 0;
+
+                if (in->mate.bumper_left.held || in->driver.trigger_left > 0.5)
+                {
+                    if(r->shooter.trigger_or_bumper_first)
+                    {
+                        r->drivetrain_controller.tag_aligner_pid.errorAccum = 0;
+                        r->shooter.trigger_or_bumper_first = false;
+                    }
+                    
+                    if(r->side == 0) alignToTag(7, r);
+                    if(r->side == 1) alignToTag(4, r);
+                }
+
+
+
+                int target_tag_id;
+                if(r->side == 0) target_tag_id = 7;
+                else if(r->side == 1) target_tag_id = 4;
+
+                bool tag_seen = true;
+                for(int i = 0; i < r->photon.global_tags.size(); i++)
+                {
+                    if(r->photon.global_tags[i].tag_id == target_tag_id) tag_seen = true;
+                }
+
+                if(tag_seen)
+                {
+                    printf("TAG SEEN\n");
+                    calculateVision(r, target_tag_id);
+
+                    if (isnanf(r->photon.calculated_pivot_angle) == 0)
+                    {
+                        r->shooter.target_angle = r->photon.calculated_pivot_angle - CFG_SHOOTER_ANGLE_OFFSET; // Uncomment to enable shooter a movement
+                    }
+                }
+
+
+                if (in->mate.a.down)
+                {
+                    r->robotState.robotMode = MODE_INTAKING;
+                }
+                if (in->mate.y.down)
+                {
+                    r->robotState.robotMode = MODE_AMP;
+                }
+                if (in->mate.x.down)
+                {
+                    r->shooter.target_angle = 0.9 - CFG_SHOOTER_ANGLE_OFFSET;
+                }
+
+            }   break;
+
+            case MODE_CLIMBING:
+            {
+                if (in->mate.option_button.held)
+                {
+                    r->shooter.target_angle = 1.2f;
+                    r->elevator.target_height = 0.225;
+
+                }
+                else
+                {
+                    r->shooter.target_angle = 1.2f;
+                    r->elevator.target_height = 0.0;
+
+                }
+
+                if (fabsf(in->mate.joystick_left.y) > 0.2) r->elevator.target_height = CLAMP(0.225 + in->mate.joystick_left.y * 0.1, 0, CFG_ELEVATOR_RANGE);
+
+                r->shooter.firing_mode = false;
+                r->ready_fire_amp = false;
+
+                r->shooter.firing_motor_speed = -1.0;
+                
+                r->shooter.control_motor_speed = 0;
+                r->intake.intake_speed = 0;
+
+            } break;
         }
 
         if (r->robotState.robotMode == MODE_SHOOTING)
         {
-            r->shooter.shooter_pid.kP = 2.0;
+            r->shooter.shooter_pid.kP = 0.7f;
         }
         else
         {
             r->shooter.shooter_pid.kP = 0.4;
         }
+
+        // if(fabs(r->photon.calculated_yaw_angle) < 0.1 || r->robotState.robotMode == MODE_INTAKING)
+        if(r->robotState.robotMode == MODE_INTAKING)
+        {
+            r->shooter.trigger_or_bumper_first = true;
+        }
+
+        // r->drivetrain_controller.tag_aligner_pid.kP = kP->GetDouble(0.4);
+        // r->drivetrain_controller.tag_aligner_pid.kI = kI->GetDouble(0);
+        // r->drivetrain_controller.tag_aligner_pid.kD = kD->GetDouble(0);
 
         float shooterVelocity = r->shooter.firing_encoder->GetVelocity();
         firingVelocity->SetDouble(shooterVelocity);

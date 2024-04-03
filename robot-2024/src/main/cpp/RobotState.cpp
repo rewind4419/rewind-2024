@@ -233,6 +233,21 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
     {
         case AUTO_4_PIECE:
         {
+            Pose prepickup;
+            Pose pickup;
+            float april_tag;
+            if(r->side == 0)
+            {
+                april_tag = 7;
+                prepickup = BLUE_NOTE_PREPICKUP_RIGHT;
+                
+            }
+            else if(r->side == 1)
+            {
+                april_tag = 4;
+                prepickup = RED_NOTE_PREPICKUP_LEFT;
+
+            }
             frc::SmartDashboard::PutNumber("Auto init Delay", r->auto_init_delay);
             pushTask(&r->taskmgr, genTaskDelay(r->auto_init_delay));
 
@@ -246,10 +261,10 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
             {
                 Task t;
                 t.type = TASK_WAYPOINT;
-                t.waypoint.target_pose = BLUE_NOTE_PREPICKUP_LEFT;
+                t.waypoint.target_pose = prepickup;
                 t.waypoint.epsilon = 0.4f;
                 t.waypoint.epsilon_rot = 0.4f;
-                t.waypoint.speed = 15.0f;
+                t.waypoint.speed = 12.0f;
                 t.waypoint.speed_rot = 2.0f;
 
                 pushTask(&r->taskmgr, t);
@@ -258,10 +273,10 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
             {
                 Task t;
                 t.type = TASK_WAYPOINT;
-                t.waypoint.target_pose = BLUE_NOTE_PREPICKUP_LEFT;
+                t.waypoint.target_pose = prepickup;
                 t.waypoint.epsilon = 0.4f;
                 t.waypoint.epsilon_rot = 0.25f;
-                t.waypoint.speed = 8.0f;
+                t.waypoint.speed = 7.0f;
                 t.waypoint.speed_rot = 1.0f;
 
                 pushTask(&r->taskmgr, t);
@@ -287,7 +302,7 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
             {
                 Task t;
                 t.type = TASK_ANGLE_TO_TAG_AUTO;
-                t.photon_aligner.align_tag_id = 7;
+                t.photon_aligner.align_tag_id = april_tag;
                 t.photon_aligner.angular_throttle_timer = 0.0;
                 t.photon_aligner.shooter_align_epsilon = 0.2f;
                 t.photon_aligner.delay_length = 0.0f;
@@ -314,26 +329,48 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                 pushTask(&r->taskmgr, t);
             }
 
-            Pose prepickup;
-            Pose pickup;
             for (int i = 0; i < 3; i++)
             {
+                
+                if(r->side == 0)
+                {
+                    if (i == 0)
+                    {
+                        prepickup = BLUE_NOTE_PREPICKUP_RIGHT;
+                        pickup = BLUE_NOTE_PICKUP_RIGHT;
+                    }
+                    else if (i == 1)
+                    {
+                        prepickup = BLUE_NOTE_PREPICKUP_MIDDLE;
+                        pickup = BLUE_NOTE_PICKUP_MIDDLE;
+                    }
+                    else if (i == 2)
+                    {
+                        prepickup = BLUE_NOTE_PREPICKUP_LEFT;
+                        pickup = BLUE_NOTE_PICKUP_LEFT;
+                    }
+                }
+                else if(r->side == 1)
+                {
+                    if (i == 0)
+                    {
+                        prepickup = RED_NOTE_PREPICKUP_LEFT;
+                        pickup = RED_NOTE_PICKUP_LEFT;
+                    }
+                    else if (i == 1)
+                    {
+                        prepickup = RED_NOTE_PREPICKUP_MIDDLE;
+                        pickup = RED_NOTE_PICKUP_MIDDLE;
+                    }
+                    else if (i == 2)
+                    {
+                        prepickup = RED_NOTE_PREPICKUP_RIGHT;
+                        pickup = RED_NOTE_PICKUP_RIGHT;
+                    }
+                }
 
-                if (i == 0)
-                {
-                    prepickup = BLUE_NOTE_PREPICKUP_LEFT;
-                    pickup = BLUE_NOTE_PICKUP_LEFT;
-                }
-                else if (i == 1)
-                {
-                    prepickup = BLUE_NOTE_PREPICKUP_MIDDLE;
-                    pickup = BLUE_NOTE_PICKUP_MIDDLE;
-                }
-                else if (i == 2)
-                {
-                    prepickup = BLUE_NOTE_PREPICKUP_RIGHT;
-                    pickup = BLUE_NOTE_PICKUP_RIGHT;
-                }
+
+
 
                 { // Sets pivot angle but doesn't wait for the move to finish
                     Task t;
@@ -348,7 +385,7 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                     t.waypoint.target_pose = prepickup;
                     t.waypoint.epsilon = 0.5f;
                     t.waypoint.epsilon_rot = 0.3f;
-                    t.waypoint.speed = 9.0f;
+                    t.waypoint.speed = 12.0f;
                     t.waypoint.speed_rot = 2.0f;
 
                     pushTask(&r->taskmgr, t);
@@ -358,9 +395,9 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                     Task t;
                     t.type = TASK_WAYPOINT;
                     t.waypoint.target_pose = prepickup;
-                    t.waypoint.epsilon = 0.2f;
+                    t.waypoint.epsilon = 0.3f;
                     t.waypoint.epsilon_rot = 0.25f;
-                    t.waypoint.speed = 4.0f;
+                    t.waypoint.speed = 7.0f;
                     t.waypoint.speed_rot = 1.0f;
 
                     pushTask(&r->taskmgr, t);
@@ -399,6 +436,7 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
 
                     pushTask(&r->taskmgr, t);
                 }
+
                 {
                     Task t;
                     t.type = TASK_MIDDLE_THE_WHEELS;
@@ -431,7 +469,7 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                     {
                         Task t;
                         t.type = TASK_WAYPOINT;
-                        t.waypoint.target_pose = BLUE_NOTE_PREPICKUP_RIGHT;
+                        t.waypoint.target_pose = prepickup;
                         t.waypoint.epsilon = 0.5f;
                         t.waypoint.epsilon_rot = 0.25f;
                         t.waypoint.speed = 12.0f;
@@ -443,7 +481,7 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                     {
                         Task t;
                         t.type = TASK_WAYPOINT;
-                        t.waypoint.target_pose = BLUE_NOTE_PREPICKUP_RIGHT;
+                        t.waypoint.target_pose = prepickup;
                         t.waypoint.epsilon = 0.2f;
                         t.waypoint.epsilon_rot = 0.1f;
                         t.waypoint.speed = 6.0f;
@@ -466,7 +504,7 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                     Task t;
                     t.type = TASK_ANGLE_TO_TAG_AUTO;
                     t.photon_aligner.angular_throttle = 0.0;
-                    t.photon_aligner.align_tag_id = 7;
+                    t.photon_aligner.align_tag_id = april_tag;
                     t.photon_aligner.shooter_align_epsilon = 0.2f;
                     t.photon_aligner.delay_length = 0.5f;
                     t.photon_aligner.timer_first = true;

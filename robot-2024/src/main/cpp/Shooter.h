@@ -36,6 +36,8 @@ struct Shooter
     bool brake = false;
     bool amp_mode = false;
 
+    bool trigger_or_bumper_first = true;
+
 
 
     PID shooter_pid = { .kP = 0.4f, .kI = 0, .kD = 0,  .errorAccum = 0, .lastError = 0 };

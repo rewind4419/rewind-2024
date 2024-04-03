@@ -485,7 +485,7 @@ static bool taskStep(Task* task, RobotData* robot)
 	{
 		bool task_complete = false;
 		
-		calculateVision(task->photon_aligner.align_tag_id, robot);
+		alignToTag(task->photon_aligner.align_tag_id, robot);
 
 		if(robot->input.mate.trigger_left < 0.01f) 
 		{

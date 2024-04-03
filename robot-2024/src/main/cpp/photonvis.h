@@ -10,7 +10,8 @@
 
 struct RobotData;
 
-void calculateVision(int tagId, RobotData* data);
+void alignToTag(int tagId, RobotData* robot);
+void calculateVision(RobotData* robot, int tag_id);
 
 struct TagPosition
 {
@@ -30,6 +31,9 @@ struct PhotonParameters
 
     bool first_aim = true;
     int n_tags = 0;
+
+    float calculated_pivot_angle = 0;
+    float calculated_yaw_angle = 0;
 };
 
 void updatePhoton(PhotonParameters* photon);

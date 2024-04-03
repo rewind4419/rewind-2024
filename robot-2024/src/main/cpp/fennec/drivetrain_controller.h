@@ -29,8 +29,9 @@ struct DrivetrainController
 	PID aligner_pid { .kP = 5.0, .kI = 0.01, .kD = 0.0 };
 
 	// Tag aligner pid
-	PID tag_aligner_pid = { .kP = 0.25f, .kI = 0, .kD = 0.0f,  .errorAccum = 0, .lastError = 0 };
-	PID tag_aligner_pid_auto = { .kP = 0.2f, .kI = 0, .kD = 0.0f,  .errorAccum = 0, .lastError = 0 };
+	PID tag_aligner_pid = { .kP = 0.7f, .kI = 0.3, .kD = 0.01f,  .errorAccum = 0, .lastError = 0 };
+	PID tag_aligner_pid_auto = { .kP = 0.4f, .kI = 0, .kD = 0.0f,  .errorAccum = 0, .lastError = 0 };
+	// PID tag_aligner_pid_auto = { .kP = 0.7f, .kI = 0.3, .kD = 0.01f,  .errorAccum = 0, .lastError = 0 };
 
 	bool drivetrain_ovveride = false;
 
