@@ -247,7 +247,7 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                 Task t;
                 t.type = TASK_WAYPOINT;
                 t.waypoint.target_pose = BLUE_NOTE_PREPICKUP_LEFT;
-                t.waypoint.epsilon = 1.0f;
+                t.waypoint.epsilon = 0.4f;
                 t.waypoint.epsilon_rot = 0.4f;
                 t.waypoint.speed = 15.0f;
                 t.waypoint.speed_rot = 2.0f;
@@ -260,9 +260,9 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                 t.type = TASK_WAYPOINT;
                 t.waypoint.target_pose = BLUE_NOTE_PREPICKUP_LEFT;
                 t.waypoint.epsilon = 0.4f;
-                t.waypoint.epsilon_rot = 0.1f;
-                t.waypoint.speed = 5.0f;
-                t.waypoint.speed_rot = 2.0f;
+                t.waypoint.epsilon_rot = 0.25f;
+                t.waypoint.speed = 8.0f;
+                t.waypoint.speed_rot = 1.0f;
 
                 pushTask(&r->taskmgr, t);
             }
@@ -348,7 +348,7 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                     t.waypoint.target_pose = prepickup;
                     t.waypoint.epsilon = 0.5f;
                     t.waypoint.epsilon_rot = 0.3f;
-                    t.waypoint.speed = 7.0f;
+                    t.waypoint.speed = 9.0f;
                     t.waypoint.speed_rot = 2.0f;
 
                     pushTask(&r->taskmgr, t);
@@ -359,8 +359,8 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                     t.type = TASK_WAYPOINT;
                     t.waypoint.target_pose = prepickup;
                     t.waypoint.epsilon = 0.2f;
-                    t.waypoint.epsilon_rot = 0.15f;
-                    t.waypoint.speed = 5.0f;
+                    t.waypoint.epsilon_rot = 0.25f;
+                    t.waypoint.speed = 4.0f;
                     t.waypoint.speed_rot = 1.0f;
 
                     pushTask(&r->taskmgr, t);
@@ -372,21 +372,21 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                     pushTask(&r->taskmgr, t);
                 }
 
-                {
-                    Task t;
-                    t.type = TASK_MIDDLE_THE_WHEELS;
-                    t.middle_wheels.enabled = true;
-                    pushTask(&r->taskmgr, t);
-                }
+                // {
+                //     Task t;
+                //     t.type = TASK_MIDDLE_THE_WHEELS;
+                //     t.middle_wheels.enabled = true;
+                //     pushTask(&r->taskmgr, t);
+                // }
 
-                pushTask(&r->taskmgr, genTaskDelay(0.4));
+                // pushTask(&r->taskmgr, genTaskDelay(0.1));
 
-                {
-                    Task t;
-                    t.type = TASK_MIDDLE_THE_WHEELS;
-                    t.middle_wheels.enabled = false;
-                    pushTask(&r->taskmgr, t);
-                }
+                // {
+                //     Task t;
+                //     t.type = TASK_MIDDLE_THE_WHEELS;
+                //     t.middle_wheels.enabled = false;
+                //     pushTask(&r->taskmgr, t);
+                // }
 
                 {
                     Task t;
@@ -394,7 +394,7 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                     t.waypoint.target_pose = pickup;
                     t.waypoint.epsilon = 0.2f;
                     t.waypoint.epsilon_rot = 0.25f;
-                    t.waypoint.speed = 8.0f;
+                    t.waypoint.speed = 7.0f;
                     t.waypoint.speed_rot = 1.0f;
 
                     pushTask(&r->taskmgr, t);
@@ -409,8 +409,6 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                 {
                     Task t;
                     t.type = TASK_AUTO_AWAIT_PULLER;
-                    // r->shooter.auto_await_timeout = 0.0;
-
                     pushTask(&r->taskmgr, t);
                 }
 
@@ -436,23 +434,23 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                         t.waypoint.target_pose = BLUE_NOTE_PREPICKUP_RIGHT;
                         t.waypoint.epsilon = 0.5f;
                         t.waypoint.epsilon_rot = 0.25f;
-                        t.waypoint.speed = 6.0f;
+                        t.waypoint.speed = 12.0f;
                         t.waypoint.speed_rot = 1.3f;
 
                         pushTask(&r->taskmgr, t);
                     }
 
-                    // {
-                    //     Task t;
-                    //     t.type = TASK_WAYPOINT;
-                    //     t.waypoint.target_pose = BLUE_NOTE_PICKUP_MIDDLE;
-                    //     t.waypoint.epsilon = 0.2f;
-                    //     t.waypoint.epsilon_rot = 0.1f;
-                    //     t.waypoint.speed = 6.0f;
-                    //     t.waypoint.speed_rot = 1.3f;
+                    {
+                        Task t;
+                        t.type = TASK_WAYPOINT;
+                        t.waypoint.target_pose = BLUE_NOTE_PREPICKUP_RIGHT;
+                        t.waypoint.epsilon = 0.2f;
+                        t.waypoint.epsilon_rot = 0.1f;
+                        t.waypoint.speed = 6.0f;
+                        t.waypoint.speed_rot = 1.3f;
 
-                    //     pushTask(&r->taskmgr, t);
-                    // }
+                        pushTask(&r->taskmgr, t);
+                    }
 
                     {
                         Task t;
@@ -461,14 +459,6 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                         pushTask(&r->taskmgr, t);
                     }
 
-                    pushTask(&r->taskmgr, genTaskDelay(0.2));
-
-                    {
-                        Task t;
-                        t.type = TASK_MIDDLE_THE_WHEELS;
-                        t.middle_wheels.enabled = false;
-                        pushTask(&r->taskmgr, t);
-                    }
                 }
 
                 // Blue uses tag 7

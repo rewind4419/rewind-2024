@@ -59,7 +59,10 @@ void RobotProxy::TeleopPeriodic() {
 //////////////////////
 // UNUSED
 
-void RobotProxy::DisabledInit() {
+void RobotProxy::DisabledInit() 
+{
+    robotModeInit(&r, ROBOT_DISABLE);
+
 }
 void RobotProxy::DisabledPeriodic() {
     updateRobot(&r, 0.02, ROBOT_DISABLE);

@@ -63,6 +63,8 @@ void initRobot(RobotData *r, RobotMode mode)
     initShooter(&r->shooter);
     initElevator(&r->elevator);
 
+    r->shooter.control_motor->SetIdleMode(rev::CANSparkBase::IdleMode::kCoast);
+
 
 
     r->taskmgr = TaskMgr();
@@ -132,6 +134,8 @@ void robotModeInit(RobotData *r, RobotMode new_mode)
 
     if(new_mode == ROBOT_AUTO)
     {
+        r->shooter.control_motor->SetIdleMode(rev::CANSparkBase::IdleMode::kBrake);
+
         AutoAlliance autoAlliance = A_ALLIANCE_NONE;
         if(r->side == 0)
         {
@@ -171,6 +175,12 @@ void robotModeInit(RobotData *r, RobotMode new_mode)
 
     if(new_mode == ROBOT_TELEOP)
     {
+        r->shooter.control_motor->SetIdleMode(rev::CANSparkBase::IdleMode::kBrake);
+    }
+
+    if(new_mode == ROBOT_DISABLE)
+    {
+        r->shooter.control_motor->SetIdleMode(rev::CANSparkBase::IdleMode::kCoast);
     }
 
     // Change to dependent on case later
@@ -244,10 +254,14 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         r->drivetrain_controller.ctrl.throttle.angular_throttle = 0;
     }
 
-    if(mode == ROBOT_DISABLE) return;
+    if(mode == ROBOT_DISABLE)
+    {
+        return;
+    }
 
     if (mode == ROBOT_TELEOP)
     {
+
         {
             // Drivetrain
             v2 input_translation = r->input.driver.joystick_left;
@@ -782,7 +796,6 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
     }
     else if(mode == ROBOT_AUTO)
     {
-
         if(r->auto_first)
         {
             r->auto_first = false;

@@ -188,7 +188,6 @@ static bool taskStep(Task* task, RobotData* robot)
 			robot->shooter.auto_beam_break_timer += CFG_DELTA_TIME;
 		}
 
-		// if (robot->shooter.beam_break.Get() == false)
 		if (robot->shooter.auto_beam_break_timer > 0.1)
 		{
 			robot->shooter.control_motor_speed = 0;
