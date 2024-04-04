@@ -69,6 +69,10 @@ enum TaskType {
 
 	TASK_DRIVETRAIN_OVERRIDE,
 
+	TASK_AUTO_AIM_ACTIVATION,
+
+	TASK_PHOTON_AIM_TIMER_RESET,
+
 	// TASK_FUNCTIONPTR, // TODO
 };
 
@@ -78,6 +82,11 @@ struct TaskMgr;
 struct TaskData_FiringMotor
 {
 	float direction;
+};
+
+struct TaskData_AutoAim
+{
+	bool activated;
 };
 
 struct TaskData_Delay {
@@ -109,6 +118,8 @@ struct TaskData_Waypoint {
 	float speed_rot;
 	float epsilon;
     float epsilon_rot;
+
+	bool tag_aligner;
 };
 
 struct TaskData_FollowLine {
@@ -203,6 +214,7 @@ struct Task {
 		TaskData_PhotonAligner photon_aligner;
 		TaskData_Elevator elevator;
 		TaskData_Wait_For_RPM wait_rpm;
+		TaskData_AutoAim auto_aim;
 	};
 };
 

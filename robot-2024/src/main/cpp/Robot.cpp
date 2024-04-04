@@ -154,6 +154,7 @@ void robotModeInit(RobotData *r, RobotMode new_mode)
         else
         {
             autoCmd(r, AUTO_4_PIECE, autoAlliance);
+            // autoCmd(r, AUTO_SHOOT_WHILE_INTAKING, autoAlliance);
             // if (autoMode->GetInteger(0) == 0)
             //     printf("WARNING: AUTO MODE = 0, RUNNING NO AUTO\n");
             // switch (autoMode->GetInteger(0))
@@ -200,6 +201,9 @@ void robotModeInit(RobotData *r, RobotMode new_mode)
 
 void updateRobot(RobotData *r, float time_step, RobotMode mode)
 {
+
+
+
     r->auto_init_delay = frc::SmartDashboard::GetNumber("Auto Initial Delay", 0);
 
     // calibrateShooterAngle(&r->shooter);
@@ -532,14 +536,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             } break;
             case MODE_INTAKING:
             {
-                if (r->shooter.beam_break.Get() == false)
-                {
-                    // note detected, finish the intake
-                    r->robotState.robotMode = MODE_SHOOTING;
-                    printf("STOPPING INTAKE DUE TO BEAM BREAK\n");
-                    r->shooter.control_motor_speed = 0;
-                    r->intake.intake_speed = 0;
-                }
+                
 
                 r->shooter.target_angle = 1.2f;
                 r->elevator.target_height = 0.0;
@@ -554,6 +551,18 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 if (in->mate.a.up)
                 {
                     r->robotState.robotMode = MODE_DEFAULT;
+                }
+
+                if (r->shooter.beam_break.Get() == false)
+                {
+                    // note detected, finish the intake
+                    r->robotState.robotMode = MODE_SHOOTING;
+                    printf("STOPPING INTAKE DUE TO BEAM BREAK\n");
+                    r->shooter.control_motor_speed = 0;
+                    r->intake.intake_speed = 0;
+
+                    r->shooter.target_angle = 0.0f;
+                r->elevator.target_height = 0.0;
                 }
             } break;
             case MODE_AMP:
@@ -589,17 +598,6 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 }
                 r->intake.intake_speed = 0;
 
-                if (in->mate.bumper_left.held || in->driver.trigger_left > 0.5)
-                {
-                    if(r->shooter.trigger_or_bumper_first)
-                    {
-                        r->drivetrain_controller.tag_aligner_pid.errorAccum = 0;
-                        r->shooter.trigger_or_bumper_first = false;
-                    }
-                    
-                    if(r->side == 0) alignToTag(7, r);
-                    if(r->side == 1) alignToTag(4, r);
-                }
 
 
 
@@ -607,23 +605,31 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 if(r->side == 0) target_tag_id = 7;
                 else if(r->side == 1) target_tag_id = 4;
 
-                bool tag_seen = true;
-                for(int i = 0; i < r->photon.global_tags.size(); i++)
+                if (in->mate.bumper_left.held || in->driver.trigger_left > 0.5)
+                {
+                    if(r->shooter.trigger_or_bumper_first)
+                    {
+                        r->drivetrain_controller.tag_aligner_pid.errorAccum = 0;
+                        r->shooter.trigger_or_bumper_first = false;
+                    }
+
+                    alignToTag(target_tag_id, r, true);
+                }
+
+
+                bool tag_seen = false; // THis is the issue
+                printf("global tags size = %d\n", r->photon.global_tags.size());
+                for(int i = 0; i < r->photon.n_tags; i++)
                 {
                     if(r->photon.global_tags[i].tag_id == target_tag_id) tag_seen = true;
+                    printf("tag id's = %d, %d \n",r->photon.global_tags[i].tag_id, target_tag_id);
                 }
 
                 if(tag_seen)
                 {
                     printf("TAG SEEN\n");
-                    calculateVision(r, target_tag_id);
-
-                    if (isnanf(r->photon.calculated_pivot_angle) == 0)
-                    {
-                        r->shooter.target_angle = r->photon.calculated_pivot_angle - CFG_SHOOTER_ANGLE_OFFSET; // Uncomment to enable shooter a movement
-                    }
+                    alignToTag(target_tag_id, r, false);
                 }
-
 
                 if (in->mate.a.down)
                 {
@@ -646,16 +652,14 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 {
                     r->shooter.target_angle = 1.2f;
                     r->elevator.target_height = 0.225;
-
                 }
                 else
                 {
                     r->shooter.target_angle = 1.2f;
-                    r->elevator.target_height = 0.0;
-
+                    r->elevator.target_height = 0.0 - 1.25 * INCH_TO_METER;
                 }
 
-                if (fabsf(in->mate.joystick_left.y) > 0.2) r->elevator.target_height = CLAMP(0.225 + in->mate.joystick_left.y * 0.1, 0, CFG_ELEVATOR_RANGE);
+                if (fabsf(in->mate.joystick_left.y) > 0.2) r->elevator.target_height = CLAMP(0.225 + in->mate.joystick_left.y * 0.1, -3 * INCH_TO_METER, CFG_ELEVATOR_RANGE);
 
                 r->shooter.firing_mode = false;
                 r->ready_fire_amp = false;
@@ -882,6 +886,12 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         {
             r->auto_first = false;
         }
+
+        int target_tag_id;
+        if(r->side == 0) target_tag_id = 7;
+        else if(r->side == 1) target_tag_id = 4;
+
+        autoVisionUpdate(r, target_tag_id);
         
         if ( r->middle_wheels)
         {
@@ -895,6 +905,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
     }
 
     frc::SmartDashboard::PutBoolean("Beam braeakea", r->shooter.beam_break.Get());
+
 
     // printf("Just before updates \n");
     updateManager(&r->taskmgr, r);
@@ -913,5 +924,8 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
     frc::Pose2d pose(frc::Translation2d((units::meter_t)localiser_pose.position.x, (units::meter_t) -localiser_pose.position.y), frc::Rotation2d());
 
     r->field.SetRobotPose(pose);
+
+    r->photon.global_tags.clear();
+
 }
 

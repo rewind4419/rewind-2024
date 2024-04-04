@@ -4,23 +4,59 @@
 
 #include "Robot.h"
 
-void alignToTag(int tagId, RobotData* robot)
+void autoVisionUpdate(RobotData* robot, int tag_id)
+{
+    if(robot->photon.auto_aim_activated)
+    {
+
+        alignToTag(tag_id, robot, false);
+
+        float shooter_curr_angle = robot->shooter.sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE + CFG_SHOOTER_ANGLE_OFFSET;
+
+        if(robot->photon.calculated_pivot_angle - shooter_curr_angle < 0.05 && fabs(robot->photon.calculated_yaw_angle) < 0.05 && fabs(robot->shooter.shooter_encoder->GetVelocity()) < 1000)
+        {
+            robot->photon.pitch_aim_timer += CFG_DELTA_TIME;
+        }
+
+        if(robot->photon.pitch_aim_timer > 0.3) 
+        {
+            robot->shooter.control_motor_speed = 1;
+            robot->photon.pitch_timer_reset_timer += CFG_DELTA_TIME;
+        }
+
+        if(robot->photon.pitch_timer_reset_timer > .3)
+        {
+            robot->photon.pitch_aim_timer = 0;
+        }
+
+        if(robot->shooter.beam_break.Get() == true)
+        {
+            robot->intake.intake_speed = 0.5;
+            robot->shooter.control_motor_speed = 1;
+        }
+    }
+}
+
+void alignToTag(int tagId, RobotData* robot, bool yaw_align)
 {
     calculateVision(robot, tagId);
     float angularThrottle = 0.0;
 
-    if(robot->photon.n_tags != 0)
+    if(yaw_align)
     {
+        if(robot->photon.n_tags != 0)
+        {
 
-        float calculated_throttle = 2 * evalPid(&robot->drivetrain_controller.tag_aligner_pid, robot->photon.calculated_yaw_angle, CFG_DELTA_TIME);
-        calculated_throttle = CLAMP(calculated_throttle, -CFG_MAX_TAG_ALIGN_THROTTLE, CFG_MAX_TAG_ALIGN_THROTTLE);
-        angularThrottle = calculated_throttle;
+            float calculated_throttle = 2 * evalPid(&robot->drivetrain_controller.tag_aligner_pid, robot->photon.calculated_yaw_angle, CFG_DELTA_TIME);
+            calculated_throttle = CLAMP(calculated_throttle, -CFG_MAX_TAG_ALIGN_THROTTLE, CFG_MAX_TAG_ALIGN_THROTTLE);
+            angularThrottle = calculated_throttle;
+        }
+        else angularThrottle = 0;
+
+        robot->drivetrain_controller.mode = DRIVECTRL_THROTTLE;
+        robot->drivetrain_controller.ctrl.throttle.throttle = robot->global_input_translation;
+        robot->drivetrain_controller.ctrl.throttle.angular_throttle = angularThrottle; // Uncomment to enable robot rotational movement
     }
-    else angularThrottle = 0;
-
-    robot->drivetrain_controller.mode = DRIVECTRL_THROTTLE;
-    robot->drivetrain_controller.ctrl.throttle.throttle = robot->global_input_translation;
-    robot->drivetrain_controller.ctrl.throttle.angular_throttle = angularThrottle; // Uncomment to enable robot rotational movement
 
     if (isnanf(robot->photon.calculated_pivot_angle) == 0)
     {

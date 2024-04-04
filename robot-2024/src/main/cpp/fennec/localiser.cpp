@@ -96,6 +96,17 @@ void initLocaliser(RobotData* robot)
 //   robot->photon.global_tags.clear();
 // }
 
+bool tagIdExists(std::vector<TagPosition> tag_vector, int index)
+{
+  bool current_exists = false;
+  for(int i = 0; i < tag_vector.size(); i++)
+  {
+    if(tag_vector[i].tag_id == index) current_exists = true;
+  }
+  return current_exists;
+}
+
+
 void stepLocaliser(RobotData* robot)
 {
   Localiser_FirstOrderLag* localiser = &robot->localiser;
@@ -119,10 +130,32 @@ void stepLocaliser(RobotData* robot)
   localiser->prev_imu = imu_rotation;
 
 
-  float apriltag_first_order_lag_damping = 0.6;
-  // float apriltag_first_order_lag_damping = 0.0f;
+  float apriltag_first_order_lag_damping;
+
   for (int i = 0; i < robot->photon.global_tags.size(); i++)
   {
+
+    int tag_id = robot->photon.global_tags[i].tag_id;
+
+    bool current_exists = tagIdExists(robot->photon.global_tags, tag_id);
+    bool prev_exists = tagIdExists(robot->photon.global_tags_prev, tag_id);
+
+    // printf("%d, %d, %d \n", i, current_exists, prev_exists);
+
+    if(current_exists && prev_exists)
+    {
+      frc::Translation3d diff_between_tags = robot->photon.global_tags[i].pose.Translation() - robot->photon.global_tags_prev[i].pose.Translation();
+
+      float magnitude_from_prev = static_cast<float>(diff_between_tags.Norm());
+
+      if(magnitude_from_prev < 0.3f)
+      {
+        apriltag_first_order_lag_damping = 0.6;
+      }
+      else apriltag_first_order_lag_damping = 0;
+    }
+    else apriltag_first_order_lag_damping = 0;
+
     v2 curr_tag_pose = { static_cast<float>(robot->photon.global_tags[i].pose.X()), static_cast<float>(robot->photon.global_tags[i].pose.Y()) };
 
     frc::SmartDashboard::PutNumber("April Tag Global Pose X", curr_tag_pose.x);
@@ -140,7 +173,6 @@ void stepLocaliser(RobotData* robot)
     localiser->pose_estimate.rotation = mix(localiser->pose_estimate.rotation, 
                                             curr_tag_rotation,
                                             apriltag_first_order_lag_damping);
-    
   }
   if(robot->photon.n_tags == 0) 
   {
@@ -163,5 +195,6 @@ void stepLocaliser(RobotData* robot)
   // if (localiser->pose_estimate.rotation < 0.0) {localiser->pose_estimate.rotation += M_PI * 2;}
   // localiser->pose_estimate.rotation = fmod(localiser->pose_estimate.rotation, M_PI * 2);
 
-  robot->photon.global_tags.clear();
+  robot->photon.global_tags_prev = robot->photon.global_tags;
+
 }

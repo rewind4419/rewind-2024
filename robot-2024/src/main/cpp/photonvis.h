@@ -10,7 +10,7 @@
 
 struct RobotData;
 
-void alignToTag(int tagId, RobotData* robot);
+void alignToTag(int tagId, RobotData* robot, bool yaw_align);
 void calculateVision(RobotData* robot, int tag_id);
 
 struct TagPosition
@@ -28,12 +28,20 @@ struct PhotonParameters
     frc::Transform3d tag_rel_robot[CFG_APRIL_TAG_COUNT];
 
     std::vector<TagPosition> global_tags;
+    std::vector<TagPosition> global_tags_prev;
 
     bool first_aim = true;
+    bool auto_aim_activated = false;
     int n_tags = 0;
 
     float calculated_pivot_angle = 0;
     float calculated_yaw_angle = 0;
+
+    float pitch_aim_timer = 0;
+    float pitch_timer_reset_timer = 0;
 };
 
 void updatePhoton(PhotonParameters* photon);
+
+void autoVisionUpdate(RobotData* robot, int tag_id);
+

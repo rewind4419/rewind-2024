@@ -75,23 +75,49 @@ static bool taskStep(Task* task, RobotData* robot)
 	} break;
 
 	case TASK_WAYPOINT: {
+
+
 		robot->drivetrain_controller.mode = DRIVECTRL_WAYPOINT;
 		robot->drivetrain_controller.ctrl.waypoint.pose = task->waypoint.target_pose;
 		robot->drivetrain_controller.ctrl.waypoint.speed = task->waypoint.speed;
 		robot->drivetrain_controller.ctrl.waypoint.speed_rot = task->waypoint.speed_rot;
 
+		if(task->waypoint.tag_aligner)
+		{
+
+			float tag_angle = robot->localiser.pose_estimate.rotation + robot->photon.calculated_yaw_angle + M_PI / 2;
+			if(tag_angle < 0) tag_angle += 2 * M_PI; 
+			tag_angle = fmod(tag_angle, 2 * M_PI);
+			tag_angle -= M_PI / 2;
+			robot->drivetrain_controller.ctrl.waypoint.pose.rotation = tag_angle;
+		}
+
 		// if (length(task->waypoint.target_pose.position - robot->localiser.pose_estimate.position) < task->waypoint.epsilon)
 
 		float angular_error = leastAngularError(robot->localiser.pose_estimate.rotation,  task->waypoint.target_pose.rotation);
-		if (length(robot->localiser.pose_estimate.position - task->waypoint.target_pose.position) < task->waypoint.epsilon
-			&& fabsf(angular_error) < task->waypoint.epsilon_rot)
+		if(!task->waypoint.tag_aligner)
 		{
-			robot->drivetrain_controller.mode = DRIVECTRL_THROTTLE;
-			robot->drivetrain_controller.ctrl.throttle.throttle = {0,0};
-			robot->drivetrain_controller.ctrl.throttle.angular_throttle = 0;
-			// robot->middle_wheels = task->middle_wheels.enabled;
-			return true;
+			if (length(robot->localiser.pose_estimate.position - task->waypoint.target_pose.position) < task->waypoint.epsilon && fabsf(angular_error) < task->waypoint.epsilon_rot)
+			{
+				robot->drivetrain_controller.mode = DRIVECTRL_THROTTLE;
+				robot->drivetrain_controller.ctrl.throttle.throttle = {0,0};
+				robot->drivetrain_controller.ctrl.throttle.angular_throttle = 0;
+				// robot->middle_wheels = task->middle_wheels.enabled;
+				return true;
+			}
 		}
+		else
+		{
+			if (length(robot->localiser.pose_estimate.position - task->waypoint.target_pose.position) < task->waypoint.epsilon && fabsf(angular_error) < task->waypoint.epsilon_rot && robot->shooter.beam_break.Get() == true)
+			{
+				robot->drivetrain_controller.mode = DRIVECTRL_THROTTLE;
+				robot->drivetrain_controller.ctrl.throttle.throttle = {0,0};
+				robot->drivetrain_controller.ctrl.throttle.angular_throttle = 0;
+				// robot->middle_wheels = task->middle_wheels.enabled;
+				return true;
+			}
+		}
+
 
 		v2 translation = robot->localiser.pose_estimate.position - task->waypoint.target_pose.position;
 		frc::SmartDashboard::PutNumber("task translation x", translation.x);
@@ -225,7 +251,8 @@ static bool taskStep(Task* task, RobotData* robot)
 		robot->drivetrain_controller.ctrl.velocity.velocity = task->drivetrain_velocity.target_velocity;
 		robot->drivetrain_controller.ctrl.velocity.angular_velocity = task->drivetrain_velocity.target_angular_velocity;
 
-        task->drivetrain_velocity.timer += robot->delta_time;
+        task->drivetrain_velocity.timer += CFG_DELTA_TIME;
+		printf("Drive train vel time = %f\n", task->drivetrain_velocity.timer);
 		
 		return task->drivetrain_velocity.timer > task->drivetrain_velocity.length;
 	} break;
@@ -485,7 +512,7 @@ static bool taskStep(Task* task, RobotData* robot)
 	{
 		bool task_complete = false;
 		
-		alignToTag(task->photon_aligner.align_tag_id, robot);
+		alignToTag(task->photon_aligner.align_tag_id, robot, true);
 
 		if(robot->input.mate.trigger_left < 0.01f) 
 		{
@@ -673,7 +700,20 @@ static bool taskStep(Task* task, RobotData* robot)
 	case TASK_DRIVETRAIN_OVERRIDE:
 	{
 		robot->drivetrain.drivetrain_override = true;
+		return true;
 	} break;
+
+	case TASK_AUTO_AIM_ACTIVATION:
+	{
+		robot->photon.auto_aim_activated = task->auto_aim.activated;
+		return true;
+	}
+
+	case TASK_PHOTON_AIM_TIMER_RESET:
+	{
+		robot->photon.pitch_aim_timer = 0;
+		return true;
+	}
 
 
 	default: break;

@@ -16,6 +16,7 @@ enum DrivetrainControllerMode
 
 struct DrivetrainController
 {
+
 	// linear velocity
 	PID normal_pid  = { .kP = 0.1, .kI = 0, .kD = 0 };
 	PID tangent_pid = { .kP = 0.1, .kI = 0, .kD = 0 };
@@ -34,7 +35,6 @@ struct DrivetrainController
 	// PID tag_aligner_pid_auto = { .kP = 0.7f, .kI = 0.3, .kD = 0.01f,  .errorAccum = 0, .lastError = 0 };
 
 	bool drivetrain_ovveride = false;
-
 
 
 	// input

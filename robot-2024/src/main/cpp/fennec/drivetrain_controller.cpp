@@ -44,8 +44,6 @@ void updateDrivetrainController(RobotData* r, DrivetrainController* controller, 
 			update(&controller->velocity_avg, current_velocity_raw);
 			update(&controller->ang_velocity_avg, current_angular_velocity_raw);
 
-
-
 			v2 current_velocity = eval(controller->velocity_avg);
 			float current_angular_velocity = eval(controller->ang_velocity_avg);
 
@@ -91,8 +89,8 @@ void updateDrivetrainController(RobotData* r, DrivetrainController* controller, 
 			move_to.x = evalPid(&controller->linear_x_pid, move_to.x, r->delta_time);
 			move_to.y = evalPid(&controller->linear_y_pid, move_to.y, r->delta_time);
 
-			printf("%f movetoX\n", move_to.x);
-			printf("%f movetoY\n", move_to.y);
+			// printf("%f movetoX\n", move_to.x);
+			// printf("%f movetoY\n", move_to.y);
 
 			if (length(move_to) > 1)
 				move_to = normalize(move_to);
@@ -138,6 +136,7 @@ void updateDrivetrainController(RobotData* r, DrivetrainController* controller, 
 				frc::SmartDashboard::PutNumber("Translation X", translation.x);
 				frc::SmartDashboard::PutNumber("Translation Y", translation.y);
 
+				drivetrainUpdate(drivetrain, translation, rotation, dt);
 				drivetrainUpdate(drivetrain, translation, rotation, dt);
 				// drivetrainUpdate(drivetrain, translation, 0, dt);
 		    }
