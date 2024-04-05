@@ -4,6 +4,14 @@
 
 #include "Robot.h"
 
+
+void initPhoton(RobotData* r)
+{
+    photon::PhotonPipelineResult result = r->photon.april_cam.GetLatestResult();
+    std::span<const photon::PhotonTrackedTarget> targets = result.GetTargets();
+    r->photon.n_tags = targets.size();
+}
+
 void initVisionCalculations(RobotData* robot)
 {
     robot->photon.regression_function = true;

@@ -252,7 +252,6 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
             {
                 april_tag = 4;
                 prepickup = RED_NOTE_PREPICKUP_LEFT;
-
             }
             frc::SmartDashboard::PutNumber("Auto init Delay", r->auto_init_delay);
             pushTask(&r->taskmgr, genTaskDelay(r->auto_init_delay));
@@ -379,11 +378,13 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                     }
                     else if (i == 1)
                     {
+                        continue;
                         prepickup = BLUE_NOTE_PREPICKUP_MIDDLE;
                         pickup = BLUE_NOTE_PICKUP_MIDDLE;
                     }
                     else if (i == 2)
                     {
+                        continue;
                         prepickup = BLUE_NOTE_PREPICKUP_LEFT;
                         pickup = BLUE_NOTE_PICKUP_LEFT;
                     }
@@ -1964,12 +1965,14 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                     t.type = TASK_SHOOTER_POSITIONING_NO_RETURN;
                     t.shooter.target_angle = 1.2f;
                     pushTask(&r->taskmgr, t);
-                }     
+                }  
+
+                printf("inside loop");   
 
                 {
                     Task t;
                     t.type = TASK_WAYPOINT;
-                t.waypoint.tag_aligner = false;
+                    t.waypoint.tag_aligner = false;
                     t.waypoint.target_pose = prepickup;
                     t.waypoint.epsilon = 0.5f;
                     t.waypoint.epsilon_rot = 0.3f;
@@ -2173,6 +2176,74 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                 t.type = TASK_DRIVETRAIN_OVERRIDE;
                 pushTask(&r->taskmgr, t);
             }
+        }
+        
+        case AUTO_PREFIRE_LEAVE_COMMUNITY:
+        {
+
+            Pose prepickup;
+            Pose pickup;
+            float april_tag;
+            if(r->side == 0)
+            {
+                april_tag = 7;
+                prepickup = BLUE_NOTE_PREPICKUP_RIGHT;
+                
+            }
+            else if(r->side == 1)
+            {
+                april_tag = 4;
+                prepickup = RED_NOTE_PREPICKUP_LEFT;
+
+            }
+            frc::SmartDashboard::PutNumber("Auto init Delay", r->auto_init_delay);
+            pushTask(&r->taskmgr, genTaskDelay(r->auto_init_delay));
+
+            {
+                Task t;
+                t.type = TASK_SHOOTER_FIRE;
+                t.firing_motor.direction = 0;
+                pushTask(&r->taskmgr, t);
+            }
+
+            if(r->photon.n_tags == 0)
+            {
+                {
+                    Task t;
+                    t.type = TASK_DRIVETRAIN_VELOCITY;
+                    t.drivetrain_velocity.target_angular_velocity = 0;
+                    t.drivetrain_velocity.target_velocity = {0, 10};
+                    t.drivetrain_velocity.timer = 0;
+                    t.drivetrain_velocity.length = 0.5;
+                    pushTask(&r->taskmgr, t);
+
+                }
+
+                {
+                    Task t;
+                    t.type = TASK_MIDDLE_THE_WHEELS;
+                    t.middle_wheels.enabled = true;
+                    pushTask(&r->taskmgr, t);
+                }
+
+                pushTask(&r->taskmgr, genTaskDelay(0.2));
+
+                {
+                    Task t;
+                    t.type = TASK_MIDDLE_THE_WHEELS;
+                    t.middle_wheels.enabled = false;
+                    pushTask(&r->taskmgr, t);
+                }
+
+
+            }
+
+            {
+                Task t;
+                t.type = TASK_DRIVETRAIN_OVERRIDE;
+                pushTask(&r->taskmgr, t);
+            }
+
         }
     }
 

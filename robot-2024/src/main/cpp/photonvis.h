@@ -15,6 +15,9 @@ void calculateVision(RobotData* robot, int tag_id);
 
 void initVisionCalculations(RobotData* robot);
 
+void initPhoton(RobotData* r);
+
+
 
 struct TagPosition
 {

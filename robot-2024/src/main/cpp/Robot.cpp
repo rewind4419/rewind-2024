@@ -143,6 +143,7 @@ void robotModeInit(RobotData *r, RobotMode new_mode)
     r->shooter.axis_motors[0]->SetIdleMode(rev::CANSparkBase::IdleMode::kCoast);
     r->shooter.axis_motors[1]->SetIdleMode(rev::CANSparkBase::IdleMode::kCoast);
 
+    // initPhoton(r);
     initVisionCalculations(r);
 
     r->drivetrain.drivetrain_override = false;
@@ -178,10 +179,12 @@ void robotModeInit(RobotData *r, RobotMode new_mode)
         }
         else
         {
-            // autoCmd(r, AUTO_4_PIECE, autoAlliance);
+            autoCmd(r, AUTO_4_PIECE, autoAlliance);
             // autoCmd(r, AUTO_PREFIRE_LEAVE_COMMUNITY_RIGHT, autoAlliance);
             // autoCmd(r, AUTO_PREFIRE_LEAVE_COMMUNITY_LEFT, autoAlliance);
-            autoCmd(r, AUTO_4_PIECE_CONFIG, autoAlliance);
+            // autoCmd(r, AUTO_4_PIECE_CONFIG, autoAlliance);
+            // autoCmd(r, AUTO_PREFIRE_LEAVE_COMMUNITY, autoAlliance);
+            
             
             //printf("%d\n", autoMode->GetInteger(0));
             // autoCmd(r, AUTO_SHOOT_WHILE_INTAKING, autoAlliance);
@@ -512,6 +515,13 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             r->robotState.robotMode = MODE_DEFAULT;
         }
 
+        if (in->mate.option_button.down && (r->robotState.robotMode == MODE_DEFAULT || r->robotState.robotMode == MODE_SHOOTING))
+        {
+            r->robotState.robotMode = MODE_CLIMBING;
+            r->shooter.target_angle = 1.2f;
+            r->elevator.target_height = 0.225; //Might need to change?
+        }
+
         frc::SmartDashboard::PutBoolean("Beam Break", r->shooter.beam_break.Get());
         
         currentDriverState->SetInteger(r->robotState.robotMode);
@@ -557,16 +567,12 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                     r->shooter.target_angle = 0.0;
                     r->shooter.shooter_pid.errorAccum = 0;
                 }
-                if (in->mate.option_button.down)
-                {
-                    r->robotState.robotMode = MODE_CLIMBING;
-                    r->shooter.target_angle = 1.2f;
-                    r->elevator.target_height = 0.225; //Might need to change?
-                }
+                
 
                 if(in->mate.big_button.down)
                 {
                     r->photon.regression_function = false;
+                    calibratePositions(r);
                 }
                 r->manual_shooting_mode = false;
             } break;
@@ -963,7 +969,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
 
     // // COMP COMP COMP COMP CoMP UNCOMMENT PLEASE
-    updateElevator(&r->elevator, r);
+    // updateElevator(&r->elevator, r);
     updateIntake(&r->intake);
     updateShooter(&r->shooter, r);
     updateDrivetrainController(r, &r->drivetrain_controller, &r->drivetrain, r->latest_odometry_frame, r->delta_time);
