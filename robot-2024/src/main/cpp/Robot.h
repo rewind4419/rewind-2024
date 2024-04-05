@@ -61,6 +61,8 @@ enum Aligner
 
 struct RobotData
 {
+  bool manual_shooting_mode = false;
+  int pose_calib_index = 0;
   // high level
   TaskMgr taskmgr;
   RobotStateContainer robotState;

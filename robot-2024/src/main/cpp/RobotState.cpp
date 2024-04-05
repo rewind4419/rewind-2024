@@ -27,6 +27,12 @@ SDR Auto issues
 
 */
 
+bool first_prefire_shot = false;
+
+bool note_left = false;
+bool note_middle = true;
+bool note_right = true;
+
 extern nt::GenericEntry* singleWaypointSpeed;
 extern nt::GenericEntry* singleWaypointSpeedRot;
 
@@ -258,6 +264,36 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                 pushTask(&r->taskmgr, t);
             }
 
+            if(r->photon.n_tags == 0)
+            {
+                {
+                    Task t;
+                    t.type = TASK_DRIVETRAIN_VELOCITY;
+                    t.drivetrain_velocity.target_angular_velocity = 0;
+                    t.drivetrain_velocity.target_velocity = {0, 10};
+                    t.drivetrain_velocity.timer = 0;
+                    t.drivetrain_velocity.length = 0.5;
+                    pushTask(&r->taskmgr, t);
+
+                }
+
+                {
+                    Task t;
+                    t.type = TASK_MIDDLE_THE_WHEELS;
+                    t.middle_wheels.enabled = true;
+                    pushTask(&r->taskmgr, t);
+                }
+
+                pushTask(&r->taskmgr, genTaskDelay(0.2));
+
+                {
+                    Task t;
+                    t.type = TASK_MIDDLE_THE_WHEELS;
+                    t.middle_wheels.enabled = false;
+                    pushTask(&r->taskmgr, t);
+                }
+            }
+
             {
                 Task t;
                 t.type = TASK_WAYPOINT;
@@ -291,7 +327,7 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                 pushTask(&r->taskmgr, t);
             }
 
-            pushTask(&r->taskmgr, genTaskDelay(0.5));
+            pushTask(&r->taskmgr, genTaskDelay(0.2));
 
             {
                 Task t;
@@ -525,7 +561,7 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                     pushTask(&r->taskmgr, t);
                 }
 
-                pushTask(&r->taskmgr, genTaskDelay(0.5));
+                // pushTask(&r->taskmgr, genTaskDelay(0.5));
             
                 {
                     Task t;
@@ -543,7 +579,7 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                     {
                         Task t;
                         t.type = TASK_WAYPOINT;
-                t.waypoint.tag_aligner = false;
+                        t.waypoint.tag_aligner = false;
                         t.waypoint.target_pose = prepickup;
                         t.waypoint.epsilon = 0.5f;
                         t.waypoint.epsilon_rot = 0.3f;
@@ -570,11 +606,11 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                 pushTask(&r->taskmgr, t);
             }
 
-            {
-                Task t;
-                t.type = TASK_SHOOTER_STOP;
-                pushTask(&r->taskmgr, t);
-            }
+            // {
+            //     Task t;
+            //     t.type = TASK_SHOOTER_STOP;
+            //     pushTask(&r->taskmgr, t);
+            // }
             
             {
                 Task t;
@@ -1052,86 +1088,6 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
             }
             frc::SmartDashboard::PutNumber("Auto init Delay", r->auto_init_delay);
             pushTask(&r->taskmgr, genTaskDelay(r->auto_init_delay));
-
-            // {
-            //     Task t;
-            //     t.type = TASK_SHOOTER_FIRE;
-            //     t.firing_motor.direction = 0;
-            //     pushTask(&r->taskmgr, t);
-            // }
-
-            // {
-            //     Task t;
-            //     t.type = TASK_WAYPOINT;
-            //     t.waypoint.tag_aligner = false;
-            //     t.waypoint.target_pose = prepickup;
-            //     t.waypoint.epsilon = 0.4f;
-            //     t.waypoint.epsilon_rot = 0.4f;
-            //     t.waypoint.speed = 12.0f;
-            //     t.waypoint.speed_rot = 2.0f;
-
-            //     pushTask(&r->taskmgr, t);
-            // }
-
-            // {
-            //     Task t;
-            //     t.type = TASK_WAYPOINT;
-            //     t.waypoint.tag_aligner = false;
-            //     t.waypoint.target_pose = prepickup;
-            //     t.waypoint.epsilon = 0.4f;
-            //     t.waypoint.epsilon_rot = 0.25f;
-            //     t.waypoint.speed = 7.0f;
-            //     t.waypoint.speed_rot = 1.0f;
-
-            //     pushTask(&r->taskmgr, t);
-            // }
-
-            // {
-            //     Task t;
-            //     t.type = TASK_MIDDLE_THE_WHEELS;
-            //     t.middle_wheels.enabled = true;
-            //     pushTask(&r->taskmgr, t);
-            // }
-
-            // pushTask(&r->taskmgr, genTaskDelay(0.5));
-
-            // {
-            //     Task t;
-            //     t.type = TASK_MIDDLE_THE_WHEELS;
-            //     t.middle_wheels.enabled = false;
-            //     pushTask(&r->taskmgr, t);
-            // }
-
-            // // Blue uses tag 7
-            // {
-            //     Task t;
-            //     t.type = TASK_ANGLE_TO_TAG_AUTO;
-            //     t.photon_aligner.align_tag_id = april_tag;
-            //     t.photon_aligner.angular_throttle_timer = 0.0;
-            //     t.photon_aligner.shooter_align_epsilon = 0.2f;
-            //     t.photon_aligner.delay_length = 0.0f;
-            //     t.photon_aligner.timer_first = true;
-            //     pushTask(&r->taskmgr, t);
-            // }
-
-            // {
-            //     Task t;
-            //     t.type = TASK_WAIT_FOR_FIRING_RPM;
-            //     t.wait_rpm.rpm = 5300;
-            //     t.wait_rpm.timer = 0.0;
-            //     pushTask(&r->taskmgr, t);
-            // }
-        
-            // {
-            //     Task t;
-            //     t.type = TASK_SEAT_RING;
-            //     t.shooter.delay_timer = 0;
-            //     t.shooter.delay_length = 0.1f;
-            //     t.shooter.seat_speed_control = 1.0f;
-            //     t.shooter.seat_speed_firing = 0;
-            //     t.shooter.seat_first = false;
-            //     pushTask(&r->taskmgr, t);
-            // }
 
             {
                 Task t;
@@ -1664,7 +1620,563 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                 pushTask(&r->taskmgr, t);
             }
         }
+
+        case AUTO_PREFIRE_LEAVE_COMMUNITY_RIGHT:
+        {
+
+            Pose prepickup;
+            Pose pickup;
+            float april_tag;
+            if(r->side == 0)
+            {
+                april_tag = 7;
+                prepickup = BLUE_NOTE_PREPICKUP_RIGHT;
+                
+            }
+            else if(r->side == 1)
+            {
+                april_tag = 4;
+                prepickup = RED_NOTE_PREPICKUP_LEFT;
+
+            }
+            frc::SmartDashboard::PutNumber("Auto init Delay", r->auto_init_delay);
+            pushTask(&r->taskmgr, genTaskDelay(r->auto_init_delay));
+
+            {
+                Task t;
+                t.type = TASK_SHOOTER_FIRE;
+                t.firing_motor.direction = 0;
+                pushTask(&r->taskmgr, t);
+            }
+
+            if(r->photon.n_tags == 0)
+            {
+                {
+                    Task t;
+                    t.type = TASK_DRIVETRAIN_VELOCITY;
+                    t.drivetrain_velocity.target_angular_velocity = 0;
+                    t.drivetrain_velocity.target_velocity = {0, 10};
+                    t.drivetrain_velocity.timer = 0;
+                    t.drivetrain_velocity.length = 0.5;
+                    pushTask(&r->taskmgr, t);
+
+                }
+
+                {
+                    Task t;
+                    t.type = TASK_MIDDLE_THE_WHEELS;
+                    t.middle_wheels.enabled = true;
+                    pushTask(&r->taskmgr, t);
+                }
+
+                pushTask(&r->taskmgr, genTaskDelay(0.2));
+
+                {
+                    Task t;
+                    t.type = TASK_MIDDLE_THE_WHEELS;
+                    t.middle_wheels.enabled = false;
+                    pushTask(&r->taskmgr, t);
+                }
+
+
+            }
+
+            {
+                Task t;
+                t.type = TASK_DRIVETRAIN_VELOCITY;
+                t.drivetrain_velocity.target_angular_velocity = 0;
+                t.drivetrain_velocity.target_velocity = {0.81506 * 10,  0.57 * 10};
+                t.drivetrain_velocity.timer = 0;
+                t.drivetrain_velocity.length = 1.5;
+                pushTask(&r->taskmgr, t);
+            }
+
+            {
+                Task t;
+                t.type = TASK_DRIVETRAIN_OVERRIDE;
+                pushTask(&r->taskmgr, t);
+            }
+
+        }
+
+        case AUTO_PREFIRE_LEAVE_COMMUNITY_LEFT:
+        {
+
+            Pose prepickup;
+            Pose pickup;
+            float april_tag;
+            if(r->side == 0)
+            {
+                april_tag = 7;
+                prepickup = BLUE_NOTE_PREPICKUP_RIGHT;
+                
+            }
+            else if(r->side == 1)
+            {
+                april_tag = 4;
+                prepickup = RED_NOTE_PREPICKUP_LEFT;
+
+            }
+            frc::SmartDashboard::PutNumber("Auto init Delay", r->auto_init_delay);
+            pushTask(&r->taskmgr, genTaskDelay(r->auto_init_delay));
+
+            {
+                Task t;
+                t.type = TASK_SHOOTER_FIRE;
+                t.firing_motor.direction = 0;
+                pushTask(&r->taskmgr, t);
+            }
+
+            if(r->photon.n_tags == 0)
+            {
+                {
+                    Task t;
+                    t.type = TASK_DRIVETRAIN_VELOCITY;
+                    t.drivetrain_velocity.target_angular_velocity = 0;
+                    t.drivetrain_velocity.target_velocity = {0, 10};
+                    t.drivetrain_velocity.timer = 0;
+                    t.drivetrain_velocity.length = 0.5;
+                    pushTask(&r->taskmgr, t);
+
+                }
+
+                {
+                    Task t;
+                    t.type = TASK_MIDDLE_THE_WHEELS;
+                    t.middle_wheels.enabled = true;
+                    pushTask(&r->taskmgr, t);
+                }
+
+                pushTask(&r->taskmgr, genTaskDelay(0.2));
+
+                {
+                    Task t;
+                    t.type = TASK_MIDDLE_THE_WHEELS;
+                    t.middle_wheels.enabled = false;
+                    pushTask(&r->taskmgr, t);
+                }
+
+            }
+
+            {
+                Task t;
+                t.type = TASK_DRIVETRAIN_VELOCITY;
+                t.drivetrain_velocity.target_angular_velocity = 0;
+                t.drivetrain_velocity.target_velocity = {- 0.81506 * 10,  0.57 * 10};
+                t.drivetrain_velocity.timer = 0;
+                t.drivetrain_velocity.length = 1.5;
+                pushTask(&r->taskmgr, t);
+            }
+
+            {
+                Task t;
+                t.type = TASK_DRIVETRAIN_OVERRIDE;
+                pushTask(&r->taskmgr, t);
+            }
+
+        }
+
+        case AUTO_4_PIECE_CONFIG:
+        {
+            Pose prepickup;
+            Pose pickup;
+            float april_tag;
+            if(r->side == 0)
+            {
+                april_tag = 7;
+                prepickup = BLUE_NOTE_PREPICKUP_RIGHT;
+                
+            }
+            else if(r->side == 1)
+            {
+                april_tag = 4;
+                prepickup = RED_NOTE_PREPICKUP_LEFT;
+
+            }
+            frc::SmartDashboard::PutNumber("Auto init Delay", r->auto_init_delay);
+            pushTask(&r->taskmgr, genTaskDelay(r->auto_init_delay));
+
+            {
+                Task t;
+                t.type = TASK_SHOOTER_FIRE;
+                t.firing_motor.direction = 0;
+                pushTask(&r->taskmgr, t);
+            }
+
+            if(r->photon.n_tags == 0)
+            {
+                {
+                    Task t;
+                    t.type = TASK_DRIVETRAIN_VELOCITY;
+                    t.drivetrain_velocity.target_angular_velocity = 0;
+                    t.drivetrain_velocity.target_velocity = {0, 10};
+                    t.drivetrain_velocity.timer = 0;
+                    t.drivetrain_velocity.length = 0.5;
+                    pushTask(&r->taskmgr, t);
+
+                }
+
+                {
+                    Task t;
+                    t.type = TASK_MIDDLE_THE_WHEELS;
+                    t.middle_wheels.enabled = true;
+                    pushTask(&r->taskmgr, t);
+                }
+
+                pushTask(&r->taskmgr, genTaskDelay(0.2));
+
+                {
+                    Task t;
+                    t.type = TASK_MIDDLE_THE_WHEELS;
+                    t.middle_wheels.enabled = false;
+                    pushTask(&r->taskmgr, t);
+                }
+            }
+
+            if(first_prefire_shot)
+            {
+                {
+                    Task t;
+                    t.type = TASK_WAYPOINT;
+                    t.waypoint.tag_aligner = false;
+                    t.waypoint.target_pose = prepickup;
+                    t.waypoint.epsilon = 0.4f;
+                    t.waypoint.epsilon_rot = 0.4f;
+                    t.waypoint.speed = 12.0f;
+                    t.waypoint.speed_rot = 2.0f;
+
+                    pushTask(&r->taskmgr, t);
+                }
+
+                {
+                    Task t;
+                    t.type = TASK_WAYPOINT;
+                    t.waypoint.tag_aligner = false;
+                    t.waypoint.target_pose = prepickup;
+                    t.waypoint.epsilon = 0.4f;
+                    t.waypoint.epsilon_rot = 0.25f;
+                    t.waypoint.speed = 7.0f;
+                    t.waypoint.speed_rot = 1.0f;
+
+                    pushTask(&r->taskmgr, t);
+                }
+
+                {
+                    Task t;
+                    t.type = TASK_MIDDLE_THE_WHEELS;
+                    t.middle_wheels.enabled = true;
+                    pushTask(&r->taskmgr, t);
+                }
+
+                pushTask(&r->taskmgr, genTaskDelay(0.2));
+
+                {
+                    Task t;
+                    t.type = TASK_MIDDLE_THE_WHEELS;
+                    t.middle_wheels.enabled = false;
+                    pushTask(&r->taskmgr, t);
+                }
+
+                // Blue uses tag 7
+                {
+                    Task t;
+                    t.type = TASK_ANGLE_TO_TAG_AUTO;
+                    t.photon_aligner.align_tag_id = april_tag;
+                    t.photon_aligner.angular_throttle_timer = 0.0;
+                    t.photon_aligner.shooter_align_epsilon = 0.2f;
+                    t.photon_aligner.delay_length = 0.0f;
+                    t.photon_aligner.timer_first = true;
+                    pushTask(&r->taskmgr, t);
+                }
+
+                {
+                    Task t;
+                    t.type = TASK_WAIT_FOR_FIRING_RPM;
+                    t.wait_rpm.rpm = 5300;
+                    t.wait_rpm.timer = 0.0;
+                    pushTask(&r->taskmgr, t);
+                }
+            
+                {
+                    Task t;
+                    t.type = TASK_SEAT_RING;
+                    t.shooter.delay_timer = 0;
+                    t.shooter.delay_length = 0.1f;
+                    t.shooter.seat_speed_control = 1.0f;
+                    t.shooter.seat_speed_firing = 0;
+                    t.shooter.seat_first = false;
+                    pushTask(&r->taskmgr, t);
+                }
+            }
+            
+            for (int i = 0; i < 3; i++)
+            {
+                
+                // Blue side
+                if(r->side == 0)
+                {
+                    if (i == 0)
+                    {
+                        if(!note_right) continue;
+                        prepickup = BLUE_NOTE_PREPICKUP_RIGHT;
+                        pickup = BLUE_NOTE_PICKUP_RIGHT;
+                    }
+                    else if (i == 1)
+                    {
+                        if(!note_middle) continue;
+                        prepickup = BLUE_NOTE_PREPICKUP_MIDDLE;
+                        pickup = BLUE_NOTE_PICKUP_MIDDLE;
+                    }
+                    else if (i == 2)
+                    {
+                        if(!note_left) continue;
+                        prepickup = BLUE_NOTE_PREPICKUP_LEFT;
+                        pickup = BLUE_NOTE_PICKUP_LEFT;
+                    }
+                }
+                else if(r->side == 1)
+                {
+                    if (i == 0)
+                    {
+                        if(!note_left) continue;
+                        prepickup = RED_NOTE_PREPICKUP_LEFT;
+                        pickup = RED_NOTE_PICKUP_LEFT;
+                    }
+                    else if (i == 1)
+                    {
+                        if(!note_middle) continue;
+                        prepickup = RED_NOTE_PREPICKUP_MIDDLE;
+                        pickup = RED_NOTE_PICKUP_MIDDLE;
+                    }
+                    else if (i == 2)
+                    {
+                        if(!note_right) continue;
+                        prepickup = RED_NOTE_PREPICKUP_RIGHT;
+                        pickup = RED_NOTE_PICKUP_RIGHT;
+                    }
+                }
+
+
+
+
+                { // Sets pivot angle but doesn't wait for the move to finish
+                    Task t;
+                    t.type = TASK_SHOOTER_POSITIONING_NO_RETURN;
+                    t.shooter.target_angle = 1.2f;
+                    pushTask(&r->taskmgr, t);
+                }     
+
+                {
+                    Task t;
+                    t.type = TASK_WAYPOINT;
+                t.waypoint.tag_aligner = false;
+                    t.waypoint.target_pose = prepickup;
+                    t.waypoint.epsilon = 0.5f;
+                    t.waypoint.epsilon_rot = 0.3f;
+                    t.waypoint.speed = 12.0f;
+                    t.waypoint.speed_rot = 2.0f;
+
+                    pushTask(&r->taskmgr, t);
+                }
+
+                {
+                    Task t;
+                    t.type = TASK_WAYPOINT;
+                t.waypoint.tag_aligner = false;
+                    t.waypoint.target_pose = prepickup;
+                    t.waypoint.epsilon = 0.3f;
+                    t.waypoint.epsilon_rot = 0.25f;
+                    t.waypoint.speed = 7.0f;
+                    t.waypoint.speed_rot = 1.0f;
+
+                    pushTask(&r->taskmgr, t);
+                }
+
+                {
+                    Task t;
+                    t.type = TASK_SHOOTER_PULLER_START;
+                    pushTask(&r->taskmgr, t);
+                }
+
+                // {
+                //     Task t;
+                //     t.type = TASK_MIDDLE_THE_WHEELS;
+                //     t.middle_wheels.enabled = true;
+                //     pushTask(&r->taskmgr, t);
+                // }
+
+                // pushTask(&r->taskmgr, genTaskDelay(0.1));
+
+                // {
+                //     Task t;
+                //     t.type = TASK_MIDDLE_THE_WHEELS;
+                //     t.middle_wheels.enabled = false;
+                //     pushTask(&r->taskmgr, t);
+                // }
+
+                {
+                    Task t;
+                    t.type = TASK_WAYPOINT_PULLER;
+                    t.waypoint.target_pose = pickup;
+                    t.waypoint.epsilon = 0.2f;
+                    t.waypoint.epsilon_rot = 0.25f;
+                    t.waypoint.speed = 7.0f;
+                    t.waypoint.speed_rot = 1.0f;
+
+                    pushTask(&r->taskmgr, t);
+                }
+
+                {
+                    Task t;
+                    t.type = TASK_MIDDLE_THE_WHEELS;
+                    t.middle_wheels.enabled = true;
+                    pushTask(&r->taskmgr, t);
+                }
+
+                {
+                    Task t;
+                    t.type = TASK_AUTO_AWAIT_PULLER;
+                    pushTask(&r->taskmgr, t);
+                }
+
+                {
+                    Task t;
+                    t.type = TASK_MIDDLE_THE_WHEELS;
+                    t.middle_wheels.enabled = false;
+                    pushTask(&r->taskmgr, t);
+                }
+                
+
+                {
+                    Task t;
+                    t.type = TASK_SHOOTER_PULLER_STOP;
+                    pushTask(&r->taskmgr, t);
+                }
+
+                if (i == 2)
+                {
+                    {
+                        Task t;
+                        t.type = TASK_WAYPOINT;
+                    t.waypoint.tag_aligner = false;
+                        t.waypoint.target_pose = prepickup;
+                        t.waypoint.epsilon = 0.5f;
+                        t.waypoint.epsilon_rot = 0.25f;
+                        t.waypoint.speed = 12.0f;
+                        t.waypoint.speed_rot = 1.3f;
+
+                        pushTask(&r->taskmgr, t);
+                    }
+
+                    {
+                        Task t;
+                        t.type = TASK_WAYPOINT;
+                        t.waypoint.tag_aligner = false;
+                        t.waypoint.target_pose = prepickup;
+                        t.waypoint.epsilon = 0.2f;
+                        t.waypoint.epsilon_rot = 0.1f;
+                        t.waypoint.speed = 6.0f;
+                        t.waypoint.speed_rot = 1.3f;
+
+                        pushTask(&r->taskmgr, t);
+                    }
+
+                    {
+                        Task t;
+                        t.type = TASK_MIDDLE_THE_WHEELS;
+                        t.middle_wheels.enabled = true;
+                        pushTask(&r->taskmgr, t);
+                    }
+
+                }
+
+                // Blue uses tag 7
+                {
+                    Task t;
+                    t.type = TASK_ANGLE_TO_TAG_AUTO;
+                    t.photon_aligner.angular_throttle = 0.0;
+                    t.photon_aligner.align_tag_id = april_tag;
+                    t.photon_aligner.shooter_align_epsilon = 0.2f;
+                    t.photon_aligner.delay_length = 0.5f;
+                    t.photon_aligner.timer_first = true;
+                    pushTask(&r->taskmgr, t);
+                }
+
+                {
+                    Task t;
+                    t.type = TASK_WAIT_FOR_FIRING_RPM;
+                    t.wait_rpm.rpm = 5300;
+                    t.wait_rpm.timer = 0.0;
+                    pushTask(&r->taskmgr, t);
+                }
+
+                // pushTask(&r->taskmgr, genTaskDelay(0.5));
+            
+                {
+                    Task t;
+                    t.type = TASK_SEAT_RING;
+                    t.shooter.delay_timer = 0;
+                    t.shooter.delay_length = 0.1f;
+                    t.shooter.seat_speed_control = 1.0f;
+                    t.shooter.seat_speed_firing = 0;
+                    t.shooter.seat_first = false;
+                    pushTask(&r->taskmgr, t);
+                }
+
+                if (i < 2)
+                {
+                    {
+                        Task t;
+                        t.type = TASK_WAYPOINT;
+                        t.waypoint.tag_aligner = false;
+                        t.waypoint.target_pose = prepickup;
+                        t.waypoint.epsilon = 0.5f;
+                        t.waypoint.epsilon_rot = 0.3f;
+                        t.waypoint.speed = 10.0f;
+                        t.waypoint.speed_rot = 2.5f;
+
+                        pushTask(&r->taskmgr, t);
+                    }
+                }
+
+            }
+
+            {
+                Task t;
+                t.type = TASK_MIDDLE_THE_WHEELS;
+                t.middle_wheels.enabled = true;
+                pushTask(&r->taskmgr, t);
+            }
+
+            {
+                Task t;
+                t.type = TASK_SHOOTER_POSITIONING_NO_RETURN;
+                t.shooter.target_angle = 0;
+                pushTask(&r->taskmgr, t);
+            }
+
+            // {
+            //     Task t;
+            //     t.type = TASK_SHOOTER_STOP;
+            //     pushTask(&r->taskmgr, t);
+            // }
+            
+            {
+                Task t;
+                t.type = TASK_MIDDLE_THE_WHEELS;
+                t.middle_wheels.enabled = true;
+                pushTask(&r->taskmgr, t);
+            }
+
+            {
+                Task t;
+                t.type = TASK_DRIVETRAIN_OVERRIDE;
+                pushTask(&r->taskmgr, t);
+            }
+        }
     }
+
+
 
     return;
 }

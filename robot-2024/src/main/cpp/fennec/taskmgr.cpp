@@ -200,6 +200,7 @@ static bool taskStep(Task* task, RobotData* robot)
 		if (robot->shooter.auto_await_timeout > 1.5) 
 		{
 			robot->shooter.auto_await_timeout = 0;
+			robot->shooter.auto_beam_break_timer = 0.0;
 			return true;
 		}
 
@@ -219,6 +220,7 @@ static bool taskStep(Task* task, RobotData* robot)
 			robot->shooter.control_motor_speed = 0;
 			robot->intake.intake_speed = 0;
 			robot->shooter.auto_beam_break_timer = 0.0;
+			robot->shooter.auto_await_timeout = 0.0;
 			printf("PULLER STOPPED EARLY PULLER STOPPED EARLY PULLER STOPPED EARLY \n");
 			
 			return true;
@@ -560,8 +562,8 @@ static bool taskStep(Task* task, RobotData* robot)
 		// }
 		// else
 		
-			float init_velocity = 12.5f;
-		
+		float init_velocity = 12.5f;
+	
 
 		// frc::SmartDashboard::PutNumber("Initial Velocity", init_velocity);
 
@@ -575,6 +577,8 @@ static bool taskStep(Task* task, RobotData* robot)
 		shooter_total_angle += angle_fudge_factor;
 		float shooter_height = CFG_SHOOTER_RADIUS * sinf( shooter_total_angle ) + CFG_SHOOTER_AXIS_HEIGHT;
 
+    	dist_from_tag = dist_from_tag * cos(degToRad(25));
+
 		frc::SmartDashboard::PutNumber("Shooter Height", shooter_height);
 
 		float shooter_offset = CFG_SHOOTER_DIST_CAM_TO_AXIS - CFG_SHOOTER_RADIUS * cosf(shooter_total_angle);
@@ -587,8 +591,15 @@ static bool taskStep(Task* task, RobotData* robot)
 
 		float solved_shooter_angle = (solved_angle_1 < solved_angle_2) ? solved_angle_1 : solved_angle_2;
 
+		float solved_angle_after_regression_function = 0.878567 * solved_shooter_angle + 0.158185;
+
 		if (isnanf(solved_shooter_angle) == 0)
 		{
+			// if(robot->photon.regression_function)
+			// {
+			// 	robot->shooter.target_angle = solved_angle_after_regression_function - CFG_SHOOTER_ANGLE_OFFSET; // Uncomment to enable shooter a movement
+			// }
+			// else robot->shooter.target_angle = solved_shooter_angle - CFG_SHOOTER_ANGLE_OFFSET; // Uncomment to enable shooter a movement
 			robot->shooter.target_angle = solved_shooter_angle - CFG_SHOOTER_ANGLE_OFFSET; // Uncomment to enable shooter a movement
 		}
 

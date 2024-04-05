@@ -13,6 +13,9 @@ struct RobotData;
 void alignToTag(int tagId, RobotData* robot, bool yaw_align);
 void calculateVision(RobotData* robot, int tag_id);
 
+void initVisionCalculations(RobotData* robot);
+
+
 struct TagPosition
 {
     frc::Pose3d pose;
@@ -32,6 +35,7 @@ struct PhotonParameters
 
     bool first_aim = true;
     bool auto_aim_activated = false;
+    bool regression_function = true;
     int n_tags = 0;
 
     float calculated_pivot_angle = 0;

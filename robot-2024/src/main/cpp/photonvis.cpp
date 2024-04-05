@@ -4,6 +4,11 @@
 
 #include "Robot.h"
 
+void initVisionCalculations(RobotData* robot)
+{
+    robot->photon.regression_function = true;
+}
+
 void autoVisionUpdate(RobotData* robot, int tag_id)
 {
     if(robot->photon.auto_aim_activated)
@@ -74,7 +79,6 @@ void calculateVision(RobotData* robot, int tag_id)
 
     //Projectile Motion
     float dist_from_tag = length(vect_to_tag);
-    frc::SmartDashboard::PutNumber("Dist from tag", dist_from_tag);
 
 
     // float init_velocity = 0.00195305 * fabs(robot->shooter.firing_encoder->GetVelocity()) + 1.49364;
@@ -86,17 +90,26 @@ void calculateVision(RobotData* robot, int tag_id)
     float offset;
     shooter_curr_angle += offset;
 
-    frc::SmartDashboard::PutNumber("Current Angle", shooter_curr_angle);
+    // frc::SmartDashboard::PutNumber("Current Angle", shooter_curr_angle);
     // float shooter_height = CFG_SHOOTER_RADIUS * sinf( shooter_curr_angle + 0.3542) + CFG_SHOOTER_AXIS_HEIGHT;
 
 
     float angle_fudge_factor = 0.5117 * shooter_curr_angle + 0.169995;
-    frc::SmartDashboard::PutNumber("Fudge", angle_fudge_factor);
+    // frc::SmartDashboard::PutNumber("Fudge", angle_fudge_factor);
 
     shooter_curr_angle += angle_fudge_factor;
     float shooter_height = CFG_SHOOTER_RADIUS * sinf( shooter_curr_angle ) + CFG_SHOOTER_AXIS_HEIGHT;
-    
-    frc::SmartDashboard::PutNumber("Shooter Height", shooter_height * 39.37);
+
+    dist_from_tag = dist_from_tag * cos(degToRad(25));
+
+    float shooter_offset = CFG_SHOOTER_DIST_CAM_TO_AXIS - CFG_SHOOTER_RADIUS * cosf(shooter_curr_angle);
+    dist_from_tag += shooter_offset;
+
+    frc::SmartDashboard::PutNumber("Dist from tag", dist_from_tag * 39.37);
+
+    printf("height = %f\n", shooter_height);
+
+    frc::SmartDashboard::PutNumber("Current Height", shooter_height * 39.37);
 
     float equation_term_1 = (CFG_GRAVITATIONAL_CONSTANT * std::pow(dist_from_tag, 2)) / std::pow(init_velocity, 2);
 
@@ -105,9 +118,22 @@ void calculateVision(RobotData* robot, int tag_id)
 
     float solved_shooter_angle = (solved_angle_1 < solved_angle_2) ? solved_angle_1 : solved_angle_2;
 
+    float solved_angle_after_regression_function = 0.878567 * solved_shooter_angle + 0.158185;
 
+
+    // if(robot->photon.regression_function)
+    // {
+    //     robot->photon.calculated_pivot_angle = solved_angle_after_regression_function;
+    // }
+    // else robot->photon.calculated_pivot_angle = solved_shooter_angle;
     robot->photon.calculated_pivot_angle = solved_shooter_angle;
+
     robot->photon.calculated_yaw_angle = angle_to_speaker;
+
+    frc::SmartDashboard::PutNumber("YAW CHECK", angle_to_speaker);
+
+    frc::SmartDashboard::PutNumber("Calculated Angle", solved_angle_after_regression_function);
+
 
 }
 
