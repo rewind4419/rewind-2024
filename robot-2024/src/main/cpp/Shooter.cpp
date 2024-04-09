@@ -20,7 +20,7 @@ void initShooter(Shooter* shooter)
     shooter->axis_motors[0] = new rev::CANSparkFlex(CFG_SHOOTER_AXIS_LEFT, rev::CANSparkFlex::MotorType::kBrushless);
     shooter->axis_motors[1] = new rev::CANSparkFlex(CFG_SHOOTER_AXIS_RIGHT, rev::CANSparkFlex::MotorType::kBrushless);
 
-    shooter->shooter_encoder = std::make_unique<rev::SparkMaxRelativeEncoder>(shooter->axis_motors[0]->GetEncoder());
+    shooter->shooter_encoder = std::make_unique<rev::SparkMaxRelativeEncoder>(shooter->axis_motors[1]->GetEncoder());
     shooter->firing_encoder = std::make_unique<rev::SparkMaxRelativeEncoder>(shooter->firing_motor->GetEncoder());
     shooter->control_encoder = std::make_unique<rev::SparkMaxRelativeEncoder>(shooter->control_motor->GetEncoder());
 
@@ -29,7 +29,7 @@ void initShooter(Shooter* shooter)
 
     shooter->target_angle = 0;
 
-    shooter->prev_angle = shooter->shooter_encoder->GetPosition();
+    shooter->prev_angle = -shooter->shooter_encoder->GetPosition();
 
     shooter->shooter_firing_calibrate_speed = 1.0f;
     shooter->amp_mode = false;
@@ -56,12 +56,13 @@ void updateShooter(Shooter* shooter, RobotData* r)
     float firing_motor_velocity = shooter->firing_encoder->GetVelocity();
     frc::SmartDashboard::PutNumber("Current Firing Motor Velocity", firing_motor_velocity);
 
-    if (shooter->firing_motor_speed * CFG_TARGET_VELOCITY_FIRING_WHEELS != shooter->last_firing_motor_target)
-    {
-        shooter->firing_wheel_pid.errorAccum = 0.0;
-        printf("Resetting error accum on firing motor\n");
-        shooter->last_firing_motor_target = shooter->firing_motor_speed * CFG_TARGET_VELOCITY_FIRING_WHEELS;
-    }
+    // // Shooter integral resetter
+    // if (shooter->firing_motor_speed * CFG_TARGET_VELOCITY_FIRING_WHEELS != shooter->last_firing_motor_target)
+    // {
+    //     //shooter->firing_wheel_pid.errorAccum = 0.0;
+    //     printf("Resetting error accum on firing motor\n");
+    //     shooter->last_firing_motor_target = shooter->firing_motor_speed * CFG_TARGET_VELOCITY_FIRING_WHEELS;
+    // }
     
 
     //////// Firing Motor Brake Code ////////
@@ -132,7 +133,7 @@ void updateShooter(Shooter* shooter, RobotData* r)
     counter_throttle *= cg_extension_coeff;
 
     //////// Finding Total Angle ////////
-    float curr_angle = shooter->shooter_encoder->GetPosition();
+    float curr_angle = -shooter->shooter_encoder->GetPosition();
     shooter->sum_angle += curr_angle - shooter->prev_angle;
 
     //////// Pivot Throttle Estimation ////////
@@ -166,11 +167,33 @@ void updateShooter(Shooter* shooter, RobotData* r)
 
     frc::SmartDashboard::PutNumber("Shooter Throttle", shooter->axis_throttle);
 
-    for(int i = 0; i < CFG_SHOOTER_AXIS_MOTOR_COUNT; i++)
+    if(r->input.mate.bumper_right.held && r->input.mate.joystick_left.y > 0.2)
     {
-        if (i == 1) shooter->axis_motors[i]->Set(-shooter->axis_throttle);
-        else shooter->axis_motors[i]->Set(shooter->axis_throttle);
+        for(int i = 0; i < CFG_SHOOTER_AXIS_MOTOR_COUNT; i++)
+        {
+            if (i == 1) shooter->axis_motors[i]->Set(-0.5);
+            else shooter->axis_motors[i]->Set(0.5); // COMMENT THIS FOR 1 MOTOR
+        }
     }
+    if(r->input.mate.bumper_right.held && r->input.mate.joystick_left.y > 0.2)
+    {
+        for(int i = 0; i < CFG_SHOOTER_AXIS_MOTOR_COUNT; i++)
+        {
+            if (i == 1) shooter->axis_motors[i]->Set(-0.5);
+            else shooter->axis_motors[i]->Set(0.5);
+        }
+    }
+    else
+    {
+        for(int i = 0; i < CFG_SHOOTER_AXIS_MOTOR_COUNT; i++)
+        {
+            if (i == 1) shooter->axis_motors[i]->Set(-shooter->axis_throttle);
+            else shooter->axis_motors[i]->Set(shooter->axis_throttle);
+        }
+    }
+
+    
+
 
     shooter->prev_angle = curr_angle;
 }

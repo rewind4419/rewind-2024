@@ -179,7 +179,8 @@ void robotModeInit(RobotData *r, RobotMode new_mode)
         }
         else
         {
-            autoCmd(r, AUTO_4_PIECE, autoAlliance);
+            //autoCmd(r, AUTO_4_PIECE, autoAlliance);
+            autoCmd(r, AUTO_4_PIECE_REVERSED, autoAlliance);
             // autoCmd(r, AUTO_PREFIRE_LEAVE_COMMUNITY_RIGHT, autoAlliance);
             // autoCmd(r, AUTO_PREFIRE_LEAVE_COMMUNITY_LEFT, autoAlliance);
             // autoCmd(r, AUTO_4_PIECE_CONFIG, autoAlliance);
@@ -530,12 +531,19 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             case MODE_DEFAULT:
             {
                 // Always down in default mode
+                float current_height = (r->elevator.sum_rotation) / CFG_ELEVATOR_MAX_ROTATION * CFG_ELEVATOR_RANGE;
+                float diff = r->elevator.target_height - current_height;
+
+                if(fabs(diff) < 0.05)
+                {   
+                    r->shooter.target_angle = 0;
+                }           
                 r->elevator.target_height = 0;
-                r->shooter.target_angle = 0;
+
 
                 r->shooter.firing_mode = true;
                 r->ready_fire_amp = false;
-                r->shooter.firing_motor_speed = -1.0;
+                r->shooter.firing_motor_speed = 0.0;
 
                 //r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5);
                 if (r->shooter.beam_break.Get())
@@ -557,6 +565,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 if (in->mate.y.down)
                 {
                     r->robotState.robotMode = MODE_AMP;
+                    r->shooter.firing_wheel_pid.errorAccum = 0.0;
                 }
 
                 if (in->mate.x.down)
@@ -585,7 +594,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
                 r->shooter.firing_mode = true;
                 r->ready_fire_amp = false;
-                r->shooter.firing_motor_speed = -1.0;
+                r->shooter.firing_motor_speed = 0.0;
 
                 r->intake.intake_speed = CFG_INTAKE_MAX_SPEED;
                 r->shooter.control_motor_speed = CFG_CONTROL_PULLER_MAX_SPEED;
@@ -615,7 +624,13 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 // r->elevator.target_height = ampScoreHeight->GetDouble(0.275);
 
                 r->shooter.target_angle = (1.45);
-                r->elevator.target_height = (0.31);
+                float shooter_angle = r->shooter.sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE + CFG_SHOOTER_ANGLE_OFFSET;
+                float diff = r->shooter.target_angle - shooter_angle;
+
+                // if(fabs(diff) < 0.2)
+                {   
+                    r->elevator.target_height = (0.31);
+                }
 
                 r->shooter.firing_mode = true;
                 r->ready_fire_amp = false;
@@ -691,6 +706,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 if (in->mate.y.down)
                 {
                     r->robotState.robotMode = MODE_AMP;
+                    r->shooter.firing_wheel_pid.errorAccum = 0.0;
                 }
                 if (in->mate.x.down)
                 {
@@ -705,8 +721,14 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             {
                 if (in->mate.option_button.held)
                 {
+                    float shooter_angle = r->shooter.sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE + CFG_SHOOTER_ANGLE_OFFSET;
+                    float diff = r->shooter.target_angle - shooter_angle;
+
+                    // if(fabs(diff) < 0.2)
+                    {   
+                        r->elevator.target_height = 0.225;
+                    }
                     r->shooter.target_angle = 1.2f;
-                    r->elevator.target_height = 0.225;
                 }
                 else
                 {
@@ -961,7 +983,19 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
     frc::SmartDashboard::PutBoolean("Beam braeakea", r->shooter.beam_break.Get());
 
+    float len_field = static_cast<float>(r->photon.aprilTagFieldLayout.GetTagPose(4).value().X()) - static_cast<float>(r->photon.aprilTagFieldLayout.GetTagPose(7).value().X());
 
+    frc::SmartDashboard::PutNumber("Length Field", len_field);
+
+    float center = len_field / 2 + static_cast<float>(r->photon.aprilTagFieldLayout.GetTagPose(7).value().X());
+
+    frc::SmartDashboard::PutNumber("center field x", center);
+
+    float center_y = static_cast<float>(r->photon.aprilTagFieldLayout.GetTagPose(4).value().Y());
+
+    frc::SmartDashboard::PutNumber("Center y", center_y);
+    // red - blue
+    
     // printf("Just before updates \n");
     updateManager(&r->taskmgr, r);
 
@@ -969,7 +1003,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
 
     // // COMP COMP COMP COMP CoMP UNCOMMENT PLEASE
-    // updateElevator(&r->elevator, r);
+    updateElevator(&r->elevator, r);
     updateIntake(&r->intake);
     updateShooter(&r->shooter, r);
     updateDrivetrainController(r, &r->drivetrain_controller, &r->drivetrain, r->latest_odometry_frame, r->delta_time);

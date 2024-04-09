@@ -166,6 +166,10 @@ constexpr int CFG_APRIL_TAG_COUNT = 16;
 constexpr float CFG_MAX_TAG_ALIGN_THROTTLE = 0.4f;
 
 //////// Field Layout //////// 
+
+// Center field x = 8.270620346069336
+//Center field y = 5.547867774963379
+
 constexpr float CFG_SPEAKER_HEIGHT = 90 * INCH_TO_METER;
 //constexpr float CFG_SPEAKER_HEIGHT = 92 * INCH_TO_METER;
 //constexpr float CFG_SPEAKER_HEIGHT = 87.5413 * INCH_TO_METER;

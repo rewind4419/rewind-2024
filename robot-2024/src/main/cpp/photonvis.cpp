@@ -148,9 +148,9 @@ void calculateVision(RobotData* robot, int tag_id)
 void updatePhoton(PhotonParameters* photon)
 {
     photon::PhotonPipelineResult result = photon->april_cam.GetLatestResult();
-
     if(result.HasTargets())
     {
+        frc::SmartDashboard::PutNumber("HAS TARGETS", 1);
         std::span<const photon::PhotonTrackedTarget> targets = result.GetTargets();
         photon->n_tags = targets.size();
 
@@ -173,6 +173,10 @@ void updatePhoton(PhotonParameters* photon)
 
             photon->global_tags.push_back( TagPosition {robot_pose, working_target.fiducialId});
         }
+    } 
+    else 
+    {
+        photon->n_tags = 0;
+        frc::SmartDashboard::PutNumber("HAS TARGETS", 0);
     }
-    else photon->n_tags = 0;
 }
