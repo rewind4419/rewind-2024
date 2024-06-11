@@ -134,7 +134,6 @@ void stepLocaliser(RobotData* robot)
 
   for (int i = 0; i < robot->photon.global_tags.size(); i++)
   {
-
     int tag_id = robot->photon.global_tags[i].tag_id;
 
     bool current_exists = tagIdExists(robot->photon.global_tags, tag_id);

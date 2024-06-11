@@ -27,7 +27,7 @@ struct TagPosition
 
 struct PhotonParameters
 {
-    photon::PhotonCamera april_cam{"back"};
+    photon::PhotonCamera april_cam{"front"};
 
 	frc::AprilTagFieldLayout aprilTagFieldLayout = frc::LoadAprilTagLayoutField(frc::AprilTagField::k2024Crescendo);
 

@@ -52,6 +52,7 @@ void autoVisionUpdate(RobotData* robot, int tag_id)
 
 void alignToTag(int tagId, RobotData* robot, bool yaw_align)
 {
+    printf("Aligning to Tag\n");
     calculateVision(robot, tagId);
     float angularThrottle = 0.0;
 
@@ -69,7 +70,10 @@ void alignToTag(int tagId, RobotData* robot, bool yaw_align)
         robot->drivetrain_controller.mode = DRIVECTRL_THROTTLE;
         robot->drivetrain_controller.ctrl.throttle.throttle = robot->global_input_translation;
         robot->drivetrain_controller.ctrl.throttle.angular_throttle = angularThrottle; // Uncomment to enable robot rotational movement
+        printf("Angular Throttle = %f\n", angularThrottle);
+
     }
+
 
     if (isnanf(robot->photon.calculated_pivot_angle) == 0)
     {
@@ -148,11 +152,12 @@ void calculateVision(RobotData* robot, int tag_id)
 void updatePhoton(PhotonParameters* photon)
 {
     photon::PhotonPipelineResult result = photon->april_cam.GetLatestResult();
+    std::span<const photon::PhotonTrackedTarget> targets = result.GetTargets();
+    photon->n_tags = targets.size();
+    printf("N_Tags = %d\n", photon->n_tags);
     if(result.HasTargets())
     {
         frc::SmartDashboard::PutNumber("HAS TARGETS", 1);
-        std::span<const photon::PhotonTrackedTarget> targets = result.GetTargets();
-        photon->n_tags = targets.size();
 
         for(int i = 0; i < targets.size(); i++)
         {

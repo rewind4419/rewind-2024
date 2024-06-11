@@ -179,8 +179,8 @@ void robotModeInit(RobotData *r, RobotMode new_mode)
         }
         else
         {
-            //autoCmd(r, AUTO_4_PIECE, autoAlliance);
-            autoCmd(r, AUTO_4_PIECE_REVERSED, autoAlliance);
+            autoCmd(r, AUTO_4_PIECE, autoAlliance);
+            // autoCmd(r, AUTO_4_PIECE_REVERSED, autoAlliance);
             // autoCmd(r, AUTO_PREFIRE_LEAVE_COMMUNITY_RIGHT, autoAlliance);
             // autoCmd(r, AUTO_PREFIRE_LEAVE_COMMUNITY_LEFT, autoAlliance);
             // autoCmd(r, AUTO_4_PIECE_CONFIG, autoAlliance);
@@ -290,6 +290,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         r->drivetrain_controller.ctrl.throttle.throttle = v2{0, 0};
         r->drivetrain_controller.ctrl.throttle.angular_throttle = 0;
     }
+    
 
     if(mode == ROBOT_DISABLE)
     {
