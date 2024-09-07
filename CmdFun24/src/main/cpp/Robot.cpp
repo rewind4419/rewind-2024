@@ -9,7 +9,7 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 
 void Robot::RobotInit() {
-  m_led.SetLength(kLength);
+  m_led.SetLength(m_kLength);
   m_led.SetData(m_ledBuffer);
   m_led.Start();
   
@@ -26,8 +26,7 @@ void Robot::RobotInit() {
  */
 void Robot::RobotPeriodic() {
   frc2::CommandScheduler::GetInstance().Run();
-  
-  bool ballSensor {!(ballSensorInverted.Get())};
+  bool ballSensor {!(m_ballSensorInverted.Get())};
   if (ballSensor == true)
     {
       std::cout << "true";
@@ -49,7 +48,6 @@ void Robot::RobotPeriodic() {
     m_ledBuffer[19].SetHSV(180,255,255); // red 
     */
 
-
     /*
     m_ledBuffer[2].SetHSV(120,255,255); //
     m_ledBuffer[4].SetHSV(125,255,255); //
@@ -65,14 +63,13 @@ void Robot::RobotPeriodic() {
     m_ledBuffer[19].SetHSV(180,255,255); // red
     */
 
-
-    for (int i = 0; i < kLength; i++) {
+    for (int i = 0; i < m_kLength; i++) {
       m_ledBuffer[i].SetHSV(145, 255, 255);
       }
     }
   else
     {
-      for (int i = 0; i < kLength; i++) {
+      for (int i = 0; i < m_kLength; i++) {
       m_ledBuffer[i].SetHSV(170, 255, 10);
     }
 
@@ -81,7 +78,6 @@ void Robot::RobotPeriodic() {
 
   m_led.SetData(m_ledBuffer);
   frc::SmartDashboard::PutBoolean(" BallSensor Detect", ballSensor);
-
 }
 
 /**
