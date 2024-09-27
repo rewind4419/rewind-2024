@@ -45,11 +45,9 @@ struct Robot
 	RobotHardware hw;
 
 	Drivetrain drive;
-	Intake intake;
 	Input input;
 
 	float delta_time = 0.02;
-
 	float auto_timer = 0;
 
 };

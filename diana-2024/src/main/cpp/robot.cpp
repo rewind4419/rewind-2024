@@ -6,7 +6,6 @@
 
 // Subsystems
 #include "subsystems/drivetrain.h"
-#include "subsystems/intake.h"
 
 #include "frc/Joystick.h"
 #include "frc/smartdashboard/SmartDashboard.h"
@@ -61,18 +60,13 @@ void robotInit(Robot* robot)
 	frc::SmartDashboard::GetNumber("Auton Speed", 0.4);
 }
 
-
 float auto_timer = 0;
-
 void robotModeChange(Robot* robot, RobotMode mode)
 {
 	auto_timer = 0;
 
-	robot->intake.target_angle = 0.25;
-
 	if (mode == BOTMODE_TELEOP)
 	{
-
 	}
 }
 
@@ -80,63 +74,9 @@ void robotUpdate(Robot* robot, RobotMode mode)
 {
 	if (mode == BOTMODE_TELEOP)
 	{
-		robot->intake.puller_speed = 0.1;
 		updateGamepad(&robot->input);
 
-		if (robot->input.driver.bumper_left.down)
-		{
-			
-		}
-
-		if(robot->input.driver.a.held)
-		{
-			robot->intake.extended = true;
-			robot->intake.puller_speed = 0.8;			
-			robot->intake.outtaking = false;
-
-		}
-		
-		if (robot->input.driver.x.held)
-		{
-			robot->intake.extended = false;
-			robot->intake.puller_speed = 0.1;
-			robot->intake.outtaking = false;
-
-		}
-
-
-		if (robot->intake.extended)
-		{
-			// printf("HI\n");
-
-			if(robot->input.driver.a.held)
-			{
-				robot->intake.target_angle = 0.82f;
-				// printf("HOLA\n");
-			}
-			else
-			{
-				robot->intake.target_angle = 0.6f;
-			}
-		}
-		else
-		{
-			robot->intake.target_angle = 0.25f;
-		}
-
-		if(robot->input.driver.y.held)
-		{	
-			robot->intake.extended = true;
-			robot->intake.outtaking = true;
-		}
-
-		if(robot->intake.outtaking)
-		{
-			robot->intake.puller_speed *= -1;
-		}
-		
 		updateDrivetrain(robot, robot->input.driver.joystick_left.x, robot->input.driver.trigger_right - robot->input.driver.trigger_left);
-		updateCubeIntake(robot);
 	}
 
 	if (mode == BOTMODE_AUTO)
@@ -164,6 +104,5 @@ void robotUpdate(Robot* robot, RobotMode mode)
 		// 	updateDrivetrain(robot, 0, 0);
 		// }
 		// updateCubeIntake(robot);
-
 	}
 }
