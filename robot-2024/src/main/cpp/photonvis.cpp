@@ -74,7 +74,6 @@ void alignToTag(int tagId, RobotData* robot, bool yaw_align)
 
     }
 
-
     if (isnanf(robot->photon.calculated_pivot_angle) == 0)
     {
         robot->shooter.target_angle = robot->photon.calculated_pivot_angle - CFG_SHOOTER_ANGLE_OFFSET; // Uncomment to enable shooter a movement
