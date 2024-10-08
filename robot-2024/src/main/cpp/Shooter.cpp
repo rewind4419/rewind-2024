@@ -132,11 +132,13 @@ void updateShooter(Shooter* shooter, RobotData* r)
     if (shooter->amp_mode)
     {
         shooter->control_motor->Set(evalPid(&shooter->amp_wheel_pid, CFG_SHOOTER_AMP_SCORE_TARGET_VELOCITY - shooter->control_encoder->GetVelocity(), CFG_DELTA_TIME));
+        printf("Shooter motor amp mode\n");
     }
     else
     {
         shooter->amp_wheel_pid.errorAccum = 0.0;
         shooter->control_motor->Set(-1 * shooter->control_motor_speed);
+        printf("Shooter motor being set, control speed = %f\n", shooter->control_motor_speed);
     }
 
     shooter->firing_motor->Set(firing_throttle);
@@ -146,8 +148,7 @@ void updateShooter(Shooter* shooter, RobotData* r)
 
     //////// Gravitational Feed Forward Code ////////
     float counter_throttle = CFG_SHOOTER_PERPENDICULAR_THROTTLE * cos(shooter_angle);
-    float elevator_dist = (r->elevator.sum_rotation / CFG_ELEVATOR_MAX_ROTATION * CFG_ELEVATOR_RANGE);
-    float cg_hypo = sqrtf(std::pow(4.5 * INCH_TO_METER, 2) + std::pow(elevator_dist + 14 * INCH_TO_METER, 2) );
+    float cg_hypo = sqrtf(std::pow(4.5 * INCH_TO_METER, 2) + std::pow(0 + 14 * INCH_TO_METER, 2) );
     float cg_extension_coeff = cg_hypo / (14.705 * INCH_TO_METER);
     counter_throttle *= cg_extension_coeff;
 

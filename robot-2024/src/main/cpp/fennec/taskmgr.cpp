@@ -632,21 +632,6 @@ static bool taskStep(Task* task, RobotData* robot)
 		return final_task;
 	}break;
 
-	case TASK_ELEVATOR_POSITIONING: 
-    {
-        printf("Setting Angle\n");
-        robot->elevator.target_height = task->elevator.target_height;
-        float curr_angle = robot->elevator.sum_rotation / CFG_ELEVATOR_MAX_ROTATION * CFG_ELEVATOR_RANGE;
-        bool height_complete = ( fabsf(robot->elevator.target_height - curr_angle) < 0.2f );
-        if (height_complete)
-        {
-            printf("Position Achieved\n");
-        }
-        printf("NOT COMPLETE delta = %f\n", fabsf(robot->elevator.target_height - curr_angle));
-		printf("Epsilon %f but its just using 0.2 hardcoded\n", task->elevator.epsilon);
-        return height_complete;
-    } break;
-
 	case TASK_WAIT_FOR_FIRING_RPM:
 	{
 		bool task_complete = false;
@@ -679,34 +664,6 @@ static bool taskStep(Task* task, RobotData* robot)
 		printf("NOT COMPLETE delta = %f\n", fabsf(robot->shooter.target_angle - current_angle));
 		return angle_achieved;
 	} break;
-
-	//Comment out if it doesn't work - Nethra
-	case TASK_EXTEND_FOR_CLIMB: 
-    {
-        robot->elevator.target_height = task->elevator.ideal_height;
-        float current_height = robot->elevator.sum_rotation / CFG_ELEVATOR_MAX_ROTATION * CFG_ELEVATOR_RANGE;
-        bool height_achieved = ( fabsf(robot->elevator.ideal_height - current_height) < task->elevator.epsilon);
-        if (height_achieved)
-        {
-            printf("Height Achieved\n");
-        }
-        printf("NOT COMPLETE delta = %f\n", fabsf(robot->elevator.ideal_height - current_height));
-        return height_achieved;
-    } break;
-
-	//Comment out if it doesn't work - Nethra
-	case TASK_RETRACT_FOR_CLIMB: 
-    {
-        robot->elevator.target_height = task->elevator.retract_height;
-        float current_height = robot->elevator.sum_rotation / CFG_ELEVATOR_MAX_ROTATION * CFG_ELEVATOR_RANGE;
-        bool height_accomplished = ( fabsf(robot->elevator.retract_height - current_height) < task->elevator.epsilon);
-        if (height_accomplished)
-        {
-            printf("Climb Achieved\n");
-        }
-        printf("NOT COMPLETE delta = %f\n", fabsf(robot->elevator.retract_height - current_height));
-        return height_accomplished;
-    } break;
 
 	case TASK_DRIVETRAIN_OVERRIDE:
 	{

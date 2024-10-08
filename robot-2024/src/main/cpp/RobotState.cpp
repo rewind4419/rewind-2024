@@ -163,14 +163,6 @@ void robotCmd(RobotData* r, RobotCommand state)
 
             {
                 Task t;
-                t.type = TASK_ELEVATOR_POSITIONING;
-                t.elevator.target_height = 0.4f;
-                t.elevator.epsilon = 0.2f;
-                pushTask(&r->taskmgr, t);
-            }
-
-            {
-                Task t;
                 t.type = TASK_AMP_READY;
                 pushTask(&r->taskmgr, t);
             }
@@ -193,40 +185,6 @@ void robotCmd(RobotData* r, RobotCommand state)
                 pushTask(&r->taskmgr, t);
             }
 
-        } break;
-
-        //Comment out if it doesn't work - Nethra
-        case CLIMB_POSITIONING:
-        {
-            {
-                printf("Quein  forst on|\n");
-                Task t;
-                t.type = TASK_ANGLE_FOR_CLIMB;
-                t.shooter.target_angle = 1.25f;
-                t.shooter.epsilon = 0.05f;
-                pushTask(&r->taskmgr, t);
-            }      
-
-            {
-                printf("Queued 2nd\n");
-                Task t;
-                t.type = TASK_EXTEND_FOR_CLIMB;
-                t.elevator.ideal_height = 0.275f; //Change
-                t.elevator.epsilon = 0.1f;
-                pushTask(&r->taskmgr, t);
-            }
-        } break;
-
-        //Comment out if it doesn't work - Nethra
-        case CLIMBING:
-        {
-            {
-                Task t;
-                t.type = TASK_RETRACT_FOR_CLIMB;
-                t.elevator.retract_height = 0.0f;
-                t.elevator.epsilon = 0.05f;
-                pushTask(&r->taskmgr, t);
-            }
         } break;
     }   
     

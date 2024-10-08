@@ -80,7 +80,6 @@ void initRobot(RobotData *r, RobotMode mode)
     initDrivetrainController(&r->drivetrain_controller);
     initIntake(&r->intake);
     initShooter(&r->shooter);
-    initElevator(&r->elevator);
 
     
 
@@ -157,7 +156,6 @@ void robotModeInit(RobotData *r, RobotMode new_mode)
     r->taskmgr = TaskMgr{};
 
     resetShooter(&r->shooter);
-    resetElevator(&r->elevator);
 
     if(new_mode == ROBOT_AUTO)
     {
@@ -240,7 +238,6 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
     // calibrateShooterAngle(&r->shooter);
     // printCalibrationData(&r->drivetrain);
-    // calibrateElevator(&r->elevator);
     // r->side = frc::SmartDashboard::GetNumber("Init Side", 0);
 
     beamBreak->SetBoolean(r->shooter.beam_break.Get());
@@ -521,7 +518,6 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         {
             r->robotState.robotMode = MODE_CLIMBING;
             r->shooter.target_angle = 1.2f;
-            r->elevator.target_height = 0.225; //Might need to change?
         }
 
         frc::SmartDashboard::PutBoolean("Beam Break", r->shooter.beam_break.Get());
@@ -531,15 +527,9 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         {
             case MODE_DEFAULT:
             {
-                // Always down in default mode
-                float current_height = (r->elevator.sum_rotation) / CFG_ELEVATOR_MAX_ROTATION * CFG_ELEVATOR_RANGE;
-                float diff = r->elevator.target_height - current_height;
-
-                if(fabs(diff) < 0.05)
-                {   
+                printf("Mode = default\n");
                     r->shooter.target_angle = 0;
-                }           
-                r->elevator.target_height = 0;
+                          
 
 
                 r->shooter.firing_mode = true;
@@ -549,6 +539,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 //r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5);
                 if (r->shooter.beam_break.Get())
                 {
+                    printf("Beam break true\n");
                     r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5)- (float)in->mate.bumper_left.held * CFG_CONTROL_PULLER_MAX_SPEED;
                     r->intake.intake_speed = (in->mate.trigger_right * 0.5 + 0.5)- (float)in->mate.bumper_left.held * CFG_INTAKE_PULLER_MAX_SPEED;
                 }
@@ -556,17 +547,20 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 {
                     r->shooter.control_motor_speed = - (in->mate.trigger_left * 0.5 + 0.5) * CFG_CONTROL_PULLER_MAX_SPEED;
                     r->intake.intake_speed = - (in->mate.trigger_left * 0.5 + 0.5) * CFG_INTAKE_PULLER_MAX_SPEED;
+                    printf("Beam break false\n");
                 }
 
                 if (in->mate.a.down)
                 {
                     r->robotState.robotMode = MODE_INTAKING;
+                    printf("To mode intaking\n");
                 }
 
                 if (in->mate.y.down)
                 {
                     r->robotState.robotMode = MODE_AMP;
                     r->shooter.firing_wheel_pid.errorAccum = 0.0;
+                    printf("To mode amp\n");
                 }
 
                 if (in->mate.x.down)
@@ -576,6 +570,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                     r->shooter.firing_motor_speed = -1.0;
                     r->shooter.target_angle = 0.0;
                     r->shooter.shooter_pid.errorAccum = 0;
+                    printf("To mode Shooting\n");
                 }
                 
 
@@ -588,10 +583,9 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             } break;
             case MODE_INTAKING:
             {
-                
+                printf("Mode = intaking\n");
 
                 r->shooter.target_angle = 1.2f;
-                r->elevator.target_height = 0.0;
 
                 r->shooter.firing_mode = true;
                 r->ready_fire_amp = false;
@@ -603,6 +597,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 if (in->mate.a.up)
                 {
                     r->robotState.robotMode = MODE_DEFAULT;
+                    printf("To mode default\n");
                 }
 
                 if (r->shooter.beam_break.Get() == false)
@@ -616,11 +611,12 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                     r->intake.intake_speed = 0;
 
                     r->shooter.target_angle = 0.0f;
-                r->elevator.target_height = 0.0;
                 }
             } break;
             case MODE_AMP:
             {
+                printf("Mode = Amp\n");
+
                 // r->shooter.target_angle = ampScoreAngle->GetDouble(1.45);
                 // r->elevator.target_height = ampScoreHeight->GetDouble(0.275);
 
@@ -628,10 +624,6 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 float shooter_angle = r->shooter.sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE + CFG_SHOOTER_ANGLE_OFFSET;
                 float diff = r->shooter.target_angle - shooter_angle;
 
-                // if(fabs(diff) < 0.2)
-                {   
-                    r->elevator.target_height = (0.31);
-                }
 
                 r->shooter.firing_mode = true;
                 r->ready_fire_amp = false;
@@ -643,6 +635,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             } break;
             case MODE_SHOOTING:
             {
+                printf("Mode = Shoot\n");
                 r->shooter.firing_mode = true;
                 r->ready_fire_amp = false;
 
@@ -686,7 +679,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                     // Used for auto alignment to apriltags
                 }
 
-
+                // Test
                 bool tag_seen = false; // THis is the issue
                 printf("global tags size = %d\n", r->photon.global_tags.size());
                 for(int i = 0; i < r->photon.n_tags; i++)
@@ -727,19 +720,15 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                     float shooter_angle = r->shooter.sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE + CFG_SHOOTER_ANGLE_OFFSET;
                     float diff = r->shooter.target_angle - shooter_angle;
 
-                    // if(fabs(diff) < 0.2)
-                    {   
-                        r->elevator.target_height = 0.225;
-                    }
+                    
                     r->shooter.target_angle = 1.2f;
                 }
                 else
                 {
                     r->shooter.target_angle = 1.2f;
-                    r->elevator.target_height = 0.0 - 1.25 * INCH_TO_METER;
                 }
 
-                if (fabsf(in->mate.joystick_left.y) > 0.2) r->elevator.target_height = CLAMP(0.225 + in->mate.joystick_left.y * 0.1, -3 * INCH_TO_METER, CFG_ELEVATOR_RANGE);
+                //if (fabsf(in->mate.joystick_left.y) > 0.2) r->elevator.target_height = CLAMP(0.225 + in->mate.joystick_left.y * 0.1, -3 * INCH_TO_METER, CFG_ELEVATOR_RANGE);
 
                 r->shooter.firing_mode = false;
                 r->ready_fire_amp = false;
@@ -1006,7 +995,6 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
 
     // // COMP COMP COMP COMP CoMP UNCOMMENT PLEASE
-    updateElevator(&r->elevator, r);
     updateIntake(&r->intake);
     updateShooter(&r->shooter, r);
     updateDrivetrainController(r, &r->drivetrain_controller, &r->drivetrain, r->latest_odometry_frame, r->delta_time);
