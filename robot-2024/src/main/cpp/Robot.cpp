@@ -44,8 +44,8 @@ nt::GenericEntry* singleWaypointSpeedRot;
 nt::GenericEntry* aprilTagDist;
 nt::GenericEntry* aprilTagAngle;
 
-nt::GenericEntry* ampScoreHeight;
-nt::GenericEntry* ampScoreAngle;
+// nt::GenericEntry* ampScoreHeight;
+// nt::GenericEntry* ampScoreAngle;
 
 nt::GenericEntry* beamBreakTimerEntry;
 nt::GenericEntry* beamBreak;
@@ -80,7 +80,7 @@ void initRobot(RobotData *r, RobotMode mode)
     initDrivetrainController(&r->drivetrain_controller);
     initIntake(&r->intake);
     initShooter(&r->shooter);
-    initElevator(&r->elevator);
+    // initElevator(&r->elevator);
 
     
 
@@ -130,8 +130,8 @@ void initRobot(RobotData *r, RobotMode mode)
     singleWaypointSpeed = frc::Shuffleboard::GetTab("Localizer").Add("Single Waypoint Speed", 1.0).GetEntry();
     singleWaypointSpeedRot = frc::Shuffleboard::GetTab("Localizer").Add("Single Waypoint Speed Rot", 1.0).GetEntry();
 
-    ampScoreHeight = frc::Shuffleboard::GetTab("Main").Add("Amp Score Height", 0.275).GetEntry();
-    ampScoreAngle = frc::Shuffleboard::GetTab("Main").Add("Amp Socre Angle", 1.45).GetEntry();
+   // ampScoreHeight = frc::Shuffleboard::GetTab("Main").Add("Amp Score Height", 0.275).GetEntry();
+   // ampScoreAngle = frc::Shuffleboard::GetTab("Main").Add("Amp Socre Angle", 1.45).GetEntry();
 
     beamBreakTimerEntry = frc::Shuffleboard::GetTab("Main").Add("Beam BReak Timer", -1.0).GetEntry();
     beamBreak = frc::Shuffleboard::GetTab("Main").Add("Beam BReak", false).GetEntry();
@@ -157,7 +157,7 @@ void robotModeInit(RobotData *r, RobotMode new_mode)
     r->taskmgr = TaskMgr{};
 
     resetShooter(&r->shooter);
-    resetElevator(&r->elevator);
+   // resetElevator(&r->elevator);
 
     if(new_mode == ROBOT_AUTO)
     {
@@ -521,7 +521,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         {
             r->robotState.robotMode = MODE_CLIMBING;
             r->shooter.target_angle = 1.2f;
-            r->elevator.target_height = 0.225; //Might need to change?
+            // r->elevator.target_height = 0.225; //Might need to change?
         }
 
         frc::SmartDashboard::PutBoolean("Beam Break", r->shooter.beam_break.Get());
@@ -532,14 +532,14 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             case MODE_DEFAULT:
             {
                 // Always down in default mode
-                float current_height = (r->elevator.sum_rotation) / CFG_ELEVATOR_MAX_ROTATION * CFG_ELEVATOR_RANGE;
-                float diff = r->elevator.target_height - current_height;
+                // float current_height = (r->elevator.sum_rotation) / CFG_ELEVATOR_MAX_ROTATION * CFG_ELEVATOR_RANGE;
+                // float diff = r->elevator.target_height - current_height;
 
                 if(fabs(diff) < 0.05)
                 {   
                     r->shooter.target_angle = 0;
                 }           
-                r->elevator.target_height = 0;
+               //  r->elevator.target_height = 0;
 
 
                 r->shooter.firing_mode = true;
@@ -586,15 +586,15 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 }
                 r->manual_shooting_mode = false;
             } break;
-            case MODE_INTAKING:
+             case MODE_INTAKING:
             {
                 
 
                 r->shooter.target_angle = 1.2f;
-                r->elevator.target_height = 0.0;
+               // r->elevator.target_height = 0.0;
 
                 r->shooter.firing_mode = true;
-                r->ready_fire_amp = false;
+             //   r->ready_fire_amp = false;
                 r->shooter.firing_motor_speed = 0.0;
 
                 r->intake.intake_speed = CFG_INTAKE_MAX_SPEED;
@@ -616,10 +616,10 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                     r->intake.intake_speed = 0;
 
                     r->shooter.target_angle = 0.0f;
-                r->elevator.target_height = 0.0;
+              //  r->elevator.target_height = 0.0;
                 }
             } break;
-            case MODE_AMP:
+           /* case MODE_AMP:
             {
                 // r->shooter.target_angle = ampScoreAngle->GetDouble(1.45);
                 // r->elevator.target_height = ampScoreHeight->GetDouble(0.275);
@@ -640,7 +640,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5) - (in->mate.trigger_left * 0.5 + 0.5);
                 r->intake.intake_speed = 0;
                 
-            } break;
+            } break; */
             case MODE_SHOOTING:
             {
                 r->shooter.firing_mode = true;
@@ -718,7 +718,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
             }   break;
 
-            case MODE_CLIMBING:
+         /*   case MODE_CLIMBING:
             {
                 if (in->mate.option_button.held)
                 {
@@ -747,7 +747,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 r->shooter.control_motor_speed = 0;
                 r->intake.intake_speed = 0;
 
-            } break;
+            } break; */
         }
 
         if (r->robotState.robotMode == MODE_SHOOTING)
@@ -1004,7 +1004,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
 
     // // COMP COMP COMP COMP CoMP UNCOMMENT PLEASE
-    updateElevator(&r->elevator, r);
+   //  updateElevator(&r->elevator, r);
     updateIntake(&r->intake);
     updateShooter(&r->shooter, r);
     updateDrivetrainController(r, &r->drivetrain_controller, &r->drivetrain, r->latest_odometry_frame, r->delta_time);

@@ -32,7 +32,7 @@
 #include "Shooter.h"
 #include "RobotState.h"
 #include "photonvis.h"
-#include "Elevator.h"
+// #include "Elevator.h"
 #include "projectilecalc.h"
 
 
@@ -89,7 +89,7 @@ struct RobotData
 
   Intake intake;
   Shooter shooter;
-  Elevator elevator;
+ //  Elevator elevator;
 
   PhotonParameters photon;
 
@@ -116,7 +116,7 @@ struct RobotData
   // misc
   frc::Field2d field;
 
-  bool ready_fire_amp = false;
+ // bool ready_fire_amp = false;
 }; 
 
 void robotModeInit(RobotData *robot, RobotMode new_mode);
