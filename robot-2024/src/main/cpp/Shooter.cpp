@@ -7,11 +7,27 @@ nt::GenericEntry* pivotAngle;
 nt::GenericEntry* pivotTarget;
 nt::GenericEntry* pivotError;
 
+nt::GenericEntry* firingMotorVelocityError;
+nt::GenericEntry* firingMotorPIDOutput;
+
+nt::GenericEntry* firingMotorPower;
+
+nt::GenericEntry* shooterAxisThrottle;
+nt::GenericEntry* shooterAxisError;
+
 void initShooter(Shooter* shooter)
 {
     pivotAngle = frc::Shuffleboard::GetTab("Shooter").Add("Angle", 0.0).GetEntry();
     pivotError = frc::Shuffleboard::GetTab("Shooter").Add("Error", 0.0).GetEntry();
     pivotTarget = frc::Shuffleboard::GetTab("Shooter").Add("Target", 0.0).GetEntry();
+
+    firingMotorVelocityError = frc::Shuffleboard::GetTab("Shooter").Add("Firing Motor Error", 0.0).GetEntry();
+    firingMotorPIDOutput = frc::Shuffleboard::GetTab("Shooter").Add("Firing Motor PID Output", 0.0).GetEntry();
+
+    firingMotorPower = frc::Shuffleboard::GetTab("Shooter").Add("Firing Motor Power", 0.0).GetEntry();
+
+    shooterAxisThrottle = frc::Shuffleboard::GetTab("Shooter").Add("Axis Throttle", 0.0).GetEntry();
+    shooterAxisError = frc::Shuffleboard::GetTab("Shooter").Add("Axis Error", 0.0).GetEntry();
 
     shooter->control_motor = new rev::CANSparkFlex(CFG_SHOOTER_CONTROL_MOTOR, rev::CANSparkFlex::MotorType::kBrushless);
     shooter->firing_motor = new rev::CANSparkFlex(CFG_SHOOTER_FIRING_MOTOR, rev::CANSparkFlex::MotorType::kBrushless);
@@ -73,6 +89,9 @@ void updateShooter(Shooter* shooter, RobotData* r)
         firing_throttle = evalPid(&shooter->firing_wheel_pid, target_velocity - current_velocity, CFG_DELTA_TIME);
         frc::SmartDashboard::PutNumber("Firing Velocity Diff", target_velocity - current_velocity);
         frc::SmartDashboard::PutNumber("Firing Error Accum", shooter->firing_wheel_pid.errorAccum);
+
+        firingMotorVelocityError->SetDouble(target_velocity - current_velocity);
+        firingMotorPIDOutput->SetDouble(firing_throttle);
     }
     else 
     {
@@ -153,6 +172,9 @@ void updateShooter(Shooter* shooter, RobotData* r)
 
     float interpol_diff = inputted_angle - angle_interpol_val;
     pivotError->SetDouble(interpol_diff);
+
+
+
     float pid = evalPid(&shooter->shooter_pid, interpol_diff, CFG_DELTA_TIME);
     float target_throttle = CLAMP(pid, -CFG_SHOOTER_AXIS_THROTTLE, CFG_SHOOTER_AXIS_THROTTLE);
 
@@ -165,7 +187,8 @@ void updateShooter(Shooter* shooter, RobotData* r)
     shooter->axis_throttle += counter_throttle;
     shooter->axis_throttle = CLAMP(shooter->axis_throttle, -CFG_SHOOTER_AXIS_THROTTLE, CFG_SHOOTER_AXIS_THROTTLE);
 
-    frc::SmartDashboard::PutNumber("Shooter Throttle", shooter->axis_throttle);
+    shooterAxisThrottle->SetDouble(shooter->axis_throttle);
+    shooterAxisError->SetDouble(interpol_diff);
 
     if(r->input.mate.bumper_right.held && r->input.mate.joystick_left.y > 0.2)
     {
@@ -192,7 +215,7 @@ void updateShooter(Shooter* shooter, RobotData* r)
         }
     }
 
-    
+    firingMotorPower->SetDouble(firing_throttle);
 
 
     shooter->prev_angle = curr_angle;

@@ -682,6 +682,8 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                     }
 
                     alignToTag(target_tag_id, r, true);
+
+                    // Used for auto alignment to apriltags
                 }
 
 
