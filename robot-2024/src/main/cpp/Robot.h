@@ -114,7 +114,7 @@ struct RobotData
   // misc
   frc::Field2d field;
 
-  bool ready_fire_amp = false;
+ // bool ready_fire_amp = false;
 }; 
 
 void robotModeInit(RobotData *robot, RobotMode new_mode);
