@@ -31,6 +31,7 @@ struct Shooter
 
     bool firing_motor_task = false;
     bool shooter_first_time = true;
+    bool ready_fire_amp = false;
     bool intake_task = false;
     bool firing_mode = false;
     bool brake = false;

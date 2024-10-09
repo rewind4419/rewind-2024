@@ -533,7 +533,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
 
                 r->shooter.firing_mode = true;
-                r->ready_fire_amp = false;
+                r->shooter.ready_fire_amp = false;
                 r->shooter.firing_motor_speed = 0.0;
 
                 //r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5);
@@ -613,7 +613,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                     r->shooter.target_angle = 0.0f;
                 }
             } break;
-           /* case MODE_AMP:
+            case MODE_AMP:
             {
                 printf("Mode = Amp\n");
 
@@ -625,19 +625,20 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 float diff = r->shooter.target_angle - shooter_angle;
 
 
+
                 r->shooter.firing_mode = true;
-                r->ready_fire_amp = false;
+                r->shooter.ready_fire_amp = false;
                 r->shooter.firing_motor_speed = 0.5;
 
                 r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5) - (in->mate.trigger_left * 0.5 + 0.5);
                 r->intake.intake_speed = 0;
                 
-            } break; */
+            } break; 
             case MODE_SHOOTING:
             {
                 printf("Mode = Shoot\n");
                 r->shooter.firing_mode = true;
-                r->ready_fire_amp = false;
+                r->shooter.ready_fire_amp = false;
 
                 // if ((in->driver.trigger_right * 0.5 + 0.5) > 0.5 && fabs(r->shooter.firing_encoder->GetVelocity()) > 5500)
                 // {

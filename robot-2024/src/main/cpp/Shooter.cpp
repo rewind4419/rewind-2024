@@ -82,7 +82,7 @@ void updateShooter(Shooter* shooter, RobotData* r)
     
 
     //////// Firing Motor Brake Code ////////
-    if(shooter->firing_mode && !r->ready_fire_amp)
+    if(shooter->firing_mode && !r->shooter.ready_fire_amp)
     {
         float target_velocity = shooter->firing_motor_speed * CFG_TARGET_VELOCITY_FIRING_WHEELS;
         float current_velocity = shooter->firing_encoder->GetVelocity();
@@ -108,7 +108,7 @@ void updateShooter(Shooter* shooter, RobotData* r)
         else if(firing_motor_velocity > 0) firing_throttle = -1;
     }
 
-    if(!shooter->firing_mode && !r->ready_fire_amp)
+    if(!shooter->firing_mode && !r->shooter.ready_fire_amp)
     {
         // shooter->control_motor->SetSmartCurrentLimit(32);
         // shooter->control_motor->SetVoltage;

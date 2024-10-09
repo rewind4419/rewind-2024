@@ -643,7 +643,7 @@ static bool taskStep(Task* task, RobotData* robot)
 	
 	case TASK_AMP_READY:
 	{
-		robot->ready_fire_amp = true;
+		robot->shooter.ready_fire_amp = true;
 		return true;
 	}
 
