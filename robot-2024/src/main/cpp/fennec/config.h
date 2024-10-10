@@ -124,7 +124,7 @@ constexpr int CFG_SHOOTER_AXIS_LEFT = 21;
 constexpr int CFG_SHOOTER_AXIS_RIGHT = 22;
 constexpr int CFG_SHOOTER_AXIS_MOTOR_COUNT = 2;
 
-constexpr int CFG_SHOOTER_BB_DIO = 0;
+constexpr int CFG_SHOOTER_BB_DIO = 1;
 
 constexpr float CFG_SHOOTER_ANGLE_OFFSET = 0.296706; //In radians - 17 degrees
 constexpr float CFG_SHOOTER_AXIS_THROTTLE = 0.45f;
