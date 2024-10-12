@@ -59,9 +59,9 @@ void updateDrivetrain(Robot* robot, float steer, float throttle)
 	// printf("%f %f\n", motor_left, motor_right);
 	// push the values to the hardware
 
-	robot->hw.left_motors[0]->Set(robot->hw.controlMode, motor_left);
-	robot->hw.left_motors[1]->Set(robot->hw.controlMode, motor_left);
+	robot->hw.left_motors[0]->Set(motor_left);
+	robot->hw.left_motors[1]->Set(motor_left);
 
-	robot->hw.right_motors[1]->Set(robot->hw.controlMode, motor_right);
-	robot->hw.right_motors[0]->Set(robot->hw.controlMode, motor_right);
+	robot->hw.right_motors[1]->Set(motor_right);
+	robot->hw.right_motors[0]->Set(motor_right);
 }
