@@ -142,6 +142,25 @@ void robotCmd(RobotData* r, RobotCommand state)
 
         } break;
 
+        case SHOOTER_DELIVER_BLOOP:
+        {
+            printf("running bloop task\n");
+            {
+                Task t;
+                t.type = TASK_SHOOTER_POSITIONING;
+                t.shooter.target_angle = 0.9f; // - CFG_SHOOTER_ANGLE_OFFSET
+                t.shooter.epsilon = 0.4f;
+                pushTask(&r->taskmgr, t);
+            }
+            {
+                Task t;
+                t.type = TASK_SHOOTER_FIRE;
+                t.firing_motor.direction = 0.8f;
+                pushTask(&r->taskmgr, t);
+            }
+
+        } break;
+
         case SHOOTER_DELIVER_AMP:
         {
             

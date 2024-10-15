@@ -55,6 +55,8 @@ enum RobotStateMode
 
     MODE_AMP,
 
+    MODE_BLOOP,
+
     MODE_INTAKING,
 
     MODE_SHOOTING,
@@ -80,6 +82,8 @@ enum RobotCommand
     SHOOTER_STOP,
 
     SHOOTER_DELIVER_SPEAKER,
+
+    SHOOTER_DELIVER_BLOOP, // new state to bloop over stage tidal tumble no vision / want vision for Beach blitz
 
     SHOOTER_DELIVER_AMP,
 
