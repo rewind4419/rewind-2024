@@ -177,7 +177,7 @@ void robotModeInit(RobotData *r, RobotMode new_mode)
         }
         else
         {
-            //autoCmd(r, AUTO_4_PIECE, autoAlliance); // Sherwin - If you are feeling risky, uncomment this line to enable "auto"
+            autoCmd(r, AUTO_4_PIECE, autoAlliance); // Sherwin - If you are feeling risky, uncomment this line to enable "auto"
             
 
             // // Dont mess with these:
@@ -715,6 +715,56 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                     r->manual_shooting_mode = true;
                 }
 
+                if (in->mate.option_button.down)
+                {
+                    r->robotState.robotMode = MODE_BLOOP;
+                }
+            }   break;
+            case MODE_BLOOP:
+            {
+                // printf("Mode = Shoot\n");
+                r->shooter.firing_mode = true;
+                r->shooter.ready_fire_amp = false;
+
+                r->shooter.target_angle = 0.8 - CFG_SHOOTER_ANGLE_OFFSET;
+                r->shooter.firing_motor_speed = -0.6;
+                r->manual_shooting_mode = true;
+
+                // if ((in->driver.trigger_right * 0.5 + 0.5) > 0.5 && fabs(r->shooter.firing_encoder->GetVelocity()) > 5500)
+                // {
+                //     r->shooter.control_motor_speed = 1.0f;
+                // }
+                // else
+                {
+                    r->shooter.control_motor_speed =  (in->mate.trigger_right * 0.5 + 0.5);
+                    r->intake.intake_speed = (in->mate.trigger_right * 0.5 + 0.5);
+
+                    if (in->mate.bumper_left.held)
+                    {
+                        r->shooter.control_motor_speed -= 1.0;
+                        r->intake.intake_speed -= 1.0;
+                    }
+                }
+                r->intake.intake_speed = 0;
+
+                if (r->manual_shooting_mode)
+                {
+                    r->shooter.firing_motor_speed = manualFiringVel->GetDouble(-0.6);
+                }
+
+                if (in->mate.a.down)
+                {
+                    r->robotState.robotMode = MODE_INTAKING;
+                }
+                if (in->mate.y.down)
+                {
+                    r->robotState.robotMode = MODE_AMP;
+                    r->shooter.firing_wheel_pid.errorAccum = 0.0;
+                }
+                if (in->mate.x.down)
+                {
+                    r->robotState.robotMode = MODE_SHOOTING;
+                }
             }   break;
 
          /*   case MODE_CLIMBING:
