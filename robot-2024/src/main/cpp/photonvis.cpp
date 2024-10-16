@@ -2,9 +2,17 @@
 #include <photon/PhotonUtils.h>
 #include "field_layout.h"
 
+#include <frc/shuffleboard/Shuffleboard.h>
+
 #include "Robot.h"
 
+nt::GenericEntry* pivotAngleTemp;
+nt::GenericEntry* robotDistanceFromTag;
 
+nt::GenericEntry* visionYawError;
+nt::GenericEntry* visionYawPIDOutput;
+
+// NOT USED
 void initPhoton(RobotData* r)
 {
     photon::PhotonPipelineResult result = r->photon.april_cam.GetLatestResult();
@@ -15,6 +23,13 @@ void initPhoton(RobotData* r)
 void initVisionCalculations(RobotData* robot)
 {
     robot->photon.regression_function = true;
+
+    printf("Initializing Vis Shuffleboard!\n");
+    pivotAngleTemp = frc::Shuffleboard::GetTab("Vis").Add("Pivot Angle", -1.0).GetEntry();
+    robotDistanceFromTag = frc::Shuffleboard::GetTab("Vis").Add("Robot Distance", -1.0).GetEntry();
+
+    visionYawError = frc::Shuffleboard::GetTab("Vis").Add("Vision Yaw Error", -1.0).GetEntry();
+    visionYawPIDOutput = frc::Shuffleboard::GetTab("Vis").Add("Vision Yaw PID Output", -1.0).GetEntry();
 }
 
 void autoVisionUpdate(RobotData* robot, int tag_id)
@@ -67,10 +82,14 @@ void alignToTag(int tagId, RobotData* robot, bool yaw_align)
         }
         else angularThrottle = 0;
 
+        printf("Setting 1 Vis Shuffleboard!\n");
+        
+        printf("Yaw error %f\n ", robot->photon.calculated_yaw_angle);
+        printf("Angular throttle %f\n", angularThrottle);     
+
         robot->drivetrain_controller.mode = DRIVECTRL_THROTTLE;
         robot->drivetrain_controller.ctrl.throttle.throttle = robot->global_input_translation;
         robot->drivetrain_controller.ctrl.throttle.angular_throttle = angularThrottle; // Uncomment to enable robot rotational movement
-        printf("Angular Throttle = %f\n", angularThrottle);
 
     }
 
@@ -87,10 +106,11 @@ void calculateVision(RobotData* robot, int tag_id)
 
     v2 vect_to_tag = {static_cast<float>(robot->photon.tag_rel_robot[tag_id - 1].Y()), static_cast<float>(robot->photon.tag_rel_robot[tag_id - 1].X())};
     float angle_to_speaker = asin( vect_to_tag.x / vect_to_tag.y);
+    printf("Vec to tag %f %f\n", vect_to_tag.x, vect_to_tag.y); 
+    printf("Angle to speaker %f\n", angle_to_speaker); 
 
     //Projectile Motion
     float dist_from_tag = length(vect_to_tag);
-
 
     // float init_velocity = 0.00195305 * fabs(robot->shooter.firing_encoder->GetVelocity()) + 1.49364;
     float init_velocity = 12.2177f;
@@ -105,7 +125,7 @@ void calculateVision(RobotData* robot, int tag_id)
     // float shooter_height = CFG_SHOOTER_RADIUS * sinf( shooter_curr_angle + 0.3542) + CFG_SHOOTER_AXIS_HEIGHT;
 
 
-    float angle_fudge_factor = 0.5117 * shooter_curr_angle + 0.169995;
+    float angle_fudge_factor = 0;//0.5117 * shooter_curr_angle + 0.169995;
     // frc::SmartDashboard::PutNumber("Fudge", angle_fudge_factor);
 
     shooter_curr_angle += angle_fudge_factor;
@@ -145,7 +165,7 @@ void calculateVision(RobotData* robot, int tag_id)
 
     frc::SmartDashboard::PutNumber("Calculated Angle", solved_angle_after_regression_function);
 
-
+    pivotAngleTemp->SetDouble(solved_angle_after_regression_function);
 }
 
 void updatePhoton(PhotonParameters* photon)
@@ -167,11 +187,14 @@ void updatePhoton(PhotonParameters* photon)
 
             photon->tag_rel_robot[working_target.fiducialId - 1] = working_tag_rel_robot;
 
+            
             frc::Transform3d pose_rel_to_tag = working_tag_rel_robot.Inverse();
 
             std::optional<frc::Pose3d> tag_pose = photon->aprilTagFieldLayout.GetTagPose(working_target.fiducialId);
 
             frc::Pose3d robot_pose = tag_pose.value().TransformBy(pose_rel_to_tag);
+
+            printf("Got tag for %d -> %d with coords %f, %f\n", working_target.GetFiducialId(), working_target.fiducialId, working_tag_rel_robot.X(), working_tag_rel_robot.Y());
 
             // printf("(x, y, z) = (%f, %f, %f)\n", robot_pose.X(), robot_pose.Y(), robot_pose.Z());
 

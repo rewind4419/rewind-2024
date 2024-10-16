@@ -9,16 +9,16 @@ using namespace ctre::phoenix::motorcontrol;
 
 struct RobotHardware
 {
-	const ControlMode controlMode = ControlMode::Velocity;
-	TalonSRX* left_motors[HW_LEFT_MOTOR_COUNT];
-	TalonSRX* right_motors[HW_RIGHT_MOTOR_COUNT];
+	//const ControlMode controlMode = ControlMode::Velocity;
+	//TalonSRX* left_motors[HW_LEFT_MOTOR_COUNT];
+	//TalonSRX* right_motors[HW_RIGHT_MOTOR_COUNT];
 };
 
 inline void hwInit(RobotHardware* hw)
 {
-	hw->left_motors[0]  = new TalonSRX(23);
-	hw->left_motors[1]  = new TalonSRX(24);
+	hw->left_motors[0]  = new rev::CANSparkMax (7, rev::CANSparkMaxLowLevel::MotorType::kBrushed);
+	hw->left_motors[1]  = new rev::CANSparkMax (8, rev::CANSparkMaxLowLevel::MotorType::kBrushed);
 
-	hw->right_motors[0] = new TalonSRX(22);
-	hw->right_motors[1] = new TalonSRX(25);
+	hw->right_motors[0] = new rev::CANSparkMax (9, rev::CANSparkMaxLowLevel::MotorType::kBrushed);
+	hw->right_motors[1] = new rev::CANSparkMax (10, rev::CANSparkMaxLowLevel::MotorType::kBrushed);
 }

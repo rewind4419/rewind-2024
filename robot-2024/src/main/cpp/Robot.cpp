@@ -177,7 +177,10 @@ void robotModeInit(RobotData *r, RobotMode new_mode)
         }
         else
         {
-            autoCmd(r, AUTO_4_PIECE, autoAlliance);
+            //autoCmd(r, AUTO_4_PIECE, autoAlliance); // Sherwin - If you are feeling risky, uncomment this line to enable "auto"
+            
+
+            // // Dont mess with these:
             // autoCmd(r, AUTO_4_PIECE_REVERSED, autoAlliance);
             // autoCmd(r, AUTO_PREFIRE_LEAVE_COMMUNITY_RIGHT, autoAlliance);
             // autoCmd(r, AUTO_PREFIRE_LEAVE_COMMUNITY_LEFT, autoAlliance);
@@ -190,7 +193,7 @@ void robotModeInit(RobotData *r, RobotMode new_mode)
             // if (autoMode->GetInteger(0) == 0)
             //     printf("WARNING: AUTO MODE = 0, RUNNING NO AUTO\n");
             // switch (autoMode->GetInteger(0))
-            // {
+            // {amp
             // case 0:
             //     autoCmd(r, AUTO_NONE, autoAlliance);
             //     break;
@@ -527,7 +530,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         {
             case MODE_DEFAULT:
             {
-                printf("Mode = default\n");
+                // printf("Mode = default\n");
                     r->shooter.target_angle = 0;
                           
 
@@ -583,12 +586,12 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             } break;
              case MODE_INTAKING:
             {
-                printf("Mode = intaking\n");
+                // printf("Mode = intaking\n");
 
                 r->shooter.target_angle = 1.2f;
 
                 r->shooter.firing_mode = true;
-             //   r->ready_fire_amp = false;
+                r->shooter.ready_fire_amp = false;
                 r->shooter.firing_motor_speed = 0.0;
 
                 r->intake.intake_speed = CFG_INTAKE_MAX_SPEED;
@@ -615,7 +618,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             } break;
             case MODE_AMP:
             {
-                printf("Mode = Amp\n");
+                // printf("Mode = Amp\n");
 
                 // r->shooter.target_angle = ampScoreAngle->GetDouble(1.45);
                 // r->elevator.target_height = ampScoreHeight->GetDouble(0.275);
@@ -627,8 +630,8 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
 
                 r->shooter.firing_mode = true;
-                r->shooter.ready_fire_amp = false;
-                r->shooter.firing_motor_speed = 0.5;
+                r->shooter.ready_fire_amp = true;
+                r->shooter.firing_motor_speed = -0.175;
 
                 r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5) - (in->mate.trigger_left * 0.5 + 0.5);
                 r->intake.intake_speed = 0;
@@ -636,7 +639,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             } break; 
             case MODE_SHOOTING:
             {
-                printf("Mode = Shoot\n");
+                // printf("Mode = Shoot\n");
                 r->shooter.firing_mode = true;
                 r->shooter.ready_fire_amp = false;
 

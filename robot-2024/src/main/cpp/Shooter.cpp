@@ -108,12 +108,12 @@ void updateShooter(Shooter* shooter, RobotData* r)
         else if(firing_motor_velocity > 0) firing_throttle = -1;
     }
 
-    if(!shooter->firing_mode && !r->shooter.ready_fire_amp)
-    {
-        // shooter->control_motor->SetSmartCurrentLimit(32);
-        // shooter->control_motor->SetVoltage;
-    }
-    else shooter->control_motor->SetSmartCurrentLimit(80);
+    // if(!shooter->firing_mode && !r->shooter.ready_fire_amp)
+    // {
+    //     // shooter->control_motor->SetSmartCurrentLimit(32);
+    //     // shooter->control_motor->SetVoltage;
+    // }
+    // else shooter->control_motor->SetSmartCurrentLimit(80);
 
 
     // if(shooter->firing_mode)
@@ -138,7 +138,7 @@ void updateShooter(Shooter* shooter, RobotData* r)
     {
         shooter->amp_wheel_pid.errorAccum = 0.0;
         shooter->control_motor->Set(-1 * shooter->control_motor_speed);
-        printf("Shooter motor being set, control speed = %f\n", shooter->control_motor_speed);
+        //printf("Shooter motor being set, control speed = %f\n", shooter->control_motor_speed);
     }
 
     shooter->firing_motor->Set(firing_throttle);
@@ -226,6 +226,7 @@ void calibrateShooterAngle(Shooter* shooter)
 {
     shooter->sum_angle += shooter->shooter_encoder->GetPosition() - shooter->prev_angle;
     shooter->prev_angle = shooter->shooter_encoder->GetPosition();
+
 
     printf("Shooter Sum Angle = %f\n", shooter->sum_angle);
 }

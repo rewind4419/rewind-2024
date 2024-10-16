@@ -170,12 +170,12 @@ constexpr float CFG_MAX_TAG_ALIGN_THROTTLE = 0.4f;
 // Center field x = 8.270620346069336
 //Center field y = 5.547867774963379
 
-constexpr float CFG_SPEAKER_HEIGHT = 90 * INCH_TO_METER;
+constexpr float CFG_SPEAKER_HEIGHT = 81 * INCH_TO_METER;
 //constexpr float CFG_SPEAKER_HEIGHT = 92 * INCH_TO_METER;
 //constexpr float CFG_SPEAKER_HEIGHT = 87.5413 * INCH_TO_METER;
 //constexpr float CFG_SPEAKER_HEIGHT = 84 * INCH_TO_METER;
 
-constexpr float CFG_SPEAKER_HEIGHT_AUTO = 90 * INCH_TO_METER;
+constexpr float CFG_SPEAKER_HEIGHT_AUTO = 81 * INCH_TO_METER;
 //constexpr float CFG_SPEAKER_HEIGHT_AUTO = 83.5 * INCH_TO_METER;
 //constexpr float CFG_SPEAKER_HEIGHT_AUTO = 80 * INCH_TO_METER;
 
