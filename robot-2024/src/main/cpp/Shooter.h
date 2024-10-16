@@ -36,6 +36,7 @@ struct Shooter
     bool firing_mode = false;
     bool brake = false;
     bool amp_mode = false;
+    bool bloop_mode = false;
 
     bool trigger_or_bumper_first = true;
 

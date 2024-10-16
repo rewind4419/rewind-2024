@@ -1,6 +1,9 @@
 #include "rev/CANSparkMax.h"
 #include "frc/motorcontrol/Spark.h"
 #include <ctre/phoenix/motorcontrol/can/TalonSRX.h>
+
+#include <rev/CANSparkMax.h>
+
 using namespace ctre::phoenix::motorcontrol::can;
 using namespace ctre::phoenix::motorcontrol;
 
@@ -10,15 +13,15 @@ using namespace ctre::phoenix::motorcontrol;
 struct RobotHardware
 {
 	const ControlMode controlMode = ControlMode::Velocity;
-	TalonSRX* left_motors[HW_LEFT_MOTOR_COUNT];
-	TalonSRX* right_motors[HW_RIGHT_MOTOR_COUNT];
+	rev::CANSparkMax* left_motors[HW_LEFT_MOTOR_COUNT];
+	rev::CANSparkMax* right_motors[HW_RIGHT_MOTOR_COUNT];
 };
 
 inline void hwInit(RobotHardware* hw)
 {
-	hw->left_motors[0]  = new TalonSRX(23);
-	hw->left_motors[1]  = new TalonSRX(24);
+	hw->left_motors[0]  = new rev::CANSparkMax(23, rev::CANSparkLowLevel::MotorType::kBrushed);
+	hw->left_motors[1]  = new rev::CANSparkMax(24, rev::CANSparkLowLevel::MotorType::kBrushed);
 
-	hw->right_motors[0] = new TalonSRX(22);
-	hw->right_motors[1] = new TalonSRX(25);
+	hw->right_motors[0] = new rev::CANSparkMax(22, rev::CANSparkLowLevel::MotorType::kBrushed);
+	hw->right_motors[1] = new rev::CANSparkMax(25, rev::CANSparkLowLevel::MotorType::kBrushed);
 }

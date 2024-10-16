@@ -191,14 +191,7 @@ void updateShooter(Shooter* shooter, RobotData* r)
     shooterAxisThrottle->SetDouble(shooter->axis_throttle);
     shooterAxisError->SetDouble(interpol_diff);
 
-    if(r->input.mate.bumper_right.held && r->input.mate.joystick_left.y > 0.2)
-    {
-        for(int i = 0; i < CFG_SHOOTER_AXIS_MOTOR_COUNT; i++)
-        {
-            if (i == 1) shooter->axis_motors[i]->Set(-0.5);
-            else shooter->axis_motors[i]->Set(0.5); // COMMENT THIS FOR 1 MOTOR
-        }
-    }
+
     if(r->input.mate.bumper_right.held && r->input.mate.joystick_left.y > 0.2)
     {
         for(int i = 0; i < CFG_SHOOTER_AXIS_MOTOR_COUNT; i++)
