@@ -70,8 +70,12 @@ void RobotProxy::DisabledPeriodic() {
 }
 
 
-void RobotProxy::TestInit() {}
-void RobotProxy::TestPeriodic() {}
+void RobotProxy::TestInit() {
+
+}
+void RobotProxy::TestPeriodic() {
+    printCalibrationData(&r.drivetrain);
+}
 
 void RobotProxy::SimulationInit() {}
 void RobotProxy::SimulationPeriodic() {}

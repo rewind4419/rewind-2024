@@ -27,6 +27,8 @@ SDR Auto issues
 
 */
 
+// LR orientation with respect to player station; looking out onto field.
+
 bool first_prefire_shot = true;
 
 bool note_left = true;

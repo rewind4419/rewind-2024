@@ -177,16 +177,22 @@ void robotModeInit(RobotData *r, RobotMode new_mode)
         }
         else
         {
-            autoCmd(r, AUTO_4_PIECE, autoAlliance); // Sherwin - If you are feeling risky, uncomment this line to enable "auto"
-            
+            // WORKING
+            // autoCmd(r, AUTO_4_PIECE, autoAlliance);
+            // autoCmd(r, AUTO_4_PIECE_REVERSED, autoAlliance);
+             autoCmd(r, AUTO_PREFIRE_LEAVE_COMMUNITY, autoAlliance); // Shoot Pre-load and stay still
+
+            // NOT WORKING - doesn't shoot and then moves and doesn't stop
+            // autoCmd(r, AUTO_PREFIRE_LEAVE_COMMUNITY_RIGHT, autoAlliance);
+            // autoCmd(r, AUTO_PREFIRE_LEAVE_COMMUNITY_LEFT, autoAlliance);
+
+            // just turns bot no shoot
+            // autoCmd(r, AUTO_SINGLE_TEST, autoAlliance); Does not work
 
             // // Dont mess with these:
             // autoCmd(r, AUTO_4_PIECE_REVERSED, autoAlliance);
-            // autoCmd(r, AUTO_PREFIRE_LEAVE_COMMUNITY_RIGHT, autoAlliance);
-            // autoCmd(r, AUTO_PREFIRE_LEAVE_COMMUNITY_LEFT, autoAlliance);
             // autoCmd(r, AUTO_4_PIECE_CONFIG, autoAlliance);
-            // autoCmd(r, AUTO_PREFIRE_LEAVE_COMMUNITY, autoAlliance);
-            
+            // autoCmd(r, AUTO_PREFIRE_LEAVE_COMMUNITY, autoAlliance); 
             
             //printf("%d\n", autoMode->GetInteger(0));
             // autoCmd(r, AUTO_SHOOT_WHILE_INTAKING, autoAlliance);
@@ -517,11 +523,11 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             r->robotState.robotMode = MODE_DEFAULT;
         }
 
-        if (in->mate.option_button.down && (r->robotState.robotMode == MODE_DEFAULT || r->robotState.robotMode == MODE_SHOOTING))
-        {
-            r->robotState.robotMode = MODE_CLIMBING;
-            r->shooter.target_angle = 1.2f;
-        }
+        // if (in->mate.option_button.down && (r->robotState.robotMode == MODE_DEFAULT || r->robotState.robotMode == MODE_SHOOTING))
+        // {
+        //     r->robotState.robotMode = MODE_CLIMBING;
+        //     r->shooter.target_angle = 1.2f;
+        // }
 
         frc::SmartDashboard::PutBoolean("Beam Break", r->shooter.beam_break.Get());
         
@@ -576,6 +582,10 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                     printf("To mode Shooting\n");
                 }
                 
+                if (in->mate.option_button.down)
+                {
+                    r->robotState.robotMode = MODE_BLOOP;
+                }
 
                 if(in->mate.big_button.down)
                 {
@@ -722,34 +732,39 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             }   break;
             case MODE_BLOOP:
             {
-                // printf("Mode = Shoot\n");
+                printf("Mode = Bloop\n");
                 r->shooter.firing_mode = true;
                 r->shooter.ready_fire_amp = false;
 
-                r->shooter.target_angle = 0.8 - CFG_SHOOTER_ANGLE_OFFSET;
-                r->shooter.firing_motor_speed = -0.6;
+                // Connor note
+                // Shooter manual default is 0.9 - CFG...
+                // r->shooter.target_angle = 0.8 - CFG_SHOOTER_ANGLE_OFFSET; //working at TT
+                r->shooter.target_angle = 0.6 - CFG_SHOOTER_ANGLE_OFFSET;
+                r->shooter.firing_motor_speed = -0.855; //-0.855 working at TT //does nothing
                 r->manual_shooting_mode = true;
 
+                // not needed
                 // if ((in->driver.trigger_right * 0.5 + 0.5) > 0.5 && fabs(r->shooter.firing_encoder->GetVelocity()) > 5500)
                 // {
                 //     r->shooter.control_motor_speed = 1.0f;
                 // }
                 // else
-                {
-                    r->shooter.control_motor_speed =  (in->mate.trigger_right * 0.5 + 0.5);
-                    r->intake.intake_speed = (in->mate.trigger_right * 0.5 + 0.5);
-
-                    if (in->mate.bumper_left.held)
-                    {
-                        r->shooter.control_motor_speed -= 1.0;
-                        r->intake.intake_speed -= 1.0;
-                    }
-                }
+                // {
+                   // r->shooter.control_motor_speed =  (in->mate.trigger_right * 0.5 + 0.5);
+                   // r->intake.intake_speed = (in->mate.trigger_right * 0.5 + 0.5);
+                   // if (in->mate.bumper_left.held)
+                   // {
+                   //     r->shooter.control_motor_speed -= 1.0;
+                   //     r->intake.intake_speed -= 1.0;
+                   // }
+                // }
+                
+                // confirm intake is zero when yeeting
                 r->intake.intake_speed = 0;
 
                 if (r->manual_shooting_mode)
                 {
-                    r->shooter.firing_motor_speed = manualFiringVel->GetDouble(-0.6);
+                    r->shooter.firing_motor_speed = manualFiringVel->GetDouble(-0.6); // (-0.6 at TT)
                 }
 
                 if (in->mate.a.down)
