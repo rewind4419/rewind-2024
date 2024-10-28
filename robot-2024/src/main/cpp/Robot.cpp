@@ -633,14 +633,16 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 // r->shooter.target_angle = ampScoreAngle->GetDouble(1.45);
                 // r->elevator.target_height = ampScoreHeight->GetDouble(0.275);
 
-                r->shooter.target_angle = (1.45);
+                //r->shooter.target_angle = (1.45);
+                r->shooter.target_angle = 0.6 - CFG_SHOOTER_ANGLE_OFFSET; // angle bloop
+                
                 float shooter_angle = r->shooter.sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE + CFG_SHOOTER_ANGLE_OFFSET;
                 float diff = r->shooter.target_angle - shooter_angle;
 
 
 
                 r->shooter.firing_mode = true;
-                r->shooter.ready_fire_amp = true;
+                r->shooter.ready_fire_amp = false;
                 r->shooter.firing_motor_speed = -0.175;
 
                 r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5) - (in->mate.trigger_left * 0.5 + 0.5);
