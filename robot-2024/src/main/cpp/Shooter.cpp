@@ -15,6 +15,8 @@ nt::GenericEntry* firingMotorPower;
 nt::GenericEntry* shooterAxisThrottle;
 nt::GenericEntry* shooterAxisError;
 
+nt::GenericEntry* shooterCurrent;
+
 void initShooter(Shooter* shooter)
 {
     pivotAngle = frc::Shuffleboard::GetTab("Shooter").Add("Angle", 0.0).GetEntry();
@@ -24,10 +26,12 @@ void initShooter(Shooter* shooter)
     firingMotorVelocityError = frc::Shuffleboard::GetTab("Shooter").Add("Firing Motor Error", 0.0).GetEntry();
     firingMotorPIDOutput = frc::Shuffleboard::GetTab("Shooter").Add("Firing Motor PID Output", 0.0).GetEntry();
 
-    firingMotorPower = frc::Shuffleboard::GetTab("Shooter").Add("Firing Motor Power", 0.0).GetEntry();
+    firingMotorPower = frc::Shuffleboard::GetTab("Shooter").Add("Firing Motor Throttle", 0.0).GetEntry();
 
     shooterAxisThrottle = frc::Shuffleboard::GetTab("Shooter").Add("Axis Throttle", 0.0).GetEntry();
     shooterAxisError = frc::Shuffleboard::GetTab("Shooter").Add("Axis Error", 0.0).GetEntry();
+
+    shooterCurrent = frc::Shuffleboard::GetTab("Shooter").Add("Shooter Motor Current", 0.0).GetEntry();
 
     shooter->control_motor = new rev::CANSparkFlex(CFG_SHOOTER_CONTROL_MOTOR, rev::CANSparkFlex::MotorType::kBrushless);
     shooter->firing_motor = new rev::CANSparkFlex(CFG_SHOOTER_FIRING_MOTOR, rev::CANSparkFlex::MotorType::kBrushless);
@@ -37,7 +41,7 @@ void initShooter(Shooter* shooter)
     shooter->axis_motors[1] = new rev::CANSparkFlex(CFG_SHOOTER_AXIS_RIGHT, rev::CANSparkFlex::MotorType::kBrushless);
 
     shooter->shooter_encoder = std::make_unique<rev::SparkMaxRelativeEncoder>(shooter->axis_motors[1]->GetEncoder());
-    shooter->firing_encoder = std::make_unique<rev::SparkMaxRelativeEncoder>(shooter->firing_motor->GetEncoder());
+    shooter->firing_encoder = std::make_unique<rev::SparkMaxRelativeEncoder>(shooter->firing_motor_2->GetEncoder());
     shooter->control_encoder = std::make_unique<rev::SparkMaxRelativeEncoder>(shooter->control_motor->GetEncoder());
 
 
@@ -69,7 +73,7 @@ void updateShooter(Shooter* shooter, RobotData* r)
     // shooter->beam_break_val = shooter->beam_break.Get();
 
     float firing_throttle;
-    float firing_motor_velocity = shooter->firing_encoder->GetVelocity();
+    float firing_motor_velocity = -shooter->firing_encoder->GetVelocity();
     frc::SmartDashboard::PutNumber("Current Firing Motor Velocity", firing_motor_velocity);
 
     // // Shooter integral resetter
@@ -85,20 +89,20 @@ void updateShooter(Shooter* shooter, RobotData* r)
  //   if(shooter->firing_mode && !r->shooter.ready_fire_amp)
     {
         float target_velocity = shooter->firing_motor_speed * CFG_TARGET_VELOCITY_FIRING_WHEELS;
-        float current_velocity = shooter->firing_encoder->GetVelocity();
+        float current_velocity = -shooter->firing_encoder->GetVelocity();
 
         static float lastCounts = 0.0f;
         float thisCounts = shooter->firing_encoder->GetPosition();
 
-        printf("RPM last counts: %f, this counts: %f, direct: %f\n", lastCounts, thisCounts, shooter->firing_encoder->GetPosition());
+        printf("Filtered velocity: %f\n", current_velocity);
+
+        printf("RPM last counts: %f, this counts: %f, direct: %f\n", lastCounts, thisCounts, (thisCounts-lastCounts)*(60.0f/0.02f));
 
         lastCounts = shooter->firing_encoder->GetPosition();
         
-
-
         firing_throttle = evalPid(&shooter->firing_wheel_pid, target_velocity - current_velocity, CFG_DELTA_TIME);
-
          
+        shooterCurrent->SetDouble(shooter->firing_motor_2->GetOutputCurrent());
 
         frc::SmartDashboard::PutNumber("Firing Velocity Diff", target_velocity - current_velocity);
         printf("Firing Target: %f, Current: %f\n", target_velocity, current_velocity);
@@ -155,7 +159,8 @@ void updateShooter(Shooter* shooter, RobotData* r)
         //printf("Shooter motor being set, control speed = %f\n", shooter->control_motor_speed);
     }
 
-    shooter->firing_motor->Set(firing_throttle * 1.0);
+    // firing_motor unplugged
+    //shooter->firing_motor->Set(firing_throttle * 1.0);
     shooter->firing_motor_2->Set(-firing_throttle * 1.0);
 
     float shooter_angle = shooter->sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE + CFG_SHOOTER_ANGLE_OFFSET;
