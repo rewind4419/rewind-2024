@@ -24,7 +24,7 @@ void initVisionCalculations(RobotData* robot)
 {
     robot->photon.regression_function = true;
 
-    printf("Initializing Vis Shuffleboard!\n");
+    //printf("Initializing Vis Shuffleboard!\n");
     pivotAngleTemp = frc::Shuffleboard::GetTab("Vis").Add("Pivot Angle", -1.0).GetEntry();
     robotDistanceFromTag = frc::Shuffleboard::GetTab("Vis").Add("Robot Distance", -1.0).GetEntry();
 
@@ -67,7 +67,7 @@ void autoVisionUpdate(RobotData* robot, int tag_id)
 
 void alignToTag(int tagId, RobotData* robot, bool yaw_align)
 {
-    printf("Aligning to Tag\n");
+   // printf("Aligning to Tag\n");
     calculateVision(robot, tagId);
     float angularThrottle = 0.0;
 
@@ -82,10 +82,10 @@ void alignToTag(int tagId, RobotData* robot, bool yaw_align)
         }
         else angularThrottle = 0;
 
-        printf("Setting 1 Vis Shuffleboard!\n");
+        //printf("Setting 1 Vis Shuffleboard!\n");
         
-        printf("Yaw error %f\n ", robot->photon.calculated_yaw_angle);
-        printf("Angular throttle %f\n", angularThrottle);     
+       // printf("Yaw error %f\n ", robot->photon.calculated_yaw_angle);
+       // printf("Angular throttle %f\n", angularThrottle);     
 
         robot->drivetrain_controller.mode = DRIVECTRL_THROTTLE;
         robot->drivetrain_controller.ctrl.throttle.throttle = robot->global_input_translation;
@@ -98,7 +98,7 @@ void alignToTag(int tagId, RobotData* robot, bool yaw_align)
         robot->shooter.target_angle = robot->photon.calculated_pivot_angle - CFG_SHOOTER_ANGLE_OFFSET; // Uncomment to enable shooter a movement
     }
 
-    frc::SmartDashboard::PutNumber("Aim Calculated Angle", robot->photon.calculated_pivot_angle);
+    // // frc::SmartDashboard::PutNumber("Aim Calculated Angle", robot->photon.calculated_pivot_angle);
 }
 
 void calculateVision(RobotData* robot, int tag_id)
@@ -106,8 +106,8 @@ void calculateVision(RobotData* robot, int tag_id)
 
     v2 vect_to_tag = {static_cast<float>(robot->photon.tag_rel_robot[tag_id - 1].Y()), static_cast<float>(robot->photon.tag_rel_robot[tag_id - 1].X())};
     float angle_to_speaker = asin( vect_to_tag.x / vect_to_tag.y);
-    printf("Vec to tag %f %f\n", vect_to_tag.x, vect_to_tag.y); 
-    printf("Angle to speaker %f\n", angle_to_speaker); 
+    //printf("Vec to tag %f %f\n", vect_to_tag.x, vect_to_tag.y); 
+    //printf("Angle to speaker %f\n", angle_to_speaker); 
 
     //Projectile Motion
     float dist_from_tag = length(vect_to_tag);
@@ -121,12 +121,12 @@ void calculateVision(RobotData* robot, int tag_id)
     float offset;
     shooter_curr_angle += offset;
 
-    // frc::SmartDashboard::PutNumber("Current Angle", shooter_curr_angle);
+    // // frc::SmartDashboard::PutNumber("Current Angle", shooter_curr_angle);
     // float shooter_height = CFG_SHOOTER_RADIUS * sinf( shooter_curr_angle + 0.3542) + CFG_SHOOTER_AXIS_HEIGHT;
 
 
     float angle_fudge_factor = 0;//0.5117 * shooter_curr_angle + 0.169995;
-    // frc::SmartDashboard::PutNumber("Fudge", angle_fudge_factor);
+    // // frc::SmartDashboard::PutNumber("Fudge", angle_fudge_factor);
 
     shooter_curr_angle += angle_fudge_factor;
     float shooter_height = CFG_SHOOTER_RADIUS * sinf( shooter_curr_angle ) + CFG_SHOOTER_AXIS_HEIGHT;
@@ -136,11 +136,11 @@ void calculateVision(RobotData* robot, int tag_id)
     float shooter_offset = CFG_SHOOTER_DIST_CAM_TO_AXIS - CFG_SHOOTER_RADIUS * cosf(shooter_curr_angle);
     dist_from_tag += shooter_offset;
 
-    frc::SmartDashboard::PutNumber("Dist from tag", dist_from_tag * 39.37);
+    // // frc::SmartDashboard::PutNumber("Dist from tag", dist_from_tag * 39.37);
 
-    printf("height = %f\n", shooter_height);
+    //printf("height = %f\n", shooter_height);
 
-    frc::SmartDashboard::PutNumber("Current Height", shooter_height * 39.37);
+    // frc::SmartDashboard::PutNumber("Current Height", shooter_height * 39.37);
 
     float equation_term_1 = (CFG_GRAVITATIONAL_CONSTANT * std::pow(dist_from_tag, 2)) / std::pow(init_velocity, 2);
 
@@ -161,9 +161,9 @@ void calculateVision(RobotData* robot, int tag_id)
 
     robot->photon.calculated_yaw_angle = angle_to_speaker;
 
-    frc::SmartDashboard::PutNumber("YAW CHECK", angle_to_speaker);
+    // frc::SmartDashboard::PutNumber("YAW CHECK", angle_to_speaker);
 
-    frc::SmartDashboard::PutNumber("Calculated Angle", solved_angle_after_regression_function);
+    // frc::SmartDashboard::PutNumber("Calculated Angle", solved_angle_after_regression_function);
 
     pivotAngleTemp->SetDouble(solved_angle_after_regression_function);
 }
@@ -173,10 +173,10 @@ void updatePhoton(PhotonParameters* photon)
     photon::PhotonPipelineResult result = photon->april_cam.GetLatestResult();
     std::span<const photon::PhotonTrackedTarget> targets = result.GetTargets();
     photon->n_tags = targets.size();
-    printf("N_Tags = %d\n", photon->n_tags);
+    //printf("N_Tags = %d\n", photon->n_tags);
     if(result.HasTargets())
     {
-        frc::SmartDashboard::PutNumber("HAS TARGETS", 1);
+        // frc::SmartDashboard::PutNumber("HAS TARGETS", 1);
 
         for(int i = 0; i < targets.size(); i++)
         {
@@ -194,7 +194,7 @@ void updatePhoton(PhotonParameters* photon)
 
             frc::Pose3d robot_pose = tag_pose.value().TransformBy(pose_rel_to_tag);
 
-            printf("Got tag for %d -> %d with coords %f, %f\n", working_target.GetFiducialId(), working_target.fiducialId, working_tag_rel_robot.X(), working_tag_rel_robot.Y());
+            //printf("Got tag for %d -> %d with coords %f, %f\n", working_target.GetFiducialId(), working_target.fiducialId, working_tag_rel_robot.X(), working_tag_rel_robot.Y());
 
             // printf("(x, y, z) = (%f, %f, %f)\n", robot_pose.X(), robot_pose.Y(), robot_pose.Z());
 
@@ -204,6 +204,6 @@ void updatePhoton(PhotonParameters* photon)
     else 
     {
         photon->n_tags = 0;
-        frc::SmartDashboard::PutNumber("HAS TARGETS", 0);
+        // frc::SmartDashboard::PutNumber("HAS TARGETS", 0);
     }
 }

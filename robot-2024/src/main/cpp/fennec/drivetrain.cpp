@@ -172,7 +172,7 @@ void drivetrainUpdateRawVectors(Drivetrain* drivetrain, v2* target_vectors, floa
         if(drivetrain->drivetrain_override) steer_throttle = 0;
         module->steer_motor->Set( steer_throttle);
 
-        frc::SmartDashboard::PutNumber("Final Steer", steer_throttle);
+        // frc::SmartDashboard::PutNumber("Final Steer", steer_throttle);
 
         // printf("steer speed = %f\n", steer_throttle);
 		
@@ -197,7 +197,7 @@ void drivetrainUpdateRawVectors(Drivetrain* drivetrain, v2* target_vectors, floa
 
         if(drivetrain->drivetrain_override) drive_throttle = 0;
         module->drive_motor->Set(drive_throttle);
-        frc::SmartDashboard::PutNumber("Final Drive", drive_throttle);
+        // frc::SmartDashboard::PutNumber("Final Drive", drive_throttle);
 
 
         // printf("drive speed = %f\n", drive_throttle);
@@ -282,9 +282,11 @@ OdometryFrame getDrivetrainOdometry(Drivetrain* drivetrain)
 
 void printCalibrationData(Drivetrain* drivetrain)
 {
-    printf("==== SWERVE CALIBRATE ====\n");
-    printf("Warning: Disable this before use!\n");
-    for (int i = 0; i < DrivetrainSwerve_Count; i++)
+    //printf("==== SWERVE CALIBRATE ====\n");
+    //printf("Warning: Disable this before use!\n");
+    
+// mjh comment entire print block    
+/*     for (int i = 0; i < DrivetrainSwerve_Count; i++)
     {
         SwerveDriveModule* module = &drivetrain->swerve_drives[i];
 
@@ -300,5 +302,6 @@ void printCalibrationData(Drivetrain* drivetrain)
         }
         printf(" -- %f\n", module->direction_encoder->GetAbsolutePosition() * M_PI / 180.0);
     }
-    printf("==========================\n");
+    printf("==========================\n"); */
+    
 }

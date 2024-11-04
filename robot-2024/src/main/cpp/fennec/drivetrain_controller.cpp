@@ -67,11 +67,11 @@ void updateDrivetrainController(RobotData* r, DrivetrainController* controller, 
 
 			Pose current_pose = r->localiser.pose_estimate;
 			v2 move_to = target_pose.position - current_pose.position;
-			frc::SmartDashboard::PutNumber("Waypoint Difference x", move_to.x);
-			frc::SmartDashboard::PutNumber("Waypoint Difference y", move_to.y);
+			// frc::SmartDashboard::PutNumber("Waypoint Difference x", move_to.x);
+			// frc::SmartDashboard::PutNumber("Waypoint Difference y", move_to.y);
 
 
-			frc::SmartDashboard::PutNumber("Side", r->side);
+			// frc::SmartDashboard::PutNumber("Side", r->side);
 
 
 			v2 current_facing = rotate(v2{ 0, 1 }, current_pose.rotation);
@@ -103,7 +103,7 @@ void updateDrivetrainController(RobotData* r, DrivetrainController* controller, 
 			}
 			else if (r->side == 0) 
 			{
-				frc::SmartDashboard::PutNumber("Move to Offset", current_pose.rotation + r->localiser.starting_rotation + M_PI / 2);
+				// frc::SmartDashboard::PutNumber("Move to Offset", current_pose.rotation + r->localiser.starting_rotation + M_PI / 2);
 				move_to = rotate(move_to, current_pose.rotation + r->localiser.starting_rotation + M_PI / 2);
 			}
 
@@ -133,8 +133,8 @@ void updateDrivetrainController(RobotData* r, DrivetrainController* controller, 
 
 				translation.x -= rotation * CFG_DRIVETRAIN_ANTIDRIFT;
 
-				frc::SmartDashboard::PutNumber("Translation X", translation.x);
-				frc::SmartDashboard::PutNumber("Translation Y", translation.y);
+				// frc::SmartDashboard::PutNumber("Translation X", translation.x);
+				// frc::SmartDashboard::PutNumber("Translation Y", translation.y);
 
 				drivetrainUpdate(drivetrain, translation, rotation, dt);
 				drivetrainUpdate(drivetrain, translation, rotation, dt);

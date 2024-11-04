@@ -13,8 +13,8 @@ void stepLocaliser(Localiser_FirstOrderLag* localiser, OdometryFrame odometry_fr
   localiser->pose_estimate.position = localiser->pose_estimate.position + rotate(odometry_frame.delta_position, localiser->pose_estimate.rotation);
   // localiser->pose_estimate.rotation = localiser->pose_estimate.rotation + odometry_frame.delta_rotation;
 
-    frc::SmartDashboard::PutNumber("YeetX", rotate(odometry_frame.delta_position, localiser->pose_estimate.rotation).x);
-    frc::SmartDashboard::PutNumber("YeetY", rotate(odometry_frame.delta_position, localiser->pose_estimate.rotation).y);
+    // frc::SmartDashboard::PutNumber("YeetX", rotate(odometry_frame.delta_position, localiser->pose_estimate.rotation).x);
+    // frc::SmartDashboard::PutNumber("YeetY", rotate(odometry_frame.delta_position, localiser->pose_estimate.rotation).y);
 
 
   if (localiser->first)

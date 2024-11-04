@@ -127,7 +127,7 @@ void robotCmd(RobotData* r, RobotCommand state)
 
         case SHOOTER_DELIVER_SPEAKER:
         {
-            printf("running speaker task\n");
+           // printf("running speaker task\n");
             {
                 Task t;
                 t.type = TASK_SHOOTER_POSITIONING;
@@ -213,7 +213,7 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                 april_tag = 4;
                 prepickup = RED_NOTE_PREPICKUP_LEFT;
             }
-            frc::SmartDashboard::PutNumber("Auto init Delay", r->auto_init_delay);
+            // frc::SmartDashboard::PutNumber("Auto init Delay", r->auto_init_delay);
             pushTask(&r->taskmgr, genTaskDelay(r->auto_init_delay));
 
             {
@@ -742,7 +742,7 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                 pickup = RED_NOTE_PICKUP_LEFT;
             }
 
-            frc::SmartDashboard::PutNumber("Auto init Delay", r->auto_init_delay);
+            // frc::SmartDashboard::PutNumber("Auto init Delay", r->auto_init_delay);
             pushTask(&r->taskmgr, genTaskDelay(r->auto_init_delay));
 
             {
@@ -1048,7 +1048,7 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                 pickup = RED_NOTE_PICKUP_LEFT;
 
             }
-            frc::SmartDashboard::PutNumber("Auto init Delay", r->auto_init_delay);
+            // frc::SmartDashboard::PutNumber("Auto init Delay", r->auto_init_delay);
             pushTask(&r->taskmgr, genTaskDelay(r->auto_init_delay));
 
             {
@@ -1601,7 +1601,7 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                 prepickup = RED_NOTE_PREPICKUP_LEFT;
 
             }
-            frc::SmartDashboard::PutNumber("Auto init Delay", r->auto_init_delay);
+            // frc::SmartDashboard::PutNumber("Auto init Delay", r->auto_init_delay);
             pushTask(&r->taskmgr, genTaskDelay(r->auto_init_delay));
 
             {
@@ -1692,7 +1692,7 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                 delay_vel_2 = 1.5;
 
             }
-            frc::SmartDashboard::PutNumber("Auto init Delay", r->auto_init_delay);
+            // frc::SmartDashboard::PutNumber("Auto init Delay", r->auto_init_delay);
             pushTask(&r->taskmgr, genTaskDelay(r->auto_init_delay));
 
             {
@@ -1796,7 +1796,7 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                 prepickup = RED_NOTE_PREPICKUP_LEFT;
 
             }
-            frc::SmartDashboard::PutNumber("Auto init Delay", r->auto_init_delay);
+            // frc::SmartDashboard::PutNumber("Auto init Delay", r->auto_init_delay);
             pushTask(&r->taskmgr, genTaskDelay(r->auto_init_delay));
 
             {
@@ -1969,7 +1969,7 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                     pushTask(&r->taskmgr, t);
                 }  
 
-                printf("inside loop");   
+                //printf("inside loop");   
 
                 {
                     Task t;
@@ -2198,7 +2198,7 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                 prepickup = RED_NOTE_PREPICKUP_LEFT;
 
             }
-            frc::SmartDashboard::PutNumber("Auto init Delay", r->auto_init_delay);
+            // frc::SmartDashboard::PutNumber("Auto init Delay", r->auto_init_delay);
             pushTask(&r->taskmgr, genTaskDelay(r->auto_init_delay));
 
             {
@@ -2293,7 +2293,7 @@ void autoCmd(RobotData* r, AutoState state, AutoAlliance alliance)
                 april_tag = 4;
                 prepickup = RED_NOTE_PREPICKUP_RIGHT;
             }
-            frc::SmartDashboard::PutNumber("Auto init Delay", r->auto_init_delay);
+            // frc::SmartDashboard::PutNumber("Auto init Delay", r->auto_init_delay);
             pushTask(&r->taskmgr, genTaskDelay(r->auto_init_delay));
 
             {

@@ -42,9 +42,9 @@ void initLocaliser(RobotData* robot)
 
 
 
-//   frc::SmartDashboard::PutNumber("Localiser X", localiser->pose_estimate.position.x);
-//   frc::SmartDashboard::PutNumber("Localiser Y", localiser->pose_estimate.position.y);
-//   frc::SmartDashboard::PutNumber("Localiser Rotation", localiser->pose_estimate.rotation);
+//   // frc::SmartDashboard::PutNumber("Localiser X", localiser->pose_estimate.position.x);
+//   // frc::SmartDashboard::PutNumber("Localiser Y", localiser->pose_estimate.position.y);
+//   // frc::SmartDashboard::PutNumber("Localiser Rotation", localiser->pose_estimate.rotation);
 
 //   float delta_rot = imu_rotation - localiser->prev_imu;
 //   localiser->prev_imu = imu_rotation;
@@ -56,13 +56,13 @@ void initLocaliser(RobotData* robot)
 //   {
 //     v2 curr_tag_pose = { static_cast<float>(robot->photon.global_tags[i].pose.X()), static_cast<float>(robot->photon.global_tags[i].pose.Y()) };
 
-//     frc::SmartDashboard::PutNumber("April Tag Global Pose X", curr_tag_pose.x);
-//     frc::SmartDashboard::PutNumber("April Tag Global Pose Y", curr_tag_pose.y);
+//     // frc::SmartDashboard::PutNumber("April Tag Global Pose X", curr_tag_pose.x);
+//     // frc::SmartDashboard::PutNumber("April Tag Global Pose Y", curr_tag_pose.y);
 
 //     // float curr_tag_rotation = static_cast<float>(robot->photon.global_tags[i].pose.Rotation().Z()) ;
 //     float curr_tag_rotation = static_cast<float>(robot->photon.global_tags[i].pose.Rotation().Z()) + M_PI/ 2;
 
-//     frc::SmartDashboard::PutNumber("April Tag Global Rotation", curr_tag_rotation);
+//     // frc::SmartDashboard::PutNumber("April Tag Global Rotation", curr_tag_rotation);
 
 //     localiser->pose_estimate.position = mix(localiser->pose_estimate.position, 
 //                                             curr_tag_pose, 
@@ -122,9 +122,9 @@ void stepLocaliser(RobotData* robot)
 
 
 
-  frc::SmartDashboard::PutNumber("Localiser X", localiser->pose_estimate.position.x);
-  frc::SmartDashboard::PutNumber("Localiser Y", localiser->pose_estimate.position.y);
-  frc::SmartDashboard::PutNumber("Localiser Rotation", localiser->pose_estimate.rotation);
+  // frc::SmartDashboard::PutNumber("Localiser X", localiser->pose_estimate.position.x);
+  // frc::SmartDashboard::PutNumber("Localiser Y", localiser->pose_estimate.position.y);
+  // frc::SmartDashboard::PutNumber("Localiser Rotation", localiser->pose_estimate.rotation);
 
   float delta_rot = imu_rotation - localiser->prev_imu;
   localiser->prev_imu = imu_rotation;
@@ -157,13 +157,13 @@ void stepLocaliser(RobotData* robot)
 
     v2 curr_tag_pose = { static_cast<float>(robot->photon.global_tags[i].pose.X()), static_cast<float>(robot->photon.global_tags[i].pose.Y()) };
 
-    frc::SmartDashboard::PutNumber("April Tag Global Pose X", curr_tag_pose.x);
-    frc::SmartDashboard::PutNumber("April Tag Global Pose Y", curr_tag_pose.y);
+    // frc::SmartDashboard::PutNumber("April Tag Global Pose X", curr_tag_pose.x);
+    // frc::SmartDashboard::PutNumber("April Tag Global Pose Y", curr_tag_pose.y);
 
     // float curr_tag_rotation = static_cast<float>(robot->photon.global_tags[i].pose.Rotation().Z()) ;
     float curr_tag_rotation = static_cast<float>(robot->photon.global_tags[i].pose.Rotation().Z()) + M_PI/ 2;
 
-    frc::SmartDashboard::PutNumber("April Tag Global Rotation", curr_tag_rotation);
+    // frc::SmartDashboard::PutNumber("April Tag Global Rotation", curr_tag_rotation);
 
     localiser->pose_estimate.position = mix(localiser->pose_estimate.position, 
                                             curr_tag_pose, 

@@ -63,22 +63,22 @@ void updateProjectileCalculations(RobotData* r)
         else if(i == 1) dist_from_tag = length(vect_to_red_speaker);
 
         //Projectile Motion
-        frc::SmartDashboard::PutNumber("Dist from tag", dist_from_tag);
+        // frc::SmartDashboard::PutNumber("Dist from tag", dist_from_tag);
 
         // float init_velocity = 0.00195305 * fabs(r->shooter.firing_encoder->GetVelocity()) + 1.49364;
         float init_velocity = 12.2177f;
         float shooter_curr_angle = r->shooter.sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE + CFG_SHOOTER_ANGLE_OFFSET;
 
-        frc::SmartDashboard::PutNumber("Current Angle", shooter_curr_angle);
+        // frc::SmartDashboard::PutNumber("Current Angle", shooter_curr_angle);
 
         float angle_fudge_factor = 0.5117 * shooter_curr_angle + 0.169995;
         shooter_curr_angle += angle_fudge_factor;
 
-        frc::SmartDashboard::PutNumber("Fudge", angle_fudge_factor);
+        // frc::SmartDashboard::PutNumber("Fudge", angle_fudge_factor);
 
         float shooter_height = CFG_SHOOTER_RADIUS * sinf( shooter_curr_angle ) + CFG_SHOOTER_AXIS_HEIGHT;
         
-        frc::SmartDashboard::PutNumber("Shooter Height", shooter_height * 39.37);
+        // frc::SmartDashboard::PutNumber("Shooter Height", shooter_height * 39.37);
 
         // float shooter_offset = CFG_SHOOTER_DIST_CAM_TO_AXIS - CFG_SHOOTER_RADIUS * cosf(shooter_curr_angle);
         // dist_from_tag += shooter_offset;

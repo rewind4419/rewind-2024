@@ -27,9 +27,9 @@ static void doTask(TaskMgr* mgr, Task* task, RobotData* robot) {
 	}
 
 	bool complete = taskStep(task, robot);
-	frc::SmartDashboard::PutNumber("Current Task", task->type);
+	// frc::SmartDashboard::PutNumber("Current Task", task->type);
 	if (complete) {
-		printf("Task Complete %d\n", task->type);
+		//printf("Task Complete %d\n", task->type);
 		if (task->type == TASK_LIST) free(task->list);
 		*task = { };
 		mgr->read_head = (mgr->read_head + 1) % TASKMGR_MAX_TASKS;
@@ -60,7 +60,7 @@ extern nt::GenericEntry* waypointTaskRotEpsilon;
 
 static bool taskStep(Task* task, RobotData* robot)
 {
-	printf("%d <- Updating task\n", task->type);
+	//printf("%d <- Updating task\n", task->type);
 	currentAutoTask->SetInteger(task->type);
 
 	switch (task->type) {
@@ -120,8 +120,8 @@ static bool taskStep(Task* task, RobotData* robot)
 
 
 		v2 translation = robot->localiser.pose_estimate.position - task->waypoint.target_pose.position;
-		frc::SmartDashboard::PutNumber("task translation x", translation.x);
-		frc::SmartDashboard::PutNumber("task translation y", translation.y);
+		// frc::SmartDashboard::PutNumber("task translation x", translation.x);
+		// frc::SmartDashboard::PutNumber("task translation y", translation.y);
 
 		waypointTaskEpsilon->SetDouble(length(robot->localiser.pose_estimate.position - task->waypoint.target_pose.position));
 		waypointTaskEpsilon->SetDouble(fabsf(angular_error));
@@ -130,8 +130,8 @@ static bool taskStep(Task* task, RobotData* robot)
 	} break;
 
 	case TASK_WAYPOINT_PULLER: {
-		printf("Waypoint puller\n");
-		printf("%d Beambreak\n", robot->shooter.beam_break.Get());
+		//printf("Waypoint puller\n");
+		//printf("%d Beambreak\n", robot->shooter.beam_break.Get());
 
 
 
@@ -139,7 +139,7 @@ static bool taskStep(Task* task, RobotData* robot)
 
 		beamBreakTimerEntry->SetDouble(beamBreakTimer);
 
-		printf("Beam Break Timer = %f\n", beamBreakTimer );
+		//printf("Beam Break Timer = %f\n", beamBreakTimer );
 
 
 		if (robot->shooter.beam_break.Get() == false)
@@ -155,7 +155,7 @@ static bool taskStep(Task* task, RobotData* robot)
 		{
 			robot->shooter.control_motor_speed = 0;
 			robot->intake.intake_speed = 0;
-			printf("PULLER STOPPED EARLY PULLER STOPPED EARLY PULLER STOPPED EARLY \n");
+			//printf("PULLER STOPPED EARLY PULLER STOPPED EARLY PULLER STOPPED EARLY \n");
 			
 		}
 
@@ -178,8 +178,8 @@ static bool taskStep(Task* task, RobotData* robot)
 		}
 
 		v2 translation = robot->localiser.pose_estimate.position - task->waypoint.target_pose.position;
-		frc::SmartDashboard::PutNumber("task translation x", translation.x);
-		frc::SmartDashboard::PutNumber("task translation y", translation.y);
+		// frc::SmartDashboard::PutNumber("task translation x", translation.x);
+		// frc::SmartDashboard::PutNumber("task translation y", translation.y);
 
 		return false;
 
@@ -204,10 +204,10 @@ static bool taskStep(Task* task, RobotData* robot)
 			return true;
 		}
 
-		printf("Waypoint puller\n");
-		printf("%d Beambreak\n", robot->shooter.beam_break.Get());
+		//printf("Waypoint puller\n");
+		//printf("%d Beambreak\n", robot->shooter.beam_break.Get());
 		beamBreakTimerEntry->SetDouble(robot->shooter.auto_beam_break_timer);
-		printf("Beam Break Timer = %f\n", robot->shooter.auto_beam_break_timer );
+		//printf("Beam Break Timer = %f\n", robot->shooter.auto_beam_break_timer );
 
 
 		if (robot->shooter.beam_break.Get() == false)
@@ -221,7 +221,7 @@ static bool taskStep(Task* task, RobotData* robot)
 			robot->intake.intake_speed = 0;
 			robot->shooter.auto_beam_break_timer = 0.0;
 			robot->shooter.auto_await_timeout = 0.0;
-			printf("PULLER STOPPED EARLY PULLER STOPPED EARLY PULLER STOPPED EARLY \n");
+			//printf("PULLER STOPPED EARLY PULLER STOPPED EARLY PULLER STOPPED EARLY \n");
 			
 			return true;
 		}
@@ -235,8 +235,8 @@ static bool taskStep(Task* task, RobotData* robot)
 
 		if (robot->shooter.auto_await_timeout > 4.0) {return true;}
 
-		printf("Auto await puller inverse\n");
-		printf("%d Beambreak\n", robot->shooter.beam_break.Get());
+		//printf("Auto await puller inverse\n");
+		//printf("%d Beambreak\n", robot->shooter.beam_break.Get());
 		if (robot->shooter.beam_break.Get() == true)
 		{
 			printf("SHOOT COMPLETE SHOOT COMPLETE \n");		
@@ -254,7 +254,7 @@ static bool taskStep(Task* task, RobotData* robot)
 		robot->drivetrain_controller.ctrl.velocity.angular_velocity = task->drivetrain_velocity.target_angular_velocity;
 
         task->drivetrain_velocity.timer += CFG_DELTA_TIME;
-		printf("Drive train vel time = %f\n", task->drivetrain_velocity.timer);
+		//printf("Drive train vel time = %f\n", task->drivetrain_velocity.timer);
 		
 		return task->drivetrain_velocity.timer > task->drivetrain_velocity.length;
 	} break;
@@ -390,7 +390,7 @@ static bool taskStep(Task* task, RobotData* robot)
 		bool angle_complete = ( fabsf(robot->shooter.target_angle - curr_angle) < task->shooter.epsilon );
 		if (angle_complete)
 		{
-			printf("Position Achieved\n");
+			//printf("Position Achieved\n");
 		}
 		// printf("NOT COMPLETE delta = %f\n", fabsf(robot->shooter.target_angle - curr_angle));
 		return angle_complete;
@@ -440,9 +440,9 @@ static bool taskStep(Task* task, RobotData* robot)
 		if(task->firing_motor.direction != 0) 
 		{
 			robot->shooter.firing_motor_speed *= task->firing_motor.direction;
-			printf("Firing Direction != 0\n");
+			// printf("Firing Direction != 0\n");
 		}
-		frc::SmartDashboard::PutNumber("Firing Motor Throttle Task", robot->shooter.firing_motor_speed);
+		// frc::SmartDashboard::PutNumber("Firing Motor Throttle Task", robot->shooter.firing_motor_speed);
 
 		robot->shooter.firing_motor_task = true;
 		robot->shooter.firing_mode = true;
@@ -458,7 +458,7 @@ static bool taskStep(Task* task, RobotData* robot)
 		robot->shooter.firing_motor_task = false;
 		robot->shooter.shooter_first_time = true;
 		robot->shooter.firing_mode = false;
-		printf("Shooter Stop\n");
+		// printf("Shooter Stop\n");
 		return true;
 	} break;
 
@@ -550,9 +550,9 @@ static bool taskStep(Task* task, RobotData* robot)
 		v2 vect_to_tag = {static_cast<float>(robot->photon.tag_rel_robot[task->photon_aligner.align_tag_id - 1].Y()), static_cast<float>(robot->photon.tag_rel_robot[task->photon_aligner.align_tag_id - 1].X())};
 		float dist_from_tag = length(vect_to_tag);
 
-		frc::SmartDashboard::PutNumber("Dist from tag", dist_from_tag);
+		// frc::SmartDashboard::PutNumber("Dist from tag", dist_from_tag);
 
-		frc::SmartDashboard::PutNumber("Angular Throttle", task->photon_aligner.angular_throttle);
+		// frc::SmartDashboard::PutNumber("Angular Throttle", task->photon_aligner.angular_throttle);
 
 		// float shooter_encoder_velocity = robot->shooter.firing_encoder->GetVelocity();
 		// float init_velocity;
@@ -565,21 +565,21 @@ static bool taskStep(Task* task, RobotData* robot)
 		float init_velocity = 12.5f;
 	
 
-		// frc::SmartDashboard::PutNumber("Initial Velocity", init_velocity);
+		// // frc::SmartDashboard::PutNumber("Initial Velocity", init_velocity);
 
 		// Uncomment after we see goodish results
 		float shooter_total_angle = robot->shooter.sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE + CFG_SHOOTER_ANGLE_OFFSET;
 
 		float angle_fudge_factor = 0.5117 * shooter_total_angle + 0.169995;
 
-		frc::SmartDashboard::PutNumber("Fudge", angle_fudge_factor);
+		// frc::SmartDashboard::PutNumber("Fudge", angle_fudge_factor);
 
 		shooter_total_angle += angle_fudge_factor;
 		float shooter_height = CFG_SHOOTER_RADIUS * sinf( shooter_total_angle ) + CFG_SHOOTER_AXIS_HEIGHT;
 
     	dist_from_tag = dist_from_tag * cos(degToRad(25));
 
-		frc::SmartDashboard::PutNumber("Shooter Height", shooter_height);
+		// frc::SmartDashboard::PutNumber("Shooter Height", shooter_height);
 
 		float shooter_offset = CFG_SHOOTER_DIST_CAM_TO_AXIS - CFG_SHOOTER_RADIUS * cosf(shooter_total_angle);
 		dist_from_tag += shooter_offset;
@@ -603,7 +603,7 @@ static bool taskStep(Task* task, RobotData* robot)
 			robot->shooter.target_angle = solved_shooter_angle - CFG_SHOOTER_ANGLE_OFFSET; // Uncomment to enable shooter a movement
 		}
 
-		frc::SmartDashboard::PutNumber("Aim Calculated Angle", solved_shooter_angle);
+		// frc::SmartDashboard::PutNumber("Aim Calculated Angle", solved_shooter_angle);
 
 		float shooter_curr_angle = robot->shooter.sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE;
 		bool final_task = false;
@@ -652,16 +652,16 @@ static bool taskStep(Task* task, RobotData* robot)
 	{
 		
 		
-		printf("TASK ANGLE FOR CLIMB\n");
+		// printf("TASK ANGLE FOR CLIMB\n");
 
 		robot->shooter.target_angle = task->shooter.target_angle;
 		float current_angle = robot->shooter.sum_angle / CFG_SHOOTER_MAX_ANGLE * CFG_SHOOTER_ANGLE_RANGE;
 		bool angle_achieved = ( fabsf(robot->shooter.target_angle - current_angle) < task->shooter.epsilon);
 		if (angle_achieved)
 		{
-			printf("Angle Achieved\n");
+			// printf("Angle Achieved\n");
 		}
-		printf("NOT COMPLETE delta = %f\n", fabsf(robot->shooter.target_angle - current_angle));
+		// printf("NOT COMPLETE delta = %f\n", fabsf(robot->shooter.target_angle - current_angle));
 		return angle_achieved;
 	} break;
 
@@ -698,11 +698,11 @@ static bool taskStep(Task* task, RobotData* robot)
 bool pushTask(TaskMgr* mgr, Task task) {
 
 	if (((mgr->write_head + 1) % TASKMGR_MAX_TASKS) == mgr->read_head) {
-		printf("TaskMgr; Failed to add task, queue is full!\n");
+		//printf("TaskMgr; Failed to add task, queue is full!\n");
 		return false;
 	}
 
-	printf("Task Pushed %d\n", task.type);
+	//printf("Task Pushed %d\n", task.type);
 
 	mgr->task_buffer[mgr->write_head] = task;
 	mgr->write_head = (mgr->write_head + 1) % TASKMGR_MAX_TASKS;

@@ -60,9 +60,9 @@ void calibratePositions(RobotData * robot)
     std::cout << dashboard_name_y << std::endl;
     std::cout << dashboard_name_r << std::endl;
 
-    frc::SmartDashboard::PutNumber(dashboard_name_x, robot->localiser.pose_estimate.position.x);
-    frc::SmartDashboard::PutNumber(dashboard_name_y, robot->localiser.pose_estimate.position.y);
-    frc::SmartDashboard::PutNumber(dashboard_name_r, robot->localiser.pose_estimate.rotation);
+    // frc::SmartDashboard::PutNumber(dashboard_name_x, robot->localiser.pose_estimate.position.x);
+    // frc::SmartDashboard::PutNumber(dashboard_name_y, robot->localiser.pose_estimate.position.y);
+    // frc::SmartDashboard::PutNumber(dashboard_name_r, robot->localiser.pose_estimate.rotation);
 
     robot->pose_calib_index++;
 }
@@ -71,10 +71,10 @@ void initRobot(RobotData *r, RobotMode mode)
 {
 //How to use smart dashboard
 // frc::SmartDashboard::PutData("Field", &r.field);
-// frc::SmartDashboard::PutNumber("AutoMode", 0);
+// // frc::SmartDashboard::PutNumber("AutoMode", 0);
 
     // initialize the sensors
-    printf("Initializing Robot");
+    //printf("Initializing Robot");
 
     initDrivetrain(&r->drivetrain);
     initDrivetrainController(&r->drivetrain_controller);
@@ -173,12 +173,12 @@ void robotModeInit(RobotData *r, RobotMode new_mode)
 
         if (autoAlliance == A_ALLIANCE_NONE)
         {
-            printf("WARNING: AUTO ALLIANCE WAS NONE, ABORTING AUTO!!\n");
+            //printf("WARNING: AUTO ALLIANCE WAS NONE, ABORTING AUTO!!\n");
         }
         else
         {
             // WORKING
-            // autoCmd(r, AUTO_4_PIECE, autoAlliance);
+            //autoCmd(r, AUTO_4_PIECE, autoAlliance);
             // autoCmd(r, AUTO_4_PIECE_REVERSED, autoAlliance);
              autoCmd(r, AUTO_PREFIRE_LEAVE_COMMUNITY, autoAlliance); // Shoot Pre-load and stay still
 
@@ -273,7 +273,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
     else if(r->driverstation_side == frc::DriverStation::kBlue) r->side = 0;
 
     //Red = 1; Blue = 0;
-    frc::SmartDashboard::PutNumber("Side", r->side);
+    // frc::SmartDashboard::PutNumber("Side", r->side);
 
     if (mode == ROBOT_DISABLE) return;
 
@@ -515,7 +515,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
         if (in->mate.big_button.down)
         {
             r->taskmgr = TaskMgr();
-            printf("Attempted to clear queue\n");
+            //printf("Attempted to clear queue\n");
         }
 
         if (in->mate.b.held)
@@ -548,7 +548,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 //r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5);
                 if (r->shooter.beam_break.Get())
                 {
-                    printf("Beam break true\n");
+                    //printf("Beam break true\n");
                     r->shooter.control_motor_speed = (in->mate.trigger_right * 0.5 + 0.5)- (float)in->mate.bumper_left.held * CFG_CONTROL_PULLER_MAX_SPEED;
                     r->intake.intake_speed = (in->mate.trigger_right * 0.5 + 0.5)- (float)in->mate.bumper_left.held * CFG_INTAKE_PULLER_MAX_SPEED;
                 }
@@ -556,20 +556,20 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 {
                     r->shooter.control_motor_speed = - (in->mate.trigger_left * 0.5 + 0.5) * CFG_CONTROL_PULLER_MAX_SPEED;
                     r->intake.intake_speed = - (in->mate.trigger_left * 0.5 + 0.5) * CFG_INTAKE_PULLER_MAX_SPEED;
-                    printf("Beam break false\n");
+                    //printf("Beam break false\n");
                 }
 
                 if (in->mate.a.down)
                 {
                     r->robotState.robotMode = MODE_INTAKING;
-                    printf("To mode intaking\n");
+                    //printf("To mode intaking\n");
                 }
 
                 if (in->mate.y.down)
                 {
                     r->robotState.robotMode = MODE_AMP;
                     r->shooter.firing_wheel_pid.errorAccum = 0.0;
-                    printf("To mode amp\n");
+                    //printf("To mode amp\n");
                 }
 
                 if (in->mate.x.down)
@@ -579,7 +579,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                     r->shooter.firing_motor_speed = -1.0;
                     r->shooter.target_angle = 0.0;
                     r->shooter.shooter_pid.errorAccum = 0;
-                    printf("To mode Shooting\n");
+                    //printf("To mode Shooting\n");
                 }
                 
                 if (in->mate.option_button.down)
@@ -610,7 +610,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                 if (in->mate.a.up)
                 {
                     r->robotState.robotMode = MODE_DEFAULT;
-                    printf("To mode default\n");
+                    //printf("To mode default\n");
                 }
 
                 if (r->shooter.beam_break.Get() == false)
@@ -619,7 +619,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
                     r->robotState.robotMode = MODE_SHOOTING;
                     r->manual_shooting_mode = false;
                     r->shooter.firing_motor_speed = -1.0;
-                    printf("STOPPING INTAKE DUE TO BEAM BREAK\n");
+                   //printf("STOPPING INTAKE DUE TO BEAM BREAK\n");
                     r->shooter.control_motor_speed = 0;
                     r->intake.intake_speed = 0;
 
@@ -697,17 +697,17 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
                 // Test
                 bool tag_seen = false; // THis is the issue
-                printf("global tags size = %d\n", r->photon.global_tags.size());
+                //printf("global tags size = %d\n", r->photon.global_tags.size());
                 for(int i = 0; i < r->photon.n_tags; i++)
                 {
                     if(r->photon.global_tags[i].tag_id == target_tag_id) tag_seen = true;
-                    printf("tag id's = %d, %d \n",r->photon.global_tags[i].tag_id, target_tag_id);
+                    //printf("tag id's = %d, %d \n",r->photon.global_tags[i].tag_id, target_tag_id);
                 }
 
                 if(tag_seen && !r->manual_shooting_mode)
                 {
 
-                    printf("TAG SEEN\n");
+                   //printf("TAG SEEN\n");
                     alignToTag(target_tag_id, r, false);
                 }
 
@@ -734,15 +734,15 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
             }   break;
             case MODE_BLOOP:
             {
-                printf("Mode = Bloop\n");
+                //printf("Mode = Bloop\n");
                 r->shooter.firing_mode = true;
                 r->shooter.ready_fire_amp = false;
 
                 // Connor note
                 // Shooter manual default is 0.9 - CFG...
                 // r->shooter.target_angle = 0.8 - CFG_SHOOTER_ANGLE_OFFSET; //working at TT
-                r->shooter.target_angle = 0.6 - CFG_SHOOTER_ANGLE_OFFSET;
-                r->shooter.firing_motor_speed = -0.6;
+                r->shooter.target_angle = 0.3 - CFG_SHOOTER_ANGLE_OFFSET;
+                r->shooter.firing_motor_speed = -0.5;
 
                 // not needed
                 // if ((in->driver.trigger_right * 0.5 + 0.5) > 0.5 && fabs(r->shooter.firing_encoder->GetVelocity()) > 5500)
@@ -1047,15 +1047,15 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
 
     float len_field = static_cast<float>(r->photon.aprilTagFieldLayout.GetTagPose(4).value().X()) - static_cast<float>(r->photon.aprilTagFieldLayout.GetTagPose(7).value().X());
 
-    frc::SmartDashboard::PutNumber("Length Field", len_field);
+    // frc::SmartDashboard::PutNumber("Length Field", len_field);
 
     float center = len_field / 2 + static_cast<float>(r->photon.aprilTagFieldLayout.GetTagPose(7).value().X());
 
-    frc::SmartDashboard::PutNumber("center field x", center);
+    // frc::SmartDashboard::PutNumber("center field x", center);
 
     float center_y = static_cast<float>(r->photon.aprilTagFieldLayout.GetTagPose(4).value().Y());
 
-    frc::SmartDashboard::PutNumber("Center y", center_y);
+    // frc::SmartDashboard::PutNumber("Center y", center_y);
     // red - blue
     
     // printf("Just before updates \n");
