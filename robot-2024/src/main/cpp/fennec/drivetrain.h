@@ -3,14 +3,22 @@
 #include "maths.h"
 
 #include <rev/CANSparkMax.h>
-#include <ctre/phoenix/sensors/CANCoder.h>
-using namespace ctre::phoenix::sensors;
+//#include <ctre/phoenix/sensors/CANCoder.h>
+//using namespace ctre::phoenix::sensors;
+
+#include <ctre/phoenix6/CANcoder.hpp>
+
 
 struct SwerveDriveModule
 {
     //  NOTE: This has to be a CANCoder pointer because they're using OOP
     //  and we cant ensure this is a value type
-    CANCoder* direction_encoder; // absolute encoder
+    
+    // parade hack
+    // CANCoder* direction_encoder; // absolute encoder
+    ctre::phoenix6::hardware::CANcoder* 
+    direction_encoder; // absolute encoder
+    
     rev::CANSparkMax* drive_motor;
     rev::CANSparkMax* steer_motor;
     rev::SparkRelativeEncoder* steer_encoder; // relative encoder

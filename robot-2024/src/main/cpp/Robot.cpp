@@ -180,7 +180,9 @@ void robotModeInit(RobotData *r, RobotMode new_mode)
             // WORKING
             //autoCmd(r, AUTO_4_PIECE, autoAlliance);
             // autoCmd(r, AUTO_4_PIECE_REVERSED, autoAlliance);
-             autoCmd(r, AUTO_PREFIRE_LEAVE_COMMUNITY, autoAlliance); // Shoot Pre-load and stay still
+            
+            // // v uncomment below to re-enable the last auto - Sherwin 12/4/2024
+            //autoCmd(r, AUTO_PREFIRE_LEAVE_COMMUNITY, autoAlliance); // Shoot Pre-load and stay still
 
             // NOT WORKING - doesn't shoot and then moves and doesn't stop
             // autoCmd(r, AUTO_PREFIRE_LEAVE_COMMUNITY_RIGHT, autoAlliance);
@@ -246,7 +248,7 @@ void updateRobot(RobotData *r, float time_step, RobotMode mode)
     r->auto_init_delay = frc::SmartDashboard::GetNumber("Auto Initial Delay", 0);
 
     // calibrateShooterAngle(&r->shooter);
-    // printCalibrationData(&r->drivetrain);
+    printCalibrationData(&r->drivetrain);
     // r->side = frc::SmartDashboard::GetNumber("Init Side", 0);
 
     beamBreak->SetBoolean(r->shooter.beam_break.Get());

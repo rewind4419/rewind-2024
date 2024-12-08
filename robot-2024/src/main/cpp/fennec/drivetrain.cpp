@@ -20,7 +20,11 @@
 void initDrivetrain(Drivetrain* drivetrain)
 {
     SwerveDriveModule fl;
-    fl.direction_encoder = new CANCoder(CFG_CAN_DRIVETRAIN_STEER_ENCODER_FL);
+    //parade hack
+    // fl.direction_encoder = new CANCoder(CFG_CAN_DRIVETRAIN_STEER_ENCODER_FL);
+    fl.direction_encoder = new ctre::phoenix6::hardware::CANcoder(CFG_CAN_DRIVETRAIN_STEER_ENCODER_FL);
+
+
     fl.drive_motor       = NEW_SPARK_MAX(CFG_CAN_DRIVETRAIN_DRIVE_MOTOR_FL);
     fl.steer_motor       = NEW_SPARK_MAX(CFG_CAN_DRIVETRAIN_STEER_MOTOR_FL);
     fl.initial_rotation_offset = -CFG_DRIVETRAIN_INITIAL_ROTATION_OFFSET_FL;
@@ -29,7 +33,7 @@ void initDrivetrain(Drivetrain* drivetrain)
     drivetrain->swerve_drives[DrivetrainSwerve_FL] = fl;
 
     SwerveDriveModule fr;
-    fr.direction_encoder = new CANCoder(CFG_CAN_DRIVETRAIN_STEER_ENCODER_FR);
+    fr.direction_encoder = new ctre::phoenix6::hardware::CANCoder(CFG_CAN_DRIVETRAIN_STEER_ENCODER_FR);
     fr.drive_motor       = NEW_SPARK_MAX(CFG_CAN_DRIVETRAIN_DRIVE_MOTOR_FR);
     fr.steer_motor       = NEW_SPARK_MAX(CFG_CAN_DRIVETRAIN_STEER_MOTOR_FR);
     fr.initial_rotation_offset = -CFG_DRIVETRAIN_INITIAL_ROTATION_OFFSET_FR;
@@ -38,7 +42,7 @@ void initDrivetrain(Drivetrain* drivetrain)
     drivetrain->swerve_drives[DrivetrainSwerve_FR] = fr;
 
     SwerveDriveModule bl;
-    bl.direction_encoder = new CANCoder(CFG_CAN_DRIVETRAIN_STEER_ENCODER_BL);
+    bl.direction_encoder = new ctre::phoenix6::hardware::CANCoder(CFG_CAN_DRIVETRAIN_STEER_ENCODER_BL);
     bl.drive_motor       = NEW_SPARK_MAX(CFG_CAN_DRIVETRAIN_DRIVE_MOTOR_BL);
     bl.steer_motor       = NEW_SPARK_MAX(CFG_CAN_DRIVETRAIN_STEER_MOTOR_BL);
     bl.initial_rotation_offset = -CFG_DRIVETRAIN_INITIAL_ROTATION_OFFSET_BL;
@@ -47,7 +51,7 @@ void initDrivetrain(Drivetrain* drivetrain)
     drivetrain->swerve_drives[DrivetrainSwerve_BL] = bl;
 
     SwerveDriveModule br;
-    br.direction_encoder = new CANCoder(CFG_CAN_DRIVETRAIN_STEER_ENCODER_BR);
+    br.direction_encoder = new ctre::phoenix6::hardware::CANCoder(CFG_CAN_DRIVETRAIN_STEER_ENCODER_BR);
     br.drive_motor       = NEW_SPARK_MAX(CFG_CAN_DRIVETRAIN_DRIVE_MOTOR_BR);
     br.steer_motor       = NEW_SPARK_MAX(CFG_CAN_DRIVETRAIN_STEER_MOTOR_BR);
     br.initial_rotation_offset = -CFG_DRIVETRAIN_INITIAL_ROTATION_OFFSET_BR;
@@ -66,7 +70,10 @@ void initDrivetrain(Drivetrain* drivetrain)
         module->steer_encoder = new rev::SparkRelativeEncoder(module->steer_motor->GetEncoder()); 
         module->drive_encoder = new rev::SparkRelativeEncoder(module->drive_motor->GetEncoder()); 
 
-        float initial_position = -module->direction_encoder->GetAbsolutePosition() * M_PI / 180 - module->initial_rotation_offset;
+        //parade hack
+        //float initial_position = -module->direction_encoder->GetAbsolutePosition() * M_PI / 180 - module->initial_rotation_offset;
+
+        float initial_position = -module->direction_encoder->GetAbsolutePosition().GetValue().value() * M_2_PI - module->initial_rotation_offset;
 
         // Convert the zero position into a vector to not worry about 
         // @Incomplete: figure out which way the 0 angle is of the CANCoders and if positive is clockwise or not
@@ -282,11 +289,11 @@ OdometryFrame getDrivetrainOdometry(Drivetrain* drivetrain)
 
 void printCalibrationData(Drivetrain* drivetrain)
 {
-    //printf("==== SWERVE CALIBRATE ====\n");
-    //printf("Warning: Disable this before use!\n");
+    printf("==== SWERVE CALIBRATE ====\n");
+    printf("Warning: Disable this before use!\n");
     
 // mjh comment entire print block    
-/*     for (int i = 0; i < DrivetrainSwerve_Count; i++)
+     for (int i = 0; i < DrivetrainSwerve_Count; i++)
     {
         SwerveDriveModule* module = &drivetrain->swerve_drives[i];
 
@@ -300,8 +307,11 @@ void printCalibrationData(Drivetrain* drivetrain)
 
             default: printf("what the heck"); break;
         }
-        printf(" -- %f\n", module->direction_encoder->GetAbsolutePosition() * M_PI / 180.0);
+        // parade hack
+        // printf(" -- %f\n", module->direction_encoder->GetAbsolutePosition() * M_PI / 180.0);
+        printf(" -- %f\n", module->direction_encoder->GetAbsolutePosition().GetValue().value() * M_2_PI);
+
     }
-    printf("==========================\n"); */
+    //printf("==========================\n");
     
 }
