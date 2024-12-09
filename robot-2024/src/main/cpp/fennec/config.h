@@ -42,18 +42,17 @@ constexpr int CFG_CAN_DRIVETRAIN_STEER_ENCODER_BR = 11; // S2
 
 //              DRIVETRAIN MOTOR OFFSET                     OFFSET (in radians)
 
-constexpr float CFG_DRIVETRAIN_INITIAL_ROTATION_OFFSET_FL = 3.707632 + M_PI;
-constexpr float CFG_DRIVETRAIN_INITIAL_ROTATION_OFFSET_FR = 2.291767 + M_PI;
-constexpr float CFG_DRIVETRAIN_INITIAL_ROTATION_OFFSET_BL = 6.238700 + M_PI;
-constexpr float CFG_DRIVETRAIN_INITIAL_ROTATION_OFFSET_BR = 2.540272 + M_PI;
+//constexpr float CFG_DRIVETRAIN_INITIAL_ROTATION_OFFSET_FL = 3.707632 + M_PI;
+//constexpr float CFG_DRIVETRAIN_INITIAL_ROTATION_OFFSET_FR = 2.291767 + M_PI;
+//constexpr float CFG_DRIVETRAIN_INITIAL_ROTATION_OFFSET_BL = 6.238700 + M_PI;
+//constexpr float CFG_DRIVETRAIN_INITIAL_ROTATION_OFFSET_BR = 2.540272 + M_PI;
 
 
-// // becky drivetrain values before we swapped the FR swerve module, disabled 10/25/2024
-// constexpr float CFG_DRIVETRAIN_INITIAL_ROTATION_OFFSET_FL = 3.701496 + M_PI;
-// constexpr float CFG_DRIVETRAIN_INITIAL_ROTATION_OFFSET_FR = 3.232098 + M_PI;
-// constexpr float CFG_DRIVETRAIN_INITIAL_ROTATION_OFFSET_BL = 6.203418 + M_PI;
-// constexpr float CFG_DRIVETRAIN_INITIAL_ROTATION_OFFSET_BR = 2.528000 + M_PI;
-
+// becky drivetrain values before we swapped the FR swerve module, disabled 10/25/2024 (parade hack)
+ constexpr float CFG_DRIVETRAIN_INITIAL_ROTATION_OFFSET_FL = 2.316 + M_PI;
+ constexpr float CFG_DRIVETRAIN_INITIAL_ROTATION_OFFSET_FR = 0.720 + M_PI;
+ constexpr float CFG_DRIVETRAIN_INITIAL_ROTATION_OFFSET_BL = -0.055 + M_PI;
+ constexpr float CFG_DRIVETRAIN_INITIAL_ROTATION_OFFSET_BR = 2.5668 + M_PI;
 
 // fl -- 2.495787
 // fr -- 2.133767
