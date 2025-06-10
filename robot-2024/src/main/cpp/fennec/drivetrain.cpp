@@ -66,7 +66,7 @@ void initDrivetrain(Drivetrain* drivetrain)
         module->steer_encoder = new rev::SparkRelativeEncoder(module->steer_motor->GetEncoder()); 
         module->drive_encoder = new rev::SparkRelativeEncoder(module->drive_motor->GetEncoder()); 
 
-        float initial_position = -module->direction_encoder->GetAbsolutePosition().GetValue().value() * M_PI * 2 - module->initial_rotation_offset;
+        float initial_position = -module->direction_encoder->GetAbsolutePosition().GetValue().value() * M_2_PI - module->initial_rotation_offset;
         
         //-module->direction_encoder->GetAbsolutePosition() * M_PI / 180 - module->initial_rotation_offset;
 
@@ -302,7 +302,7 @@ void printCalibrationData(Drivetrain* drivetrain)
 
             default: printf("what the heck"); break;
         }
-        printf(" -- %f\n", module->direction_encoder->GetAbsolutePosition().GetValue().value() * M_PI * 2);
+        printf(" -- %f\n", module->direction_encoder->GetAbsolutePosition().GetValue().value() * M_2_PI);
     }
     //printf("==========================\n");
     
